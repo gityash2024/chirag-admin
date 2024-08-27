@@ -1,0 +1,126 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import styled from 'styled-components';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Sidebar from './components/Sidebar';
+import Topbar from './components/Topbar';
+import Loader from './components/Loader';
+import GlobalStyle from './GlobalStyle'; // Import the GlobalStyle component
+
+import LanguageSelection from './pages/auth/LanguageSelection';
+import Login from './pages/auth/Login';
+import Home from './pages/Home';
+import Bookings from './pages/Bookings';
+import Wallet from './pages/Wallet';
+import Profile from './pages/Profile';
+import ManageFarmer from './pages/Farmer';
+import ManageVendor from './pages/Vendor';
+import Testimonials from './pages/Testemonials';
+import Notifications from './pages/Notifications';
+import Withdrawals from './pages/Withdrawals';
+import AssignRunnerDetails from './pages/Bookings/AssignRunnerDetails';
+import Vendor from './pages/Vendor/addVendor';
+import VendorList from './pages/Commissions/VendorList';
+import VendorDetails from './pages/Commissions/VendorDetails';
+import CommissionManagement from './pages/Commissions';
+import AddTestimonial from './pages/Testemonials/addTestemonials';
+import AddNotification from './pages/Notifications/addNotifications';
+import ApproveWithdrawal from './pages/Withdrawals/approveWithdrawal';
+import AddFarmer from './pages/Farmer/addFarmer';
+
+const AppContainer = styled.div`
+  display: flex;
+  height: 100vh;
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+`;
+
+const PageContent = styled.div`
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+`;
+
+const StyledToastContainer = styled(ToastContainer)`
+  .Toastify__toast {
+    background-color: #383838;
+    color: white;
+  }
+  .Toastify__close-button {
+    color: white;
+  }
+  .Toastify__progress-bar {
+    background-color: #f0f0f0;
+  }
+`;
+
+function App() {
+  return (
+    <Router>
+      <GlobalStyle /> 
+      <AppContainer>
+        <Routes>
+          <Route path="/" element={<LanguageSelection />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="*"
+            element={
+              <>
+                <Sidebar />
+                <MainContent>
+                  <Topbar />
+                  <PageContent>
+                    <Routes>
+                      <Route path="/home" element={<Home />} />
+                      <Route path="/assign-runner/:id" element={<AssignRunnerDetails />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/bookings" element={<Bookings />} />
+                      <Route path="/wallet" element={<Wallet />} />
+                      <Route path="/manage-farmer" element={<ManageFarmer />} />
+                      <Route path="/manage-vendor" element={<ManageVendor />} />
+                      <Route path="/testemonials" element={<Testimonials />} />
+                      <Route path="/notifications" element={<Notifications />} />
+                      <Route path="/add-notification" element={<AddNotification />} />
+                      <Route path="/withdrawals" element={<Withdrawals />} />
+                      <Route path="/commission-management" element={<CommissionManagement />} />
+                      <Route path="/commission-vendors" element={<VendorList />} />
+                      <Route path="/commission-vendors/:id" element={<VendorDetails />} />
+                      <Route path="/approve-withdrawal" element={<ApproveWithdrawal />} />
+                       <Route path="/add-vendor" element={<Vendor mode="add" />} />
+                       <Route path="/add-testimonial" element={<AddTestimonial/>} />
+                      <Route path="/view-vendor/:id" element={<Vendor mode="view" />} />
+                      <Route path="/edit-vendor/:id" element={<Vendor mode="edit" />} />
+                      <Route path="/add-farmer" element={<AddFarmer mode="add" />} />
+                      <Route path="/view-farmer/:id" element={<AddFarmer mode="view" />} />
+                      <Route path="/edit-farmer/:id" element={<AddFarmer mode="edit" />} />
+                    </Routes>
+                  </PageContent>
+                </MainContent>
+              </>
+            }
+          />
+        </Routes>
+        <StyledToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        <Loader />
+      </AppContainer>
+    </Router>
+  );
+}
+
+export default App;

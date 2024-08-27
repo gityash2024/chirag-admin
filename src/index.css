@@ -1,0 +1,17 @@
+/* Global font setting */
+body {
+  font-family: 'Public Sans';
+}
+
+/* Example usage for different weights */
+h1 {
+  font-weight: 700; /* Bold */
+}
+
+p {
+  font-weight: 400; /* Regular */
+}
+
+strong {
+  font-weight: 500; /* Medium */
+}
