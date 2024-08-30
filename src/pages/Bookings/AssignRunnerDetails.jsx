@@ -11,7 +11,7 @@ import successWithdrawalCheck from '../../assets/check-wallet.png';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans', sans-serif;
+  font-family: 'Public Sans' ;
   margin: 0 auto;
 `;
 
@@ -83,7 +83,7 @@ const DetailRow = styled.div`
 
 const DetailLabel = styled.span`
   font-weight: 500;
-  color: #666;
+  color: #121212;
   margin-right: 10px;
   display: flex;
   align-items: center;

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans', sans-serif;
+  font-family: 'Public Sans' ;
   background-color: #FFFFFF;
 `;
 

@@ -5,7 +5,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans', sans-serif;
+  font-family: 'Public Sans' ;
   background-color: #F4F4F4;
   width:90%;
   margin: 0 auto;

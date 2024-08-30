@@ -44,16 +44,16 @@ const Logo = styled.img`
 `;
 
 const Title = styled.h2`
- font-family: 'Public Sans', sans-serif;
+ font-family: 'Public Sans';
   font-weight: 400; /* Regular */
   font-size: 24px;
-  color: #23212A;
+  color: rgba(35, 33, 42, 0.6);
   margin-bottom: 10px;
 `;
 
 const Subtitle = styled.p`
   font-size: 16px;
-   font-family: 'Public Sans', sans-serif;
+   font-family: 'Public Sans';
   font-weight: 400; /* Regular */
   color: #23212A;
   margin-bottom: 20px;

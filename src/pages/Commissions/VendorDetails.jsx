@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans', sans-serif;
+  font-family: 'Public Sans' ;
 `;
 
 const Header = styled.div`

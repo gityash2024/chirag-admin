@@ -46,7 +46,7 @@ const Title = styled.h2`
   font-size: 24px;
   font-family: 'Public Sans';
   font-weight: 400; /* Regular */
-  color: #23212A;
+  color: rgba(35, 33, 42, 0.6);
   margin-bottom: 20px;
 `;
 
@@ -70,7 +70,7 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
-  width: 100%;
+  width: 94%;
   background-color: #383838;
   color: white;
   padding: 10px;

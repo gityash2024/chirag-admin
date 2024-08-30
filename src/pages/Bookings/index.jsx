@@ -12,7 +12,7 @@ import avatarImage from '../../assets/runner-avatar.png';
 
 const BookingsContainer = styled.div`
   padding: 20px;
-  font-family: 'Public Sans', sans-serif;
+  font-family: 'Public Sans' ;
 `;
 
 const Title = styled.h2`
@@ -92,7 +92,7 @@ const StatusBadge = styled.span`
 const BookingDetails = styled.p`
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  color: #121212;
   margin-bottom: 5px;
   display: flex;
   align-items: center;
@@ -129,13 +129,13 @@ const Humidity = styled.span`
   align-items: center;
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  color: #121212;
 `;
 
 const Crop = styled.span`
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  color: #121212;
 `;
 
 const PriceSummary = styled.p`
@@ -178,7 +178,7 @@ const RunnerName = styled.span`
 
 const RunnerContact = styled.span`
   font-size: 12px;
-  color: #666;
+  color: #121212;
 `;
 
 const CallButton = styled.button`
@@ -287,7 +287,7 @@ const EmptyStateImage = styled.img`
 
 const EmptyStateText = styled.p`
   font-size: 18px;
-  color: #666;
+  color: #121212;
   text-align: center;
 `;
 

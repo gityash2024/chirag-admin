@@ -23,7 +23,7 @@ import totalRunner from "../../assets/totalRunner.png";
 
 const HomeContainer = styled.div`
   padding: 20px;
-  font-family: "Public Sans", sans-serif;
+  font-family: "Public Sans" ;
 `;
 
 const Section = styled.section`
@@ -47,7 +47,7 @@ const SelectDropdown = styled.select`
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
-  font-family: "Public Sans", sans-serif;
+  font-family: "Public Sans" ;
   font-size: 14px;
 `;
 
@@ -84,7 +84,7 @@ const ReportValue = styled.h3`
 const ReportLabel = styled.p`
   font-size: 14px;
   font-weight: 600;
-  color: #666;
+  color: #121212;
   margin-bottom: 5px;
 `;
 
@@ -98,7 +98,7 @@ const SearchInput = styled.input`
   padding: 10px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  font-family: "Public Sans", sans-serif;
+  font-family: "Public Sans" ;
   font-size: 14px;
 `;
 
@@ -111,7 +111,7 @@ const DownloadButton = styled.button`
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-family: "Public Sans", sans-serif;
+  font-family: "Public Sans" ;
   font-size: 14px;
 
   svg {
