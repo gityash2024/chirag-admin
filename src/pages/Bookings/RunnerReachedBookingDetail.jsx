@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import OpacityIcon from '@mui/icons-material/Opacity';
-import CloseIcon from '@mui/icons-material/Close';
+import PhoneIcon from '@mui/icons-material/Phone';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import successWithdrawalCheck from '../../assets/check-wallet.png';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans', sans-serif;
   margin: 0 auto;
 `;
 
@@ -46,6 +46,16 @@ const BookingId = styled.h3`
   margin-bottom: 10px;
 `;
 
+const StatusBadge = styled.span`
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #000000;
+  background-color: #FDF0CC;
+`;
+
 const FlexContainer = styled.div`
   display: flex;
   gap: 20px;
@@ -67,7 +77,7 @@ const BookingDetailsCard = styled.div`
 
 const PaymentSummary = styled.div`
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
-  height: 220px;
+  height:220px;
   background: white;
   border: 1px solid #E0E0E0;
   border-radius: 8px;
@@ -83,7 +93,7 @@ const DetailRow = styled.div`
 
 const DetailLabel = styled.span`
   font-weight: 500;
-  color: #121212;
+  color: #666;
   margin-right: 10px;
   display: flex;
   align-items: center;
@@ -99,84 +109,56 @@ const HorizontalLine = styled.hr`
   margin: 15px 0;
 `;
 
-const ActionButton = styled.button`
-  width: 200px;
-  padding: 10px;
-  background-color: #000000;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin: 15px auto;
-  display: block;
+
+
+const RunnerCard = styled.div`
+  background: white;
+  
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-bottom: 20px;
+  width: 45%;
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+
+const RunnerAvatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ccc;
+  margin-right: 10px;
+`;
+const RunnerInfo = styled.div`
   display: flex;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+`;
+
+const ViewRunnerButton = styled.button`
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
   align-items: center;
 `;
 
-const ModalContent = styled.div`
+const CallButton = styled.button`
   background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 600px;
-  max-height: 80%;
-  overflow-y: auto;
-  position: relative;
-`;
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
+  color: black;
+  border: 1px solid black;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
   cursor: pointer;
-`;
-
-const RunnerTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const TableHeader = styled.th`
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #E0E0E0;
-`;
-
-const TableRow = styled.tr`
-  &:nth-child(even) {
-    background-color: #F9F9F9;
-  }
-`;
-
-const TableCell = styled.td`
-  padding: 10px;
-  border-bottom: 1px solid #E0E0E0;
-`;
-
-const SuccessModal = styled(ModalContent)`
-  text-align: center;
-  width: 300px;
-`;
-
-const SuccessIcon = styled.img`
-  width: 50px;
-  height: 50px;
-  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
 `;
 
 const PaymentRow = styled.div`
@@ -185,54 +167,37 @@ const PaymentRow = styled.div`
   margin-bottom: 10px;
 `;
 
-const AssignRunnerDetails = () => {
-  const { id } = useParams();
+const RunnerReachedBookingDetail = () => {
   const navigate = useNavigate();
-  const [showRunnerModal, setShowRunnerModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [selectedRunner, setSelectedRunner] = useState(null);
-
   const booking = {
-    id: id,
-    address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066',
+    id: 'AB123456',
+    status: 'Runner reached the field',
+    address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066',
     name: 'Sachin Doe',
     date: '13 June, 2023',
-    time: '02:00 PM - 04:00 PM',
+    time: '09:00AM',
     contactNumber: '0987654321',
     farmArea: '21 Acres',
     crop: 'Crop name',
     temperature: '24° Pratapgarh, uttrakhand',
-    humidity: '2% Mostly sunny',
-  };
-
-  const runners = [
-    { id: 1, name: 'John Doe', contact: '+91 1234567890', status: 'Active' },
-    { id: 2, name: 'Jane Smith', contact: '+91 9876543210', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', contact: '+91 5555555555', status: 'Inactive' },
-  ];
-
-  const handleAssignRunner = () => {
-    setShowRunnerModal(true);
-  };
-
-  const handleRunnerSelect = (runner) => {
-    setSelectedRunner(runner);
-    setShowRunnerModal(false);
-    setShowSuccessModal(true);
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+    humidity: '2% Mostyly sunny',
+    runner: {
+      name: 'Runner name',
+      contact: '0987654321'
+    }
   };
 
   return (
     <Container>
       <Header>
         <TitleContainer>
-          <BackButton onClick={() => navigate('/bookings')}>
-            <ArrowBackIcon />
-          </BackButton>
-          <Title>Assign Runner</Title>
+        <BackButton onClick={() => navigate(-1)}>
+  <ArrowBackIcon />
+</BackButton>
+
+          <Title>Bookings</Title>
         </TitleContainer>
+        <StatusBadge>{booking.status}</StatusBadge>
       </Header>
       <BookingId>#{booking.id}</BookingId>
       <FlexContainer>
@@ -272,6 +237,26 @@ const AssignRunnerDetails = () => {
               <DetailLabel><OpacityIcon /> {booking.humidity}</DetailLabel>
             </DetailRow>
           </BookingDetailsCard>
+          <RunnerCard>
+        <h3>Runner Assigned</h3>
+        <RunnerInfo>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <RunnerAvatar />
+    <div>
+      <div>{booking.runner.name}</div>
+      <div>Contact number: {booking.runner.contact}</div>
+    </div>
+  </div>
+  <div style={{ display: 'flex' }}>
+    
+    <CallButton><PhoneIcon /> Call Now</CallButton>
+
+  </div>
+</RunnerInfo>
+<ViewRunnerButton>
+      View runner details
+    </ViewRunnerButton>
+      </RunnerCard>
         </BookingDetailsContainer>
         <PaymentSummary>
           <h3>Payment Summary</h3>
@@ -295,49 +280,8 @@ const AssignRunnerDetails = () => {
           </PaymentRow>
         </PaymentSummary>
       </FlexContainer>
-      <ActionButton onClick={handleAssignRunner}>Assign Runner</ActionButton>
-      {showRunnerModal && (
-        <Modal>
-          <ModalContent>
-            <CloseButton onClick={() => setShowRunnerModal(false)}><CloseIcon /></CloseButton>
-            <Title>Select a Runner</Title>
-            <RunnerTable>
-              <thead>
-                <tr>
-                  <TableHeader>Runner Name</TableHeader>
-                  <TableHeader>Runner Contact</TableHeader>
-                  <TableHeader>Status</TableHeader>
-                  <TableHeader>Action</TableHeader>
-                </tr>
-              </thead>
-              <tbody>
-                {runners.map(runner => (
-                  <TableRow key={runner.id}>
-                    <TableCell>{runner.name}</TableCell>
-                    <TableCell>{runner.contact}</TableCell>
-                    <TableCell>{runner.status}</TableCell>
-                    <TableCell>
-                      <ActionButton onClick={() => handleRunnerSelect(runner)}>Select</ActionButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </tbody>
-            </RunnerTable>
-          </ModalContent>
-        </Modal>
-      )}
-      {showSuccessModal && (
-        <Modal>
-          <SuccessModal>
-            <CloseButton onClick={() => setShowSuccessModal(false)}><CloseIcon /></CloseButton>
-            <SuccessIcon src={successWithdrawalCheck} alt="Success" />
-            <Title>Request sent to runner</Title>
-            <p>You will get an update soon</p>
-          </SuccessModal>
-        </Modal>
-      )}
     </Container>
   );
 };
 
-export default AssignRunnerDetails;
+export default RunnerReachedBookingDetail;

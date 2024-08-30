@@ -28,6 +28,9 @@ import AddTestimonial from './pages/Testemonials/addTestemonials';
 import AddNotification from './pages/Notifications/addNotifications';
 import ApproveWithdrawal from './pages/Withdrawals/approveWithdrawal';
 import AddFarmer from './pages/Farmer/addFarmer';
+import ConfirmedBookingDetails from './pages/Bookings/ConfirmedBookingDetails';
+import RunnerReachedBookingDetail from './pages/Bookings/RunnerReachedBookingDetail';
+import RunnerCanceledBookingDetail from './pages/Bookings/RunnerCanceledBookingDetail';
 
 const AppContainer = styled.div`
   display: flex;
@@ -99,6 +102,9 @@ function App() {
                       <Route path="/add-farmer" element={<AddFarmer mode="add" />} />
                       <Route path="/view-farmer/:id" element={<AddFarmer mode="view" />} />
                       <Route path="/edit-farmer/:id" element={<AddFarmer mode="edit" />} />
+                      <Route path="/completed-booking/:id" element={<ConfirmedBookingDetails />} />
+                      <Route path="/confirm-booking-details/:id" element={<RunnerReachedBookingDetail />} />
+                      <Route path="/cancelled-booking-details/:id" element={<RunnerCanceledBookingDetail />} />
                     </Routes>
                   </PageContent>
                 </MainContent>

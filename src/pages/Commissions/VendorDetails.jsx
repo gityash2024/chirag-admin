@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans';
 `;
 
 const Header = styled.div`
@@ -17,37 +17,47 @@ const Header = styled.div`
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const Button = styled.button`
   padding: 8px 16px;
-  background-color: #000000;
-  color: #FFFFFF;
+  background-color: #000;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 `;
 
-const TopControls = styled.div`
+const Form = styled.form`
   display: flex;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 20px;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 15px;
+`;
+
+const Label = styled.label`
+  font-size: 14px;
+  color: #121212;
+  font-weight: 400;
+  margin-bottom: 5px;
+  display: block;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
 `;
 
 const EntriesDropdown = styled.select`
   padding: 8px;
-  margin-right: 20px;
-  border: 1px solid #F1F1F1;
+  border: 1px solid #E3E6E8;
   border-radius: 4px;
-`;
-
-const SearchInput = styled.input`
-  padding: 8px;
-  border: 1px solid #F1F1F1;
-  border-radius: 4px;
-  width: 200px;
-  margin-left: auto;
 `;
 
 const Table = styled.table`
@@ -67,12 +77,15 @@ const TableRow = styled.tr`
   &:not(:last-child) {
     border-bottom: 1px solid #E3E6E8;
   }
+  &:hover {
+    background-color: #F5F5F5;
+  }
 `;
 
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
@@ -82,79 +95,13 @@ const TableCell = styled.td`
   font-weight: 500;
   border-bottom: 1px solid #E3E6E8;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 
-const Pagination = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-`;
-
-const PageInfo = styled.span`
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'Montserrat';
-  color: #4B465C;
-`;
-
-const PageButtons = styled.div`
-  display: flex;
-`;
-
-const PageButton = styled.button`
-  padding: 5px 10px;
-  margin: 0 5px;
-  border: 1px solid #E3E6E8;
-  background-color: ${props => props.active ? '#121212' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
-  cursor: pointer;
-  border-radius: 4px;
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+const ButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
-`;
-
-
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 15px;
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  color: #4B465C;
-  font-weight: 400;
-  margin-bottom: 5px;
-  display: block;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #F1F1F1;
-  border-radius: 4px;
+  margin-top: 20px;
 `;
 
 const VendorDetails = () => {
@@ -183,6 +130,10 @@ const VendorDetails = () => {
 
     fetchVendorDetails();
   }, [id]);
+
+  const handleDone = () => {
+    navigate(-1);
+  };
 
   if (!vendorDetails) {
     return <div>Loading...</div>;
@@ -230,7 +181,9 @@ const VendorDetails = () => {
           ))}
         </tbody>
       </Table>
-      <Button>Done</Button>
+      <ButtonWrapper>
+        <Button onClick={handleDone}>Done</Button>
+      </ButtonWrapper>
     </Container>
   );
 };

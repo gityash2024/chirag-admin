@@ -9,6 +9,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import successWithdrawalCheck from '../../assets/check-wallet.png';
 import noBookingsImage from '../../assets/no-booking.png';
 import avatarImage from '../../assets/runner-avatar.png';
+import clock from '../../assets/clock.png';
+import calendar from '../../assets/calendar-event.png';
+import map from '../../assets/map-pin.png';
+import Phone from '@mui/icons-material/Phone';
 
 const BookingsContainer = styled.div`
   padding: 20px;
@@ -18,7 +22,7 @@ const BookingsContainer = styled.div`
 const Title = styled.h2`
   font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: #121212;
   margin-bottom: 20px;
 `;
 
@@ -53,6 +57,7 @@ const CardContainer = styled.div`
 
 const Card = styled.div`
   background: white;
+  cursor: pointer;
   border: 1px solid #E0E0E0;
   border-radius: 8px;
   padding: 20px;
@@ -69,7 +74,7 @@ const CardHeader = styled.div`
 const BookingId = styled.h3`
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #121212;
   margin: 0;
 `;
 
@@ -141,14 +146,14 @@ const Crop = styled.span`
 const PriceSummary = styled.p`
   font-size: 16px;
   font-weight: 700;
-  color: #333;
+  color: #121212;
   margin-top: 15px;
 `;
 
 const ServiceProvider = styled.p`
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #121212;
   margin-top: 10px;
 `;
 
@@ -173,7 +178,7 @@ const RunnerInfo = styled.div`
 const RunnerName = styled.span`
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #121212;
 `;
 
 const RunnerContact = styled.span`
@@ -183,8 +188,8 @@ const RunnerContact = styled.span`
 
 const CallButton = styled.button`
   padding: 5px 10px;
-  background-color: #fffff;
-  color: #000000;
+  background-color: #000000;
+  color: #ffffff;
   border: 1px solid #000000;
   border-radius: 4px;
   font-size: 12px;
@@ -300,6 +305,19 @@ const Bookings = () => {
   const [price, setPrice] = useState('');
   const bookingsPerPage = 9;
 
+  const handleBookingClick = (booking) => {
+    if(booking.status === 'Completed'){
+      navigate(`/completed-booking/${booking.id}`)
+    }else if(booking.status === 'Confirmed'){
+      navigate(`/confirm-booking-details/${booking.id}`)
+    }else if(activeTab==='Requests via Contact Us'){
+      return;
+    }else{
+      navigate(`/cancelled-booking-details/${booking.id}`)
+    
+    }
+    };
+
   const [bookings, setBookings] = useState({
     'Requests via Contact Us': [
       { id: 'AB123456333', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Sachin Doe', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', humidity: '2%', price: '₹ 20,000' },
@@ -385,17 +403,17 @@ const Bookings = () => {
       );
     }
     return bookings[activeTab].slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage).map((booking) => (
-      <Card key={booking.id}>
+      <Card key={booking.id} onClick={() => handleBookingClick(booking)}>
         <CardHeader>
           <BookingId>#{booking.id}</BookingId>
           {(activeTab === 'In Progress Booking' || activeTab === 'Completed' || activeTab === 'Closed') && 
             <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
           }
         </CardHeader>
-        <BookingDetails><LocationOn /> {booking.address}</BookingDetails>
+        <BookingDetails><img src={map} alt="Location" style={{ marginRight: '5px' }}/>{booking.address}</BookingDetails>
         <DateTimeRow>
-          <BookingDetails><CalendarToday /> {booking.date}</BookingDetails>
-          <BookingDetails><AccessTime /> {booking.time}</BookingDetails>
+          <BookingDetails><img src={calendar} alt="Calendar"style={{ marginRight: '5px' }} /> {booking.date}</BookingDetails>
+          <BookingDetails><img src={clock} alt="Clock" style={{ marginRight: '5px' }} /> {booking.time}</BookingDetails>
         </DateTimeRow>
         <BookingDetails>Booking Name: {booking.name}</BookingDetails>
         <BookingDetails>Farm Area: {booking.farmArea}</BookingDetails>
@@ -419,7 +437,7 @@ const Bookings = () => {
             <RunnerName>Runner name</RunnerName>
             <RunnerContact>Contact number: 0987654321</RunnerContact>
           </RunnerInfo>
-          <CallButton>Call now</CallButton>
+          <CallButton> Call now</CallButton>
         </AssignedRunnerContainer>
         </>:null
         }

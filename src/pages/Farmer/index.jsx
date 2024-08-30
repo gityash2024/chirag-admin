@@ -25,7 +25,7 @@ const ButtonGroup = styled.div`
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const AddFarmerButton = styled.button`
@@ -107,7 +107,7 @@ const TableRow = styled.tr`
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
@@ -117,7 +117,7 @@ const TableCell = styled.td`
   font-weight: 500;
   border-bottom: 1px solid #DBDADE;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 
 const FarmerCell = styled.div`
@@ -135,7 +135,7 @@ const FarmerAvatar = styled.div`
   align-items: center;
   margin-right: 10px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const ActionIcon = styled.img`
@@ -156,7 +156,7 @@ const PageInfo = styled.span`
   font-size: 14px;
   font-weight: 500;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 
 const PageButtons = styled.div`
@@ -168,7 +168,7 @@ const PageButton = styled.button`
   margin: 0 5px;
   border: 1px solid #DBDADE;
   background-color: ${props => props.active ? '#000' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
+  color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -291,12 +291,13 @@ const [farmerToBlock, setFarmerToBlock] = useState(null);
   </ButtonGroup>
 </Header>
       <TopControls>
-        <EntriesDropdown>
-          <option>07</option>
-          <option>14</option>
-          <option>21</option>
-        </EntriesDropdown>
-        <span>Entries</span>
+      <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
+          <EntriesDropdown>
+            <option>07</option>
+            <option>14</option>
+            <option>21</option>
+          </EntriesDropdown>
+          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
         <SearchInput placeholder="Search..." />
       </TopControls>
       <Table>

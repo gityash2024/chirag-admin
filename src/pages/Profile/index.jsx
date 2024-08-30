@@ -56,7 +56,7 @@ const UploadButton = styled.button`
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #333333;
+    background-color: #121212333;
   }
 `;
 
@@ -117,7 +117,7 @@ const SaveButton = styled.button`
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #333333;
+    background-color: #121212333;
   }
 `;
 

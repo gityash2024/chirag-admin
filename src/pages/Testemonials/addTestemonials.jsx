@@ -146,7 +146,7 @@ const AddTestimonial = () => {
           <ImageUploadBox>+</ImageUploadBox>
           <ImageUploadBox>+</ImageUploadBox>
         </ImageUploadArea>
-        <SaveButton type="submit">Save</SaveButton>
+        <SaveButton type="submit" onClick={() => navigate('/testemonials')}>Save</SaveButton>
       </Form>
     </Container>
   );

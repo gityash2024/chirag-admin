@@ -96,7 +96,7 @@ const ModalContent = styled.div`
 
 const ModalText = styled.p`
   margin-bottom: 20px;
-  color: #333;
+  color: #121212;
 `;
 
 const ModalButton = styled.button`
@@ -109,7 +109,7 @@ const ModalButton = styled.button`
 
 const CancelButton = styled(ModalButton)`
   background-color: #ccc;
-  color: #333;
+  color: #121212;
 `;
 
 const ConfirmButton = styled(ModalButton)`

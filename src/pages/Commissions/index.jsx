@@ -19,13 +19,22 @@ const Header = styled.div`
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const Button = styled.button`
   padding: 8px 16px;
   background-color: #ffffff ;
   color: #000000;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+`;
+const ButtonDark = styled.button`
+  padding: 8px 16px;
+  background-color: #000000 ;
+  color: #ffffff;
   border: 1px solid #000000;
   border-radius: 4px;
   cursor: pointer;
@@ -47,7 +56,7 @@ const EntriesDropdown = styled.select`
 
 const SearchInput = styled.input`
   padding: 8px;
-  border: 1px solid #E3E6E8;
+  border: 1px solid #DBDADE;
   border-radius: 4px;
   width: 200px;
   margin-left: auto;
@@ -63,7 +72,7 @@ const Table = styled.table`
 `;
 
 const TableHead = styled.thead`
-  background-color: #F9FAFC;
+  background-color: #F5F6F7;
 `;
 
 const TableRow = styled.tr`
@@ -75,7 +84,7 @@ const TableRow = styled.tr`
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
@@ -85,7 +94,7 @@ const TableCell = styled.td`
   font-weight: 500;
   border-bottom: 1px solid #E3E6E8;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 
 const Pagination = styled.div`
@@ -99,7 +108,7 @@ const PageInfo = styled.span`
   font-size: 14px;
   font-weight: 500;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 
 const PageButtons = styled.div`
@@ -111,7 +120,7 @@ const PageButton = styled.button`
   margin: 0 5px;
   border: 1px solid #E3E6E8;
   background-color: ${props => props.active ? '#121212' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
+  color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -179,19 +188,20 @@ const CommissionManagement = () => {
         <Header>
           <Title>Commission Management</Title>
           <div>
-            <Button onClick={() => setShowModal(true)}>Add Commission</Button>
+            <Button onClick={() => setShowModal(true)}>+ Add Commission</Button>
             <Link to="/commission-vendors">
-              <Button>View all vendors</Button>
+              <ButtonDark>View all vendors</ButtonDark>
             </Link>
           </div>
         </Header>
         <TopControls>
+          <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
           <EntriesDropdown>
             <option>07</option>
             <option>14</option>
             <option>21</option>
           </EntriesDropdown>
-          <span>Entries</span>
+          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
           <SearchInput placeholder="Search..." />
         </TopControls>
         <Table>

@@ -40,7 +40,7 @@ const SectionHeader = styled.div`
 const SectionTitle = styled.h2`
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: #121212;
 `;
 
 const SelectDropdown = styled.select`
@@ -77,7 +77,7 @@ const ReportIcon = styled.img`
 const ReportValue = styled.h3`
   font-size: 24px;
   font-weight: bold;
-  color: ${(props) => props.color || "#333"};
+  color: ${(props) => props.color || "#121212"};
   margin-bottom: 5px;
 `;
 

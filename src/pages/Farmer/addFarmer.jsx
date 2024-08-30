@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import LocationOn from '@mui/icons-material/LocationOn';
 import CalendarToday from '@mui/icons-material/CalendarToday';
 import AccessTime from '@mui/icons-material/AccessTime';
@@ -37,7 +37,7 @@ const RunnerAvatar = styled.img`
 const Header = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 20px;
 `;
 
@@ -62,7 +62,7 @@ const InputGroup = styled.div`
 
 const InputLabel = styled.label`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
   margin-top: 10px;
   margin-bottom: 10px;
   display: block;
@@ -74,13 +74,13 @@ const InputField = styled.input`
   border: 1px solid #F1F1F1;
   border-radius: 4px;
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-top: 20px;
 `;
 
@@ -115,6 +115,7 @@ const BookingHistoryContainer = styled.div`
 
 const BookingCard = styled.div`
   border-radius: 8px;
+  cursor: pointer;
  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.06);
   border: 1px solid #E8E8E8;
   padding: 20px; /* Adjust padding as needed */
@@ -191,6 +192,7 @@ const AddressText = styled.p`
 
 const AddFarmer = ({ mode }) => {
   const { id } = useParams();
+  const navigate=useNavigate()
 
   const bookings = [
     { id: 'AB123456',cropName: 'Cotton',contactNumber: '1234567890', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', area: '21 Acres', price: '₹ 20,000', runner: 'Runner name' },
@@ -205,6 +207,15 @@ const AddFarmer = ({ mode }) => {
     { id: 1, text: 'Lorem ipsum dolor sit amet, Lorem Ipsum sit Bengaluru, Karnataka, 560043, India. Phone number: 8434323495' },
     { id: 2, text: 'Lorem ipsum dolor sit amet, Lorem Ipsum sit Bengaluru, Karnataka, 560043, India. Phone number: 8434323495' },
   ];
+  const handleBookingClick = (booking) => {
+  if(booking.status === 'Completed'){
+    navigate(`/completed-booking/${booking.id}`)
+  }else if(booking.status === 'Confirmed'){
+    navigate(`/confirm-booking-details/${booking.id}`)
+  }else{
+    navigate(`/cancelled-booking-details/${booking.id}`)
+  }
+  };
 
   return (
     <Container>
@@ -258,7 +269,7 @@ const AddFarmer = ({ mode }) => {
           </Header>
           <BookingHistoryContainer>
           {bookings.map(booking => (
-  <BookingCard key={booking.id}>
+  <BookingCard key={booking.id} onClick={() => handleBookingClick(booking)}>
     <BookingHeader>
       <BookingId>#{booking.id}</BookingId>
       <StatusBadge status={booking.status}>{booking.status}</StatusBadge>

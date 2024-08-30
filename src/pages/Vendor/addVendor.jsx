@@ -8,7 +8,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import successIcon from '../../assets/check-wallet.png';
 import avatarImage from '../../assets/runner-avatar.png';
 import rating from '../../assets/rating.png';
-
+import clock from '../../assets/clock.png';
+import calendar from '../../assets/calendar-event.png';
+import map from '../../assets/map-pin.png';
+import Phone from '@mui/icons-material/Phone';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -20,11 +23,15 @@ const Header = styled.div`
   align-items: center;
   margin-bottom: 20px;
 `;
-
+const BookingRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-top: 20px;
 `;
 
@@ -45,7 +52,7 @@ const InputGroup = styled.div`
 
 const InputLabel = styled.label`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
   margin-top: 10px;
   margin-bottom: 10px;
   display: block;
@@ -60,12 +67,12 @@ const InputField = styled.input`
 
 const AccordionWrapper = styled.div`
   margin-bottom: 20px;
-  border: 1px solid #CCCCCC;
+  border: 2px solid #CCCCCC;
   border-radius: 8px;
 `;
 
 const AccordionHeader = styled.div`
-  background-color: #F9FAFC;
+  background-color: #F5F6F7;
   padding: 10px;
   cursor: pointer;
   display: flex;
@@ -99,7 +106,7 @@ const ImageBox = styled.div`
   width: 100px;
   height: 100px;
   margin: 10px;
-  border: 1px dashed #F1F1F1;
+  border: 1px solid #F1F1F1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,11 +130,13 @@ const BookingHistoryContainer = styled.div`
 `;
 
 const BookingCard = styled.div`
-    box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.06);
-  border: 1px solid #E8E8E8;
-
   border-radius: 8px;
-  padding: 15px;
+  cursor: pointer;
+ box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E8E8E8;
+  padding: 20px; /* Adjust padding as needed */
+   display: flex;
+  flex-direction: column;
 `;
 
 const BookingHeader = styled.div`
@@ -164,7 +173,7 @@ const BookingDetails = styled.p`
 `;
 
 const PriceSummary = styled.p`
-  font-weight: 600;
+ font-weight: 500;
   margin-top: 10px;
 `;
 
@@ -187,7 +196,7 @@ const RunnerName = styled.span`
 
 
 const Th = styled.th`
-  background-color: #F9FAFC;
+  background-color: #F5F6F7;
   padding: 10px;
   text-align: left;
   border: 1px solid #F1F1F1;
@@ -214,7 +223,7 @@ const Table = styled.table`
 `;
 
 const TableHead = styled.thead`
-  background-color: #F9FAFC;
+  background-color: #F5F6F7;
 `;
 
 const TableRow = styled.tr`
@@ -235,7 +244,7 @@ const SuccessBadge = styled.div`
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
@@ -245,7 +254,7 @@ const TableCell = styled.td`
   font-weight: 500;
   border-bottom: 1px solid #E3E6E8;
   font-family: 'Montserrat';
-  color: #4B465C;
+  color: #121212;
 `;
 const VendorCell = styled.div`
   display: flex;
@@ -262,7 +271,7 @@ const VendorAvatar = styled.div`
   align-items: center;
   margin-right: 10px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const ActionIcon = styled.img`
@@ -301,12 +310,12 @@ const Vendor = ({ mode }) => {
   };
 
   const bookings = [
-    { id: 'AB123456', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', area: '21 Acres', price: '₹ 20,000', runner: 'Runner name' },
-    { id: 'AB123457', status: 'Completed', address: 'Lorem ipsum dolor sit amet', date: '14 June, 2023', time: '03:00 PM - 05:00 PM', area: '22 Acres', price: '₹ 22,000', runner: 'Runner name' },
-    { id: 'AB123458', status: 'Closed', address: 'Lorem ipsum dolor sit amet', date: '15 June, 2023', time: '04:00 PM - 06:00 PM', area: '23 Acres', price: '₹ 24,000', runner: 'Runner name' },
-    { id: 'AB123459', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet', date: '16 June, 2023', time: '05:00 PM - 07:00 PM', area: '24 Acres', price: '₹ 26,000', runner: 'Runner name' },
-    { id: 'AB123460', status: 'Completed', address: 'Lorem ipsum dolor sit amet', date: '17 June, 2023', time: '06:00 PM - 08:00 PM', area: '25 Acres', price: '₹ 28,000', runner: 'Runner name' },
-    { id: 'AB123461', status: 'Closed', address: 'Lorem ipsum dolor sit amet', date: '18 June, 2023', time: '07:00 PM - 09:00 PM', area: '26 Acres', price: '₹ 30,000', runner: 'Runner name' },
+    { id: 'AB123456',cropName: 'Cotton',contactNumber: '1234567890', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', area: '21 Acres', price: '₹ 20,000', runner: 'Runner name' },
+    { id: 'AB123457',cropName: 'Wheat',contactNumber: '1234567890', status: 'Completed', address: 'Lorem ipsum dolor sit amet', date: '14 June, 2023', time: '03:00 PM - 05:00 PM', area: '22 Acres', price: '₹ 22,000', runner: 'Runner name' },
+    { id: 'AB123458',cropName: 'Rice',contactNumber: '1234567890', status: 'Closed', address: 'Lorem ipsum dolor sit amet', date: '15 June, 2023', time: '04:00 PM - 06:00 PM', area: '23 Acres', price: '₹ 24,000', runner: 'Runner name' },
+    { id: 'AB123459',cropName: 'Cotton',contactNumber: '1234567890', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet', date: '16 June, 2023', time: '05:00 PM - 07:00 PM', area: '24 Acres', price: '₹ 26,000', runner: 'Runner name' },
+    { id: 'AB123460',cropName: 'Wheat',contactNumber: '1234567890', status: 'Completed', address: 'Lorem ipsum dolor sit amet', date: '17 June, 2023', time: '06:00 PM - 08:00 PM', area: '25 Acres', price: '₹ 28,000', runner: 'Runner name' },
+    { id: 'AB123461',cropName: 'Rice',contactNumber: '1234567890', status: 'Closed', address: 'Lorem ipsum dolor sit amet', date: '18 June, 2023', time: '07:00 PM - 09:00 PM', area: '26 Acres', price: '₹ 30,000', runner: 'Runner name' },
   ];
 
   const runners = [
@@ -481,21 +490,26 @@ const Vendor = ({ mode }) => {
           </Header>
           <BookingHistoryContainer>
             {bookings.map(booking => (
-              <BookingCard key={booking.id}>
-                <BookingHeader>
-                  <BookingId>#{booking.id}</BookingId>
-                  <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
-                </BookingHeader>
-                <BookingDetails><LocationOn />{booking.address}</BookingDetails>
-                <BookingDetails><CalendarToday />{booking.date}</BookingDetails>
-                <BookingDetails><AccessTime />{booking.time}</BookingDetails>
+              <BookingCard key={booking.id} onClick={() => handleBookingClick(booking)}>
+              <BookingHeader>
+                <BookingId>#{booking.id}</BookingId>
+                <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
+              </BookingHeader>
+              <BookingDetails><img src={map} alt="Location" />{booking.address}</BookingDetails>
+              <BookingDetails><img src={calendar} alt="Calendar" />{booking.date}</BookingDetails>
+              <BookingDetails><img src={clock} alt="Clock" />{booking.time}</BookingDetails>
+              <BookingRow>
                 <BookingDetails>Farm Area: {booking.area}</BookingDetails>
-                <PriceSummary>Price Summary: {booking.price}</PriceSummary>
-                <RunnerInfo>
+                <BookingDetails>Crop: {booking.cropName}</BookingDetails>
+              </BookingRow>
+              <PriceSummary>Price Summary: {booking.price}</PriceSummary>
+              <RunnerInfo>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <RunnerAvatar src={avatarImage} alt="Runner" />
                   <RunnerName>{booking.runner}</RunnerName>
-                </RunnerInfo>
-              </BookingCard>
+                </div>
+              </RunnerInfo>
+            </BookingCard>
             ))}
           </BookingHistoryContainer>
           <Header>
