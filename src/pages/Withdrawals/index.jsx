@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import runnerAvatar from '../../assets/runner-avatar.png';
 
 const Container = styled.div`
   padding: 20px;
@@ -10,7 +11,7 @@ const Container = styled.div`
 const Header = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 20px;
 `;
 
@@ -57,14 +58,21 @@ const TableRow = styled.tr`
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
 const TableCell = styled.td`
   padding: 12px;
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
+`;
+const TableCell2 = styled.td`
+display: flex;
+align-items: center;
+  padding: 12px;
+  font-size: 14px;
+  color: #121212;
 `;
 
 const VendorAvatar = styled.img`
@@ -92,7 +100,7 @@ const Pagination = styled.div`
 
 const PageInfo = styled.span`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const PageButtons = styled.div`
@@ -104,7 +112,7 @@ const PageButton = styled.button`
   margin: 0 5px;
   border: 1px solid #E3E6E8;
   background-color: ${props => props.active ? '#000' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
+  color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -125,12 +133,13 @@ const Withdrawals = () => {
     <Container>
       <Header>Withdrawal Requests</Header>
       <TopControls>
-        <EntriesDropdown>
-          <option>07</option>
-          <option>14</option>
-          <option>21</option>
-        </EntriesDropdown>
-        <span>Entries</span>
+      <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
+          <EntriesDropdown>
+            <option>07</option>
+            <option>14</option>
+            <option>21</option>
+          </EntriesDropdown>
+          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
         <SearchInput placeholder="Search..." />
       </TopControls>
       <Table>
@@ -146,10 +155,10 @@ const Withdrawals = () => {
         <tbody>
           {withdrawals.map(withdrawal => (
             <TableRow key={withdrawal.id}>
-              <TableCell>
-                <VendorAvatar src="https://via.placeholder.com/32" alt={withdrawal.name} />
+              <TableCell2>
+                <VendorAvatar src={runnerAvatar} alt={withdrawal.name} />
                 {withdrawal.name}
-              </TableCell>
+              </TableCell2>
               <TableCell>{withdrawal.contact}</TableCell>
               <TableCell>{withdrawal.amount}</TableCell>
               <TableCell>{withdrawal.date}</TableCell>

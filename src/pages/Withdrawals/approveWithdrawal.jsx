@@ -1,16 +1,91 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { FiArrowLeft } from 'react-icons/fi';
 
+import CloseIcon from '@mui/icons-material/Close';
+import successWithdrawalCheck from '../../assets/check-wallet.png';
+import { useNavigate } from 'react-router-dom';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
   background-color: #FFFFFF;
 `;
 
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 400px;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 20px;
+  margin-bottom: 20px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+`;
+
+const ConfirmButton = styled(ModalButton)`
+  background-color: #000000;
+  color: white;
+`;
+
+const CancelButton = styled(ModalButton)`
+  background-color: #E0E0E0;
+  color: #000000;
+`;
+
+const SuccessModal = styled(ModalContent)`
+  text-align: center;
+  width: 300px;
+`;
+
+const SuccessIcon = styled.img`
+  width: 50px;
+  height: 50px;
+  margin-bottom: 15px;
+`;
+
 const Header = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 20px;
 `;
 
@@ -28,7 +103,7 @@ const InputWrapper = styled.div`
 
 const Label = styled.label`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 400;
   margin-bottom: 5px;
   display: block;
@@ -40,7 +115,7 @@ const Input = styled.input`
   border: 1px solid #F1F1F1;
   border-radius: 4px;
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const ApproveButton = styled.button`
@@ -57,7 +132,7 @@ const ApproveButton = styled.button`
 
 const SectionTitle = styled.h2`
   font-size: 18px;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 15px;
 `;
 
@@ -87,7 +162,7 @@ const SortControls = styled.div`
 
 const SortLabel = styled.span`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
   margin-right: 10px;
 `;
 
@@ -126,7 +201,7 @@ const PageButton = styled.button`
   margin: 0 5px;
   border: 1px solid #E3E6E8;
   background-color: ${props => props.active ? '#000' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
+  color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -151,7 +226,7 @@ const HistoryItem = styled.div`
 
 const HistoryDetails = styled.div`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const HistoryAmount = styled.div`
@@ -170,13 +245,50 @@ const SuccessBadge = styled.div`
   font-size: 12px;
   font-weight: 600;
 `;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+`;
+
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
+`;
 
 const ApproveWithdrawal = () => {
   const [activeTab, setActiveTab] = useState('History');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleApproveClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmApprove = () => {
+    setShowConfirmModal(false);
+    setShowSuccessModal(true);
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 2000);
+  };
 
   return (
     <Container>
-      <Header>Withdrawal Requests</Header>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px' }}>
+
+      <Header>Withdrawal Requests </Header>
+      <BackButton onClick={() => navigate(-1)}>
+          <BackIcon />
+          Back
+        </BackButton>
+      </div>
 
       <FormGroup>
         <InputWrapper>
@@ -204,7 +316,7 @@ const ApproveWithdrawal = () => {
         </InputWrapper>
       </FormGroup>
 
-      <ApproveButton>Approve</ApproveButton>
+      <ApproveButton onClick={handleApproveClick}>Approve</ApproveButton>
 
       <SectionTitle>Vendor details</SectionTitle>
 
@@ -384,6 +496,30 @@ const ApproveWithdrawal = () => {
           <PageButton>&gt;</PageButton>
         </PageButtons>
       </PaginationContainer>
+      {showConfirmModal && (
+        <Modal>
+          <ModalContent>
+            <CloseButton onClick={() => setShowConfirmModal(false)}><CloseIcon /></CloseButton>
+            <ModalTitle>Confirm Approval</ModalTitle>
+            <p>Are you sure you want to approve this withdrawal?</p>
+            <ModalButtons>
+              <CancelButton onClick={() => setShowConfirmModal(false)}>No</CancelButton>
+              <ConfirmButton onClick={handleConfirmApprove}>Yes</ConfirmButton>
+            </ModalButtons>
+          </ModalContent>
+        </Modal>
+      )}
+
+      {showSuccessModal && (
+        <Modal>
+          <SuccessModal>
+            <CloseButton onClick={() => setShowSuccessModal(false)}><CloseIcon /></CloseButton>
+            <SuccessIcon src={successWithdrawalCheck} alt="Success" />
+            <ModalTitle>Withdrawal Approved</ModalTitle>
+            <p>The withdrawal has been successfully approved.</p>
+          </SuccessModal>
+        </Modal>
+      )}
     </Container>
   );
 };

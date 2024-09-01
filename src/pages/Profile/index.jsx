@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
+import farmerAvatar from '../../assets/farmer.png';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -11,7 +11,7 @@ const Container = styled.div`
 const Header = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 20px;
 `;
 
@@ -84,7 +84,7 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-size: 14px;
   font-weight: 500;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 8px;
 `;
 
@@ -94,7 +94,7 @@ const Input = styled.input`
   border-radius: 4px;
   font-size: 14px;
   width: 100%;
-  color: #4B465C;
+  color: #121212;
   background-color: #FFFFFF;
   transition: border-color 0.3s;
 
@@ -122,7 +122,7 @@ const SaveButton = styled.button`
 `;
 
 const Profile = () => {
-  const [profilePic, setProfilePic] = useState('https://via.placeholder.com/100'); // Placeholder image
+  const [profilePic, setProfilePic] = useState(farmerAvatar); // Placeholder image
 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];

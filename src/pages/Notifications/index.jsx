@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import viewIcon from '../../assets/view-icon.png';
+import editIcon from '../../assets/edit-icon.png';
+import deleteIcon from '../../assets/delete-icon.png';
 
 const Container = styled.div`
   padding: 20px;
@@ -17,12 +20,13 @@ const Header = styled.div`
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
 `;
-
 const AddButton = styled(Link)`
-   padding: 8px 16px;
+  padding: 8px 16px;
   background-color: #ffffff ;
+  text-decoration: none;
+  font-weight: 500;
   color: #000000;
   border: 1px solid #000000;
   border-radius: 4px;
@@ -34,6 +38,7 @@ const AddButton = styled(Link)`
     font-size: 18px;
   }
 `;
+
 
 const TopControls = styled.div`
   display: flex;
@@ -78,14 +83,14 @@ const TableRow = styled.tr`
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
-  color: #4B465C;
+  color: #121212;
   font-weight: 600;
 `;
 
 const TableCell = styled.td`
   padding: 12px;
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const ActionButton = styled.button`
@@ -107,19 +112,24 @@ const Pagination = styled.div`
 
 const PageInfo = styled.span`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
 `;
 
 const PageButtons = styled.div`
   display: flex;
 `;
-
+const ActionIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  cursor: pointer;
+`;
 const PageButton = styled.button`
   padding: 5px 10px;
   margin: 0 5px;
   border: 1px solid #E3E6E8;
   background-color: ${props => props.active ? '#000' : 'white'};
-  color: ${props => props.active ? 'white' : '#4B465C'};
+  color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
@@ -142,12 +152,13 @@ const Notifications = () => {
         <AddButton to="/add-notification">Add Notification</AddButton>
       </Header>
       <TopControls>
-        <EntriesDropdown>
-          <option>07</option>
-          <option>14</option>
-          <option>21</option>
-        </EntriesDropdown>
-        <span>Entries</span>
+      <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
+          <EntriesDropdown>
+            <option>07</option>
+            <option>14</option>
+            <option>21</option>
+          </EntriesDropdown>
+          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
         <SearchInput placeholder="Search..." />
       </TopControls>
       <Table>
@@ -168,8 +179,9 @@ const Notifications = () => {
               <TableCell>{notification.uploadDate}</TableCell>
               <TableCell>{notification.type}</TableCell>
               <TableCell>
-                <ActionButton color="#3498db">View</ActionButton>
-                <ActionButton color="#e74c3c">Delete</ActionButton>
+              <ActionIcon src={viewIcon} alt="View" />
+                  <ActionIcon src={editIcon} alt="Edit" />
+                <ActionIcon src={deleteIcon} alt="Delete" />
               </TableCell>
             </TableRow>
           ))}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
+
+import { Link, useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
@@ -80,6 +82,7 @@ const ButtonDark = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-left: 10px;
+  margin-right: 10px;
 `;
 
 const TableHeader = styled.th`
@@ -175,8 +178,23 @@ const ClickableRow = styled(Link)`
     background-color: #F5F5F5;
   }
 `;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+`;
 
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
+`;
 const VendorList = () => {
+  const navigate=useNavigate();
   const [vendors, setVendors] = useState([
     { id: 1, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
     { id: 2, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
@@ -191,7 +209,13 @@ const VendorList = () => {
     <Container>
       <Header>
         <Title>Commission Management &gt; Vendor</Title>
-        <ButtonDark>View new vendor list</ButtonDark>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+
+        <BackButton onClick={() => navigate(-1)}>
+          <BackIcon />
+          Back
+        </BackButton>
+        </div>
       </Header>
       <TopControls>
         <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>

@@ -23,6 +23,7 @@ const SidebarContainer = styled.div`
 `;
 
 const Logo = styled.div`
+  cursor: pointer;
   padding: 20px;
   img {
     width: 100%;
@@ -52,8 +53,8 @@ const MenuItem = styled(Link)`
     background-color: rgba(255, 255, 255, 0.1);
   }
   img {
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     margin-right: 15px;
   }
 `;
@@ -69,8 +70,8 @@ const LogoutButton = styled.button`
   width: 100%;
   text-align: left;
   img {
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     margin-right: 15px;
   }
 `;
@@ -117,21 +118,88 @@ const ConfirmButton = styled(ModalButton)`
   color: white;
 `;
 
+
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { icon: homeIcon, text: 'Dashboard & Analytics', path: '/home' },
-    { icon: bookingsIcon, text: 'Farmer Management', path: '/manage-farmer' },
-    { icon: serviceHistoryIcon, text: 'Commision Management', path: '/commission-management' },
-    { icon: calendarIcon, text: 'Booking Management', path: '/bookings' },
-    { icon: reportsIcon, text: 'Vendor Management', path: '/manage-vendor' },
-    { icon: testimonialIcon, text: 'Testimonial Management', path: '/testemonials' },
-    { icon: notificationsIcon, text: 'Notification Management', path: '/notifications' },
-    { icon: withdrawalRequestsIcon, text: 'Withdrawal Requests', path: '/withdrawals' },
+    { 
+      icon: homeIcon, 
+      text: 'Dashboard & Analytics', 
+      path: '/home',
+      activePaths: ['/home']
+    },
+    { 
+      icon: bookingsIcon, 
+      text: 'Farmer Management', 
+      path: '/manage-farmer',
+      activePaths: ['/manage-farmer', '/add-farmer', '/view-farmer', '/edit-farmer']
+    },
+    { 
+      icon: serviceHistoryIcon, 
+      text: 'Commission Management', 
+      path: '/commission-management',
+      activePaths: ['/commission-management', '/commission-vendors']
+    },
+    { 
+      icon: calendarIcon, 
+      text: 'Booking Management', 
+      path: '/bookings',
+      activePaths: ['/bookings', '/assign-runner', '/cancelled-booking-details', '/completed-booking', '/confirm-booking-details']
+    },
+    { 
+      icon: reportsIcon, 
+      text: 'Vendor Management', 
+      path: '/manage-vendor',
+      activePaths: ['/manage-vendor', '/view-vendor', '/edit-vendor', '/add-vendor']
+    },
+    { 
+      icon: testimonialIcon, 
+      text: 'Testimonial Management', 
+      path: '/testemonials',
+      activePaths: ['/add-testimonial', '/testemonials']
+    },
+    { 
+      icon: notificationsIcon, 
+      text: 'Notification Management', 
+      path: '/notifications',
+      activePaths: ['/add-notification', '/notifications']
+    },
+    { 
+      icon: withdrawalRequestsIcon, 
+      text: 'Withdrawal Requests', 
+      path: '/withdrawals',
+      activePaths: ['/withdrawals', '/approve-withdrawal']
+    },
   ];
+
+  const isActive = (item) => {
+    return item.activePaths.some(path => {
+      const currentPathParts = location.pathname.split('/');
+      const activePathParts = path.split('/');
+      
+      // Check if the number of parts is the same
+      if (currentPathParts.length !== activePathParts.length) {
+        return false;
+      }
+      
+      // Check each part of the path
+      return activePathParts.every((part, index) => {
+        // If the active path part is empty (for the initial slash), it's a match
+        if (part === '') {
+          return true;
+        }
+        // If the parts match exactly, it's a match
+        if (part === currentPathParts[index]) {
+          return true;
+        }
+        // If the active path part is not empty and doesn't match, it's not a match
+        return false;
+      });
+    });
+  };
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -145,7 +213,7 @@ const Sidebar = () => {
   return (
     <>
       <SidebarContainer>
-        <Logo>
+        <Logo onClick={() => navigate('/home')}>
           <img src={chiragLogo} alt="C.H.I.R.A.G." />
         </Logo>
         <Menu>
@@ -153,7 +221,7 @@ const Sidebar = () => {
             <MenuItem
               key={item.text}
               to={item.path}
-              className={location.pathname === item.path ? 'active' : ''}
+              className={isActive(item) ? 'active' : ''}
             >
               <img src={item.icon} alt={item.text} />
               <span>{item.text}</span>
@@ -162,7 +230,7 @@ const Sidebar = () => {
         </Menu>
         <Menu bottom>
           <LogoutButton onClick={handleLogout}>
-            <img style={{ height: '25px', width: '25px' }} src={logoutIcon} alt="Logout" />
+            <img style={{ height: '30px', width: '30px' }} src={logoutIcon} alt="Logout" />
             <span style={{ fontWeight: '600' ,fontSize: '14px'}}>Logout</span>
           </LogoutButton>
         </Menu>

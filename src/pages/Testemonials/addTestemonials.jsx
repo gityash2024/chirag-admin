@@ -18,16 +18,24 @@ const Header = styled.div`
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
-  color: #4B465C;
+  color: #121212;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
 `;
 
 const BackIcon = styled(FiArrowLeft)`
-  cursor: pointer;
-  font-size: 24px;
-  color: #4B465C;
-  margin-right: 10px;
+  margin-right: 8px;
 `;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -61,7 +69,7 @@ const SaveButton = styled.button`
 
 const Label = styled.label`
   font-size: 14px;
-  color: #4B465C;
+  color: #121212;
   margin-bottom: 5px;
 `;
 
@@ -124,7 +132,10 @@ const AddTestimonial = () => {
     <Container>
       <Header>
         <Title>Testimonial Management / Add</Title>
-        <BackIcon onClick={() => navigate('/testemonials')} />
+        <BackButton onClick={() => navigate('/testemonials')}>
+          <BackIcon />
+          Back
+        </BackButton>
       </Header>
       <Form onSubmit={handleSubmit}>
         <InputGroup>

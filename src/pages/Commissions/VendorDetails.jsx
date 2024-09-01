@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
+
 
 const Container = styled.div`
   padding: 20px;
@@ -103,7 +105,21 @@ const ButtonWrapper = styled.div`
   justify-content: center;
   margin-top: 20px;
 `;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+`;
 
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
+`;
 const VendorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -143,6 +159,10 @@ const VendorDetails = () => {
     <Container>
       <Header>
         <Title>Commission Management &gt; Vendor &gt; Edit</Title>
+        <BackButton onClick={() => navigate(-1)}>
+          <BackIcon />
+          Back
+        </BackButton>
       </Header>
       <Form>
         <FormGroup>

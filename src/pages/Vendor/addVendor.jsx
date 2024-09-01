@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import LocationOn from '@mui/icons-material/LocationOn';
 import CalendarToday from '@mui/icons-material/CalendarToday';
 import AccessTime from '@mui/icons-material/AccessTime';
@@ -12,6 +12,8 @@ import clock from '../../assets/clock.png';
 import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
 import Phone from '@mui/icons-material/Phone';
+import { FiArrowLeft } from 'react-icons/fi';
+
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -280,7 +282,24 @@ const ActionIcon = styled.img`
   margin-right: 10px;
   cursor: pointer;
 `;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+`;
+
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
+`;
 const Vendor = ({ mode }) => {
+  const navigate=useNavigate();
   const { id } = useParams();
   const [droneSpecs, setDroneSpecs] = useState([{}]);
   const [batterySpecs, setBatterySpecs] = useState([{}]);
@@ -333,6 +352,10 @@ const Vendor = ({ mode }) => {
     <Container>
       <Header>
         <Title>Vendor Management / {mode === 'edit' ? 'Edit' : mode === 'view' ? 'View' : 'Add'}</Title>
+        <BackButton onClick={() => navigate('/manage-vendor')}>
+          <BackIcon />
+          Back
+        </BackButton>
       </Header>
       <Form>
         <FormRow>
