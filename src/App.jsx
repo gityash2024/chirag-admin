@@ -90,6 +90,7 @@ function App() {
                       <Route path="/testemonials" element={<Testimonials />} />
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/add-notification" element={<AddNotification />} />
+                      <Route path="/edit-notification" element={<AddNotification />} />
                       <Route path="/withdrawals" element={<Withdrawals />} />
                       <Route path="/commission-management" element={<CommissionManagement />} />
                       <Route path="/commission-vendors" element={<VendorList />} />
@@ -97,6 +98,7 @@ function App() {
                       <Route path="/approve-withdrawal" element={<ApproveWithdrawal />} />
                        <Route path="/add-vendor" element={<Vendor mode="add" />} />
                        <Route path="/add-testimonial" element={<AddTestimonial/>} />
+                       <Route path="/edit-testimonial" element={<AddTestimonial/>} />
                       <Route path="/view-vendor/:id" element={<Vendor mode="view" />} />
                       <Route path="/edit-vendor/:id" element={<Vendor mode="edit" />} />
                       <Route path="/add-farmer" element={<AddFarmer mode="add" />} />

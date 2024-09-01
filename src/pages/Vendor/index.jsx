@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import viewIcon from '../../assets/view-icon.png';
 import editIcon from '../../assets/edit-icon.png';
 import deleteIcon from '../../assets/delete-icon.png';
+import successIcon from '../../assets/check-wallet.png';
 
 const Container = styled.div`
   padding: 20px;
@@ -149,8 +150,88 @@ const PageButton = styled.button`
   cursor: pointer;
   border-radius: 4px;
 `;
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+`;
+
+const ModalButton = styled.button`
+  padding: 12px 42px;
+  border-radius: 4px;
+  background-color: ${props => props.backgroundColor || 'white'};
+  cursor: pointer;
+`;
+
+const SuccessIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+`;
+const BlockConfirmationModal = ({ onClose, onConfirm }) => (
+  <Modal>
+    <ModalContent>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <h2>Are you sure you want to block this vendor?</h2>
+      <ModalButtons>
+        <ModalButton onClick={onClose}>Cancel</ModalButton>
+        <ModalButton onClick={onConfirm} style={{ backgroundColor: 'black', color: 'white' }}>Block</ModalButton>
+      </ModalButtons>
+    </ModalContent>
+  </Modal>
+);
+
+const BlockSuccessModal = ({ onClose }) => (
+  <Modal>
+    <ModalContent>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <div style={{ textAlign: 'center' }}>
+        <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
+        </div>
+      <h3>Vendor successfully blocked</h3>
+    </ModalContent>
+  </Modal>
+);
 const ManageVendors = () => {
+  const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
+  const [showBlockSuccess, setShowBlockSuccess] = useState(false);
+  const [farmerToBlock, setFarmerToBlock] = useState(null);
+
   const [vendors] = useState([
     { id: 1, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh' },
     { id: 2, name: 'Darrell Steward', contact: '+91 123 456 7890', state: 'Chattisgarh' },
@@ -161,7 +242,21 @@ const ManageVendors = () => {
     { id: 7, name: 'Jane Cooper', contact: '+91 123 456 7890', state: 'Chattisgarh' },
     { id: 8, name: 'Ralph Edwards', contact: '+91 123 456 7890', state: 'Madhya Pradesh' },
   ]);
-
+  const handleBlockClick = (farmer) => {
+    setFarmerToBlock(farmer);
+    setShowBlockConfirmation(true);
+  };
+  
+  const handleBlockConfirm = () => {
+    // Here you would typically call an API to block the farmer
+    setShowBlockConfirmation(false);
+    setShowBlockSuccess(true);
+  };
+  const handleCloseModals = () => {
+    setShowBlockConfirmation(false);
+    setShowBlockSuccess(false);
+    setFarmerToBlock(null);
+  };
   return (
     <Container>
       <Header>
@@ -207,8 +302,11 @@ const ManageVendors = () => {
                 <Link to={`/edit-vendor/${vendor.id}`}>
                   <ActionIcon src={editIcon} alt="Edit" />
                 </Link>
-                <ActionIcon src={deleteIcon} alt="Delete" />
-              </TableCell>
+                <ActionIcon 
+  src={deleteIcon} 
+  alt="Block" 
+  onClick={() => handleBlockClick(vendor)}
+/>                </TableCell>
             </TableRow>
           ))}
         </tbody>
@@ -225,6 +323,15 @@ const ManageVendors = () => {
           <PageButton>Next</PageButton>
         </PageButtons>
       </Pagination>
+      {showBlockConfirmation && (
+      <BlockConfirmationModal 
+        onClose={handleCloseModals}
+        onConfirm={handleBlockConfirm}
+      />
+    )}
+    {showBlockSuccess && (
+      <BlockSuccessModal onClose={handleCloseModals} />
+    )}
     </Container>
   );
 };

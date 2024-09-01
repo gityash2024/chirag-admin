@@ -159,13 +159,13 @@ const Sidebar = () => {
       icon: testimonialIcon, 
       text: 'Testimonial Management', 
       path: '/testemonials',
-      activePaths: ['/add-testimonial', '/testemonials']
+      activePaths: ['/add-testimonial', '/testemonials','/edit-testimonial']
     },
     { 
       icon: notificationsIcon, 
       text: 'Notification Management', 
       path: '/notifications',
-      activePaths: ['/add-notification', '/notifications']
+      activePaths: ['/add-notification', '/notifications','/edit-notification']
     },
     { 
       icon: withdrawalRequestsIcon, 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import viewIcon from '../../assets/view-icon.png';
 import editIcon from '../../assets/edit-icon.png';
 import deleteIcon from '../../assets/delete-icon.png';
+import successIcon from '../../assets/check-wallet.png';
 
 const Container = styled.div`
   padding: 20px;
@@ -134,7 +135,129 @@ const PageButton = styled.button`
   border-radius: 4px;
 `;
 
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const Modal2 = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+`;
+const ModalContent2 = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  max-width: 600px;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 600;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+`;
+
+const ModalTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const ModalRow = styled.tr`
+  border-bottom: 1px solid #E3E6E8;
+`;
+
+const ModalCell = styled.td`
+  padding: 12px;
+  font-size: 14px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+`;
+
+const ModalButton = styled.button`
+  padding: 12px 42px;
+  border-radius: 4px;
+  background-color: ${props => props.backgroundColor || 'white'};
+  cursor: pointer;
+`;
+
+const SuccessIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+`;
+const BlockConfirmationModal = ({ onClose, onConfirm }) => (
+  <Modal2>
+    <ModalContent2>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <h2>Are you sure you want to block this notification  ?</h2>
+      <ModalButtons>
+        <ModalButton onClick={onClose}>Cancel</ModalButton>
+        <ModalButton onClick={onConfirm} style={{ backgroundColor: 'black', color: 'white' }}>Block</ModalButton>
+      </ModalButtons>
+    </ModalContent2>
+  </Modal2>
+);
+
+const BlockSuccessModal = ({ onClose }) => (
+  <Modal2>
+    <ModalContent2>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <div style={{ textAlign: 'center' }}>
+        <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
+        </div>
+      <h3>Notification successfully blocked</h3>
+    </ModalContent2>
+  </Modal2>
+);
 const Notifications = () => {
+  const [farmerToBlock, setFarmerToBlock] = useState(null);
+
+  const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
+  const [showBlockSuccess, setShowBlockSuccess] = useState(false);
+  const navigate = useNavigate();
   const [notifications] = useState([
     { id: 1, description: 'lorem ipsum dolor sit amet...', sentTo: 'Farmer', uploadDate: '23-08-2024 22:10', type: 'Discount' },
     { id: 2, description: 'lorem ipsum dolor sit amet...', sentTo: 'Vendor', uploadDate: '23-08-2024 22:10', type: 'Informative' },
@@ -144,6 +267,31 @@ const Notifications = () => {
     { id: 6, description: 'lorem ipsum dolor sit amet...', sentTo: 'Runner', uploadDate: '23-08-2024 22:10', type: 'Informative' },
     { id: 7, description: 'lorem ipsum dolor sit amet...', sentTo: 'Vendor', uploadDate: '23-08-2024 22:10', type: 'Discount' },
   ]);
+
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const handleBlockClick = (farmer) => {
+    setFarmerToBlock(farmer);
+    setShowBlockConfirmation(true);
+  };
+  
+  const handleBlockConfirm = () => {
+    // Here you would typically call an API to block the farmer
+    setShowBlockConfirmation(false);
+    setShowBlockSuccess(true);
+  };
+  const handleCloseModals = () => {
+    setShowBlockConfirmation(false);
+    setShowBlockSuccess(false);
+    setFarmerToBlock(null);
+  };
+  const openModal = (notification) => {
+    setSelectedNotification(notification);
+  };
+
+  const closeModal = () => {
+    setSelectedNotification(null);
+  };
+
 
   return (
     <Container>
@@ -179,9 +327,13 @@ const Notifications = () => {
               <TableCell>{notification.uploadDate}</TableCell>
               <TableCell>{notification.type}</TableCell>
               <TableCell>
-              <ActionIcon src={viewIcon} alt="View" />
-                  <ActionIcon src={editIcon} alt="Edit" />
-                <ActionIcon src={deleteIcon} alt="Delete" />
+                <ActionIcon src={viewIcon} alt="View" onClick={() => openModal(notification)} />
+                <ActionIcon onClick={() => { navigate('/edit-notification') }} src={editIcon} alt="Edit" />
+                <ActionIcon 
+  src={deleteIcon} 
+  alt="Block" 
+  onClick={() => handleBlockClick(notification)}
+/>   
               </TableCell>
             </TableRow>
           ))}
@@ -199,6 +351,49 @@ const Notifications = () => {
           <PageButton>Next</PageButton>
         </PageButtons>
       </Pagination>
+      {selectedNotification && (
+        <Modal>
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Notification Details</ModalTitle>
+              <CloseButton onClick={closeModal}>&times;</CloseButton>
+            </ModalHeader>
+            <ModalTable>
+              <tbody>
+                <ModalRow>
+                  <ModalCell><strong>ID:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.id}</ModalCell>
+                </ModalRow>
+                <ModalRow>
+                  <ModalCell><strong>Description:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.description}</ModalCell>
+                </ModalRow>
+                <ModalRow>
+                  <ModalCell><strong>Sent To:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.sentTo}</ModalCell>
+                </ModalRow>
+                <ModalRow>
+                  <ModalCell><strong>Upload Date:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.uploadDate}</ModalCell>
+                </ModalRow>
+                <ModalRow>
+                  <ModalCell><strong>Type:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.type}</ModalCell>
+                </ModalRow>
+              </tbody>
+            </ModalTable>
+          </ModalContent>
+        </Modal>
+      )}
+       {showBlockConfirmation && (
+      <BlockConfirmationModal 
+        onClose={handleCloseModals}
+        onConfirm={handleBlockConfirm}
+      />
+    )}
+    {showBlockSuccess && (
+      <BlockSuccessModal onClose={handleCloseModals} />
+    )}
     </Container>
   );
 };
