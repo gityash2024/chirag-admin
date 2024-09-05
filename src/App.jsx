@@ -90,7 +90,6 @@ function App() {
                       <Route path="/manage-vendor" element={<ManageVendor />} />
                       <Route path="/testemonials" element={<Testimonials />} />
                       <Route path="/recommendation" element={<Recommedations />} />
-
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/add-notification" element={<AddNotification />} />
                       <Route path="/edit-notification" element={<AddNotification />} />
