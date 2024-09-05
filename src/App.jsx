@@ -31,6 +31,7 @@ import AddFarmer from './pages/Farmer/addFarmer';
 import ConfirmedBookingDetails from './pages/Bookings/ConfirmedBookingDetails';
 import RunnerReachedBookingDetail from './pages/Bookings/RunnerReachedBookingDetail';
 import RunnerCanceledBookingDetail from './pages/Bookings/RunnerCanceledBookingDetail';
+import Recommedations from './pages/Recomendations';
 
 const AppContainer = styled.div`
   display: flex;
@@ -88,6 +89,8 @@ function App() {
                       <Route path="/manage-farmer" element={<ManageFarmer />} />
                       <Route path="/manage-vendor" element={<ManageVendor />} />
                       <Route path="/testemonials" element={<Testimonials />} />
+                      <Route path="/recommendation" element={<Recommedations />} />
+
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/add-notification" element={<AddNotification />} />
                       <Route path="/edit-notification" element={<AddNotification />} />

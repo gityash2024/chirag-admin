@@ -9,6 +9,7 @@ import calendarIcon from '../assets/calendar.png';
 import withdrawalRequestsIcon from '../assets/withdrawal-requests.png';
 import notificationsIcon from '../assets/notifications.png';
 import testimonialIcon from '../assets/testimonialial.png';
+import recommendation from '../assets/recommendation.png';
 
 import reportsIcon from '../assets/reports.png';
 import logoutIcon from '../assets/logout.png';
@@ -172,6 +173,12 @@ const Sidebar = () => {
       text: 'Withdrawal Requests', 
       path: '/withdrawals',
       activePaths: ['/withdrawals', '/approve-withdrawal']
+    },
+    { 
+      icon: recommendation, 
+      text: 'Recommendation', 
+      path: '/recommendation',
+      activePaths: ['/recommendation']
     },
   ];
 
