@@ -8,7 +8,28 @@ import image5 from "../../assets/recommendation-5.png";
 import image6 from "../../assets/recommendation-6.png";
 import image7 from "../../assets/recommendation-7.png";
 import image8 from "../../assets/recommendation-8.png";
-
+import riceImage from "../../assets/rice.png";
+import maizeImage from "../../assets/maize.png";
+import groundnutImage from "../../assets/groundnut.png";
+import pigeonPeasImage from "../../assets/pigeon-peas.png";
+import soybeanImage from "../../assets/soybean.png";
+import sugarcaneImage from "../../assets/sugarcane.png";
+import wheatImage from "../../assets/wheat.png";
+import sesameImage from "../../assets/sesame.png";
+import safflowerImage from "../../assets/safflower.png";
+import cottonImage from "../../assets/cotton.png";
+import tomatoImage from "../../assets/tomato.png";
+import onionImage from "../../assets/onion.png";
+import potatoImage from "../../assets/potato.png";
+import brinjalImage from "../../assets/brinjal.png";
+import mustardImage from "../../assets/mustard.png";
+import moongDalImage from "../../assets/moong-dal.png";
+import arharDalImage from "../../assets/arhar-dal.png";
+import chilliImage from "../../assets/chilli.png";
+import mangoImage from "../../assets/mango.png";
+import papayaImage from "../../assets/papaya.png";
+import appleImage from "../../assets/apple.png";
+import litchiImage from "../../assets/litchi.png";
 const Container = styled.div`
   padding: 20px;
   font-family: "Public Sans", sans-serif;
@@ -18,14 +39,6 @@ const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 20px;
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
 `;
 
 const Button = styled.button`
@@ -56,7 +69,7 @@ const Card = styled.div`
 
 const CardImageContainer = styled.div`
   width: 100px;
-  background: linear-gradient(160.06deg, #71A27C 1.81%, #003F17 98.19%);
+  background: linear-gradient(160.06deg, #34C487 1.81%, #083C88 98.19%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -104,6 +117,38 @@ const DoneButton = styled(Button)`
   opacity: ${props => props.disabled ? 0.5 : 1};
 `;
 
+const CropGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+`;
+
+const CropCard = styled.div`
+  border: 1px solid #EEEEEE;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  ${props => props.selected && `
+    border-color: #000000;
+  `}
+`;
+
+const CropImage = styled.img`
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+`;
+
+const CropName = styled.p`
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+`;
+
 const Recommendations = () => {
   const [selectedCrop, setSelectedCrop] = useState("Maize");
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -118,13 +163,49 @@ const Recommendations = () => {
     setIsChecked(false);
   };
 
+  const cropList = [
+    { name: "Rice", image: riceImage },
+    { name: "Maize", image: maizeImage },
+    { name: "Groundnut", image: groundnutImage },
+    { name: "Pigeon pea", image: pigeonPeasImage },
+    { name: "Soybean", image: soybeanImage },
+    { name: "Sugarcane", image: sugarcaneImage },
+    { name: "Wheat", image: wheatImage },
+    { name: "Sesame", image: sesameImage },
+    { name: "Safflower", image: safflowerImage },
+    { name: "Cotton", image: cottonImage },
+    { name: "Tomato", image: tomatoImage },
+    { name: "Onion", image: onionImage },
+    { name: "Potato", image: potatoImage },
+    { name: "Brinjal", image: brinjalImage },
+    { name: "Mustard", image: mustardImage },
+    { name: "Moong Dal", image: moongDalImage },
+    { name: "Arhar Dal", image: arharDalImage },
+    { name: "Chilli", image: chilliImage },
+    { name: "Mango", image: mangoImage },
+    { name: "Papaya", image: papayaImage },
+    { name: "Apple", image: appleImage },
+    { name: "Litchi", image: litchiImage }
+  ];
+  
+
   const renderInitialScreen = () => (
     <>
-      <Title>Recommendation</Title>
-      <Select value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
-        <option value="Maize">Maize</option>
-      </Select>
-      <Button onClick={handleViewRecommendations}>View Recommendation</Button>
+      <Title>Spray Guide</Title>
+      <p>Please select the crop</p>
+      <CropGrid>
+        {cropList.map((crop, index) => (
+          <CropCard
+            key={index}
+            selected={selectedCrop === crop.name}
+            onClick={() => setSelectedCrop(crop.name)}
+          >
+            <CropImage src={crop.image} alt={crop.name} />
+            <CropName>{crop.name}</CropName>
+          </CropCard>
+        ))}
+      </CropGrid>
+      <Button onClick={handleViewRecommendations}>Done</Button>
     </>
   );
 
