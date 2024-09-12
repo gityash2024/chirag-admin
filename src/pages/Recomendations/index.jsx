@@ -205,7 +205,7 @@ const Recommendations = () => {
           </CropCard>
         ))}
       </CropGrid>
-      <Button onClick={handleViewRecommendations}>Done</Button>
+      <Button onClick={handleViewRecommendations}>Next</Button>
     </>
   );
 

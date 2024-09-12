@@ -176,7 +176,7 @@ const Sidebar = () => {
     },
     { 
       icon: recommendation, 
-      text: 'Recommendation', 
+      text: 'Spray Assist', 
       path: '/recommendation',
       activePaths: ['/recommendation']
     },
