@@ -1,12 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
-import Loader from './components/Loader';
-import GlobalStyle from './GlobalStyle'; // Import the GlobalStyle component
+import GlobalStyle from './GlobalStyle';
 
 import LanguageSelection from './pages/auth/LanguageSelection';
 import Login from './pages/auth/Login';
@@ -64,10 +63,15 @@ const StyledToastContainer = styled(ToastContainer)`
   }
 `;
 
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('userData') !== null;
+  return isAuthenticated ? children : <Navigate to="/" />;
+};
+
 function App() {
   return (
     <Router>
-      <GlobalStyle /> 
+      <GlobalStyle />
       <AppContainer>
         <Routes>
           <Route path="/" element={<LanguageSelection />} />
@@ -75,7 +79,7 @@ function App() {
           <Route
             path="*"
             element={
-              <>
+              <ProtectedRoute>
                 <Sidebar />
                 <MainContent>
                   <Topbar />
@@ -98,9 +102,9 @@ function App() {
                       <Route path="/commission-vendors" element={<VendorList />} />
                       <Route path="/commission-vendors/:id" element={<VendorDetails />} />
                       <Route path="/approve-withdrawal" element={<ApproveWithdrawal />} />
-                       <Route path="/add-vendor" element={<Vendor mode="add" />} />
-                       <Route path="/add-testimonial" element={<AddTestimonial/>} />
-                       <Route path="/edit-testimonial" element={<AddTestimonial/>} />
+                      <Route path="/add-vendor" element={<Vendor mode="add" />} />
+                      <Route path="/add-testimonial" element={<AddTestimonial />} />
+                      <Route path="/edit-testimonial" element={<AddTestimonial />} />
                       <Route path="/view-vendor/:id" element={<Vendor mode="view" />} />
                       <Route path="/edit-vendor/:id" element={<Vendor mode="edit" />} />
                       <Route path="/add-farmer" element={<AddFarmer mode="add" />} />
@@ -112,7 +116,7 @@ function App() {
                     </Routes>
                   </PageContent>
                 </MainContent>
-              </>
+              </ProtectedRoute>
             }
           />
         </Routes>
@@ -127,7 +131,6 @@ function App() {
           draggable
           pauseOnHover
         />
-        <Loader />
       </AppContainer>
     </Router>
   );

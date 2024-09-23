@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import loginImage from '../../assets/login-image.png';
 import chiragLogo from '../../assets/chirag-logo-dark.png';
+import { loginAdmin } from '../../services/commonService';
+import { toast } from 'react-toastify';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   display: flex;
   height: 100vh;
+  position: relative;
 `;
 
 const ImageSection = styled.div`
@@ -45,7 +49,7 @@ const Logo = styled.img`
 const Title = styled.h2`
   font-size: 24px;
   font-family: 'Public Sans';
-  font-weight: 400; /* Regular */
+  font-weight: 400;
   color: rgba(35, 33, 42, 0.6);
   margin-bottom: 20px;
 `;
@@ -55,13 +59,13 @@ const Label = styled.label`
   color: #23212A;
   margin-bottom: 8px;
   font-family: 'Public Sans';
-  font-weight: 400; /* Regular */
+  font-weight: 400;
 `;
 
 const Input = styled.input`
   width: 94%;
   font-family: 'Public Sans';
-  font-weight: 400; /* Regular */
+  font-weight: 400;
   padding: 10px;
   margin-bottom: 20px;
   border: 1px solid #DBDADE;
@@ -81,12 +85,30 @@ const Button = styled.button`
 `;
 
 const Login = () => {
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [adminId, setAdminId] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/home');
+    setIsLoading(true);
+
+    try {
+      const response = await loginAdmin({ email: adminId, password, role: 'admin'});
+      if (response.data.token) {
+        toast.success('Login successful');
+        localStorage.setItem('userData', JSON.stringify(response.data));
+        navigate('/home');
+      } else {
+        toast.error('Please enter valid credentials');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed');
+      console.error('Login error:', error.response?.data?.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -105,6 +127,8 @@ const Login = () => {
             id="adminId"
             type="text"
             placeholder="Enter Admin Id"
+            value={adminId}
+            onChange={(e) => setAdminId(e.target.value)}
             required
           />
           <Label htmlFor="password">Password</Label>
@@ -112,11 +136,16 @@ const Login = () => {
             id="password"
             type="password"
             placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Button>
         </form>
       </FormSection>
+      {isLoading && <Loader />}
     </Container>
   );
 };

@@ -209,10 +209,13 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
+
     setShowLogoutModal(true);
   };
 
   const confirmLogout = () => {
+    localStorage.clear();
+    
     setShowLogoutModal(false);
     navigate('/');
   };
