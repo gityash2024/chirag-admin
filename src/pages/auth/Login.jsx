@@ -98,8 +98,9 @@ const Login = () => {
       const response = await loginAdmin({ email: adminId, password, role: 'admin'});
       if (response.data.token) {
         toast.success('Login successful');
+        console.log(response.data);
         localStorage.setItem('userData', JSON.stringify(response.data));
-        navigate('/home');
+        navigate('/');
       } else {
         toast.error('Please enter valid credentials');
       }

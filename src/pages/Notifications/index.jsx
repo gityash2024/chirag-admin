@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import viewIcon from '../../assets/view-icon.png';
 import editIcon from '../../assets/edit-icon.png';
 import deleteIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
+import { getNotifications, deleteNotification } from '../../services/commonService';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans';
 `;
 
 const Header = styled.div`
@@ -23,9 +24,10 @@ const Title = styled.h1`
   font-weight: 600;
   color: #121212;
 `;
+
 const AddButton = styled(Link)`
   padding: 8px 16px;
-  background-color: #ffffff ;
+  background-color: #ffffff;
   text-decoration: none;
   font-weight: 500;
   color: #000000;
@@ -33,13 +35,11 @@ const AddButton = styled(Link)`
   border-radius: 4px;
   cursor: pointer;
   margin-left: 10px;
-
   &::before {
     content: '+';
     font-size: 18px;
   }
 `;
-
 
 const TopControls = styled.div`
   display: flex;
@@ -94,13 +94,10 @@ const TableCell = styled.td`
   color: #121212;
 `;
 
-const ActionButton = styled.button`
-  padding: 6px 12px;
-  margin-right: 8px;
-  background-color: ${props => props.color};
-  color: white;
-  border: none;
-  border-radius: 4px;
+const ActionIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
   cursor: pointer;
 `;
 
@@ -119,12 +116,7 @@ const PageInfo = styled.span`
 const PageButtons = styled.div`
   display: flex;
 `;
-const ActionIcon = styled.img`
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
-  cursor: pointer;
-`;
+
 const PageButton = styled.button`
   padding: 5px 10px;
   margin: 0 5px;
@@ -145,30 +137,14 @@ const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 `;
-const Modal2 = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+
 const ModalContent = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 8px;
   width: 80%;
-  max-width: 600px;
-`;
-const ModalContent2 = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 350px;
   max-width: 600px;
 `;
 
@@ -207,83 +183,79 @@ const ModalCell = styled.td`
 
 const ModalButtons = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 20px;
 `;
 
 const ModalButton = styled.button`
-  padding: 12px 42px;
+  padding: 8px 16px;
+  margin-left: 10px;
+  border: none;
   border-radius: 4px;
-  background-color: ${props => props.backgroundColor || 'white'};
   cursor: pointer;
+  font-weight: 500;
 `;
 
-const SuccessIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  background-color: #4CAF50;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto 20px;
+const DeleteButton = styled(ModalButton)`
+  background-color: #FF0000;
+  color: white;
 `;
-const BlockConfirmationModal = ({ onClose, onConfirm }) => (
-  <Modal2>
-    <ModalContent2>
-      <CloseButton onClick={onClose}>&times;</CloseButton>
-      <h2>Are you sure you want to block this notification  ?</h2>
-      <ModalButtons>
-        <ModalButton onClick={onClose}>Cancel</ModalButton>
-        <ModalButton onClick={onConfirm} style={{ backgroundColor: 'black', color: 'white' }}>Block</ModalButton>
-      </ModalButtons>
-    </ModalContent2>
-  </Modal2>
-);
 
-const BlockSuccessModal = ({ onClose }) => (
-  <Modal2>
-    <ModalContent2>
-      <CloseButton onClick={onClose}>&times;</CloseButton>
-      <div style={{ textAlign: 'center' }}>
-        <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
-        </div>
-      <h3>Notification successfully blocked</h3>
-    </ModalContent2>
-  </Modal2>
-);
+const CancelButton = styled(ModalButton)`
+  background-color: #E0E0E0;
+  color: #121212;
+`;
+
 const Notifications = () => {
-  const [farmerToBlock, setFarmerToBlock] = useState(null);
-
-  const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
-  const [showBlockSuccess, setShowBlockSuccess] = useState(false);
-  const navigate = useNavigate();
-  const [notifications] = useState([
-    { id: 1, description: 'lorem ipsum dolor sit amet...', sentTo: 'Farmer', uploadDate: '23-08-2024 22:10', type: 'Discount' },
-    { id: 2, description: 'lorem ipsum dolor sit amet...', sentTo: 'Vendor', uploadDate: '23-08-2024 22:10', type: 'Informative' },
-    { id: 3, description: 'lorem ipsum dolor sit amet...', sentTo: 'Runner', uploadDate: '23-08-2024 22:10', type: 'Informative' },
-    { id: 4, description: 'lorem ipsum dolor sit amet...', sentTo: 'Farmer', uploadDate: '23-08-2024 22:10', type: 'Discount' },
-    { id: 5, description: 'lorem ipsum dolor sit amet...', sentTo: 'Farmer', uploadDate: '23-08-2024 22:10', type: 'Informative' },
-    { id: 6, description: 'lorem ipsum dolor sit amet...', sentTo: 'Runner', uploadDate: '23-08-2024 22:10', type: 'Informative' },
-    { id: 7, description: 'lorem ipsum dolor sit amet...', sentTo: 'Vendor', uploadDate: '23-08-2024 22:10', type: 'Discount' },
-  ]);
-
+  const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
-  const handleBlockClick = (farmer) => {
-    setFarmerToBlock(farmer);
-    setShowBlockConfirmation(true);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [entriesPerPage, setEntriesPerPage] = useState(7);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [currentPage, entriesPerPage, searchTerm]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getNotifications(currentPage, entriesPerPage, searchTerm);
+      setNotifications(response.data.notifications);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
   };
-  
-  const handleBlockConfirm = () => {
-    // Here you would typically call an API to block the farmer
-    setShowBlockConfirmation(false);
-    setShowBlockSuccess(true);
+
+  const handleDeleteClick = (e, notification) => {
+    e.stopPropagation();
+    setSelectedNotification(notification);
+    setShowDeleteConfirmation(true);
   };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteNotification(selectedNotification._id);
+      setShowDeleteConfirmation(false);
+      
+      
+      setShowDeleteSuccess(true);
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
   const handleCloseModals = () => {
-    setShowBlockConfirmation(false);
-    setShowBlockSuccess(false);
-    setFarmerToBlock(null);
+    setShowDeleteConfirmation(false);
+    setShowDeleteSuccess(false);
+    setSelectedNotification(null);
   };
+
   const openModal = (notification) => {
     setSelectedNotification(notification);
   };
@@ -292,7 +264,6 @@ const Notifications = () => {
     setSelectedNotification(null);
   };
 
-
   return (
     <Container>
       <Header>
@@ -300,14 +271,18 @@ const Notifications = () => {
         <AddButton to="/add-notification">Add Notification</AddButton>
       </Header>
       <TopControls>
-      <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
-          <EntriesDropdown>
-            <option>07</option>
-            <option>14</option>
-            <option>21</option>
-          </EntriesDropdown>
-          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
-        <SearchInput placeholder="Search..." />
+        <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>
+        <EntriesDropdown value={entriesPerPage} onChange={(e) => setEntriesPerPage(Number(e.target.value))}>
+          <option value={7}>07</option>
+          <option value={14}>14</option>
+          <option value={21}>21</option>
+        </EntriesDropdown>
+        <span style={{ fontWeight: '400', fontSize: '13px' }}>Entries</span>
+        <SearchInput
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </TopControls>
       <Table>
         <TableHead>
@@ -321,37 +296,41 @@ const Notifications = () => {
         </TableHead>
         <tbody>
           {notifications.map(notification => (
-            <TableRow key={notification.id}>
+            <TableRow key={notification._id}>
               <TableCell>{notification.description}</TableCell>
-              <TableCell>{notification.sentTo}</TableCell>
-              <TableCell>{notification.uploadDate}</TableCell>
+              <TableCell>{notification.recipientRole}</TableCell>
+              <TableCell>{new Date(notification.createdAt).toLocaleString()}</TableCell>
               <TableCell>{notification.type}</TableCell>
               <TableCell>
                 <ActionIcon src={viewIcon} alt="View" onClick={() => openModal(notification)} />
-                <ActionIcon onClick={() => { navigate('/edit-notification') }} src={editIcon} alt="Edit" />
-                <ActionIcon 
-  src={deleteIcon} 
-  alt="Block" 
-  onClick={() => handleBlockClick(notification)}
-/>   
+                <ActionIcon
+                  src={deleteIcon}
+                  alt="Delete"
+                  onClick={(e) => handleDeleteClick(e, notification)}
+                />
               </TableCell>
             </TableRow>
           ))}
+          {!notifications.length && (
+            <TableRow>
+              <TableCell style={{ textAlign: 'center' }} colSpan={5}> No notifications found.</TableCell>
+            </TableRow>
+          )}
         </tbody>
       </Table>
       <Pagination>
-        <PageInfo>Showing 1 to 7 of 100 entries</PageInfo>
+        <PageInfo>Showing {(currentPage - 1) * entriesPerPage + 1} to {Math.min(currentPage * entriesPerPage, notifications.length)} of {notifications.length} entries</PageInfo>
         <PageButtons>
-          <PageButton>Previous</PageButton>
-          <PageButton active>1</PageButton>
-          <PageButton>2</PageButton>
-          <PageButton>3</PageButton>
-          <PageButton>4</PageButton>
-          <PageButton>5</PageButton>
-          <PageButton>Next</PageButton>
+          <PageButton onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Previous</PageButton>
+          {[...Array(totalPages).keys()].map(page => (
+            <PageButton key={page + 1} active={currentPage === page + 1} onClick={() => setCurrentPage(page + 1)}>
+              {page + 1}
+            </PageButton>
+          ))}
+          <PageButton onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</PageButton>
         </PageButtons>
       </Pagination>
-      {selectedNotification && (
+      {selectedNotification && !showDeleteConfirmation && !showDeleteSuccess && (
         <Modal>
           <ModalContent>
             <ModalHeader>
@@ -362,7 +341,7 @@ const Notifications = () => {
               <tbody>
                 <ModalRow>
                   <ModalCell><strong>ID:</strong></ModalCell>
-                  <ModalCell>{selectedNotification.id}</ModalCell>
+                  <ModalCell>{selectedNotification._id}</ModalCell>
                 </ModalRow>
                 <ModalRow>
                   <ModalCell><strong>Description:</strong></ModalCell>
@@ -370,30 +349,51 @@ const Notifications = () => {
                 </ModalRow>
                 <ModalRow>
                   <ModalCell><strong>Sent To:</strong></ModalCell>
-                  <ModalCell>{selectedNotification.sentTo}</ModalCell>
+                  <ModalCell>{selectedNotification.recipientRole}</ModalCell>
                 </ModalRow>
                 <ModalRow>
                   <ModalCell><strong>Upload Date:</strong></ModalCell>
-                  <ModalCell>{selectedNotification.uploadDate}</ModalCell>
+                  <ModalCell>{new Date(selectedNotification.createdAt).toLocaleString()}</ModalCell>
                 </ModalRow>
                 <ModalRow>
                   <ModalCell><strong>Type:</strong></ModalCell>
                   <ModalCell>{selectedNotification.type}</ModalCell>
+                </ModalRow>
+                <ModalRow>
+                  <ModalCell><strong>Frequency:</strong></ModalCell>
+                  <ModalCell>{selectedNotification.frequency}</ModalCell>
                 </ModalRow>
               </tbody>
             </ModalTable>
           </ModalContent>
         </Modal>
       )}
-       {showBlockConfirmation && (
-      <BlockConfirmationModal 
-        onClose={handleCloseModals}
-        onConfirm={handleBlockConfirm}
-      />
-    )}
-    {showBlockSuccess && (
-      <BlockSuccessModal onClose={handleCloseModals} />
-    )}
+      {showDeleteConfirmation && (
+        <Modal>
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Confirm Delete</ModalTitle>
+              <CloseButton onClick={handleCloseModals}>&times;</CloseButton>
+            </ModalHeader>
+            <p>Are you sure you want to delete this notification?</p>
+            <ModalButtons>
+              <CancelButton onClick={handleCloseModals}>Cancel</CancelButton>
+              <DeleteButton onClick={handleDeleteConfirm}>Yes, Delete</DeleteButton>
+            </ModalButtons>
+          </ModalContent>
+        </Modal>
+      )}
+      {showDeleteSuccess && (
+        <Modal>
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Success</ModalTitle>
+              <CloseButton onClick={handleCloseModals}>&times;</CloseButton>
+            </ModalHeader>
+            <p>Notification successfully deleted</p>
+          </ModalContent>
+        </Modal>
+      )}
     </Container>
   );
 };

@@ -9,14 +9,12 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     const userData = JSON.parse(localStorage.getItem("userData"));
-
-    if (userData && userData.token) {
-      config.headers["x-access-user"] = userData.accountId;
-      config.headers["x-access-token"] = userData.token;
-      config.headers["authorization"] = `Bearer ${userData.token}`;
-      // config.headers["ngrok-skip-browser-warning"] = `69420`;
-      // "ngrok-skip-browser-warning": "69420"
+    const token = userData?.token;
+    console.log(token,'=================token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers["Content-Type"] = "application/json";
     return config;
   },
   (error) => {

@@ -5,6 +5,7 @@ import image2 from "../../assets/recommendation-2.png";
 import image3 from "../../assets/recommendation-3.png";
 import image4 from "../../assets/recommendation-4.png";
 import image5 from "../../assets/recommendation-5.png";
+import { FaCheck } from 'react-icons/fa';
 import image6 from "../../assets/recommendation-6.png";
 import image7 from "../../assets/recommendation-7.png";
 import image8 from "../../assets/recommendation-8.png";
@@ -34,7 +35,34 @@ const Container = styled.div`
   padding: 20px;
   font-family: "Public Sans", sans-serif;
 `;
+const CropCard = styled.div`
+  border: 1px solid #EEEEEE;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  ${props => props.selected && `
+    border-color: #000000;
+  `}
+`;
 
+const CheckIcon = styled.div`
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #000000;
+  display: ${props => props.visible ? 'flex' : 'none'};
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 12px;
+`;
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
@@ -124,18 +152,7 @@ const CropGrid = styled.div`
   margin-bottom: 20px;
 `;
 
-const CropCard = styled.div`
-  border: 1px solid #EEEEEE;
-  border-radius: 8px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  ${props => props.selected && `
-    border-color: #000000;
-  `}
-`;
+
 
 const CropImage = styled.img`
   width: 60px;
@@ -195,14 +212,17 @@ const Recommendations = () => {
       <p>Please select the crop</p>
       <CropGrid>
         {cropList.map((crop, index) => (
-          <CropCard
-            key={index}
-            selected={selectedCrop === crop.name}
-            onClick={() => setSelectedCrop(crop.name)}
-          >
-            <CropImage src={crop.image} alt={crop.name} />
-            <CropName>{crop.name}</CropName>
-          </CropCard>
+        <CropCard
+        key={index}
+        selected={selectedCrop === crop.name}
+        onClick={() => setSelectedCrop(crop.name)}
+      >
+        <CheckIcon visible={selectedCrop === crop.name}>
+          <FaCheck />
+        </CheckIcon>
+        <CropImage src={crop.image} alt={crop.name} />
+        <CropName>{crop.name}</CropName>
+      </CropCard>
         ))}
       </CropGrid>
       <Button onClick={handleViewRecommendations}>Next</Button>

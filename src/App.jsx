@@ -65,7 +65,7 @@ const StyledToastContainer = styled(ToastContainer)`
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('userData') !== null;
-  return isAuthenticated ? children : <Navigate to="/" />;
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 function App() {
@@ -74,7 +74,6 @@ function App() {
       <GlobalStyle />
       <AppContainer>
         <Routes>
-          <Route path="/" element={<LanguageSelection />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="*"
@@ -85,12 +84,11 @@ function App() {
                   <Topbar />
                   <PageContent>
                     <Routes>
-                      <Route path="/home" element={<Home />} />
+                      <Route path="/" element={<Home />} />
                       <Route path="/assign-runner/:id" element={<AssignRunnerDetails />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/bookings" element={<Bookings />} />
                       <Route path="/wallet" element={<Wallet />} />
-                      <Route path="/manage-farmer" element={<ManageFarmer />} />
                       <Route path="/manage-vendor" element={<ManageVendor />} />
                       <Route path="/testemonials" element={<Testimonials />} />
                       <Route path="/recommendation" element={<Recommedations />} />
@@ -104,12 +102,14 @@ function App() {
                       <Route path="/approve-withdrawal" element={<ApproveWithdrawal />} />
                       <Route path="/add-vendor" element={<Vendor mode="add" />} />
                       <Route path="/add-testimonial" element={<AddTestimonial />} />
+                      <Route path="/add-testimonial/:id" element={<AddTestimonial />} />
                       <Route path="/edit-testimonial" element={<AddTestimonial />} />
                       <Route path="/view-vendor/:id" element={<Vendor mode="view" />} />
                       <Route path="/edit-vendor/:id" element={<Vendor mode="edit" />} />
-                      <Route path="/add-farmer" element={<AddFarmer mode="add" />} />
-                      <Route path="/view-farmer/:id" element={<AddFarmer mode="view" />} />
-                      <Route path="/edit-farmer/:id" element={<AddFarmer mode="edit" />} />
+                      <Route path="/manage-farmer" element={<ManageFarmer />} />
+                      <Route path="/add-farmer" element={<AddFarmer />} />
+<Route path="/edit-farmer" element={<AddFarmer />} />
+<Route path="/view-farmer" element={<AddFarmer />} />
                       <Route path="/completed-booking/:id" element={<ConfirmedBookingDetails />} />
                       <Route path="/confirm-booking-details/:id" element={<RunnerReachedBookingDetail />} />
                       <Route path="/cancelled-booking-details/:id" element={<RunnerCanceledBookingDetail />} />

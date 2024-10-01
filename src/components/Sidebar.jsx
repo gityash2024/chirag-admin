@@ -129,8 +129,8 @@ const Sidebar = () => {
     { 
       icon: homeIcon, 
       text: 'Dashboard & Analytics', 
-      path: '/home',
-      activePaths: ['/home']
+      path: '/',
+      activePaths: ['/']
     },
     { 
       icon: bookingsIcon, 
@@ -217,13 +217,13 @@ const Sidebar = () => {
     localStorage.clear();
     
     setShowLogoutModal(false);
-    navigate('/');
+    navigate('/login');
   };
 
   return (
     <>
       <SidebarContainer>
-        <Logo onClick={() => navigate('/home')}>
+        <Logo onClick={() => navigate('/')}>
           <img src={chiragLogo} alt="C.H.I.R.A.G." />
         </Logo>
         <Menu>

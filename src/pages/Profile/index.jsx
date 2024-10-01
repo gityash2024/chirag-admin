@@ -148,7 +148,7 @@ const Profile = () => {
         <ProfileHeader>
           <ProfilePicWrapper>
             <ProfilePic src={profilePic} alt="Profile" />
-            <UploadButton>
+            {/* <UploadButton>
               <label htmlFor="profile-pic-upload" style={{ cursor: 'pointer' }}>
                 Upload New Picture
               </label>
@@ -159,7 +159,7 @@ const Profile = () => {
                 style={{ display: 'none' }}
                 onChange={handleProfilePicChange}
               />
-            </UploadButton>
+            </UploadButton> */}
           </ProfilePicWrapper>
         </ProfileHeader>
 
@@ -168,24 +168,24 @@ const Profile = () => {
           <FormRow>
             <FormGroup>
               <Label>Name</Label>
-              <Input type="text" placeholder="Enter your name" />
+              <Input type="text" value={JSON.parse(localStorage.getItem('userData'))?.name} placeholder="Enter your name" readOnly/>
             </FormGroup>
             <FormGroup>
               <Label>Email</Label>
-              <Input type="email" placeholder="Enter your email" />
+              <Input type="email" value={JSON.parse(localStorage.getItem('userData'))?.email} placeholder="Enter your email" readOnly/>
             </FormGroup>
           </FormRow>
           <FormRow>
             <FormGroup>
               <Label>Phone Number</Label>
-              <Input type="text" placeholder="Enter your phone number" />
+              <Input type="text" value={JSON.parse(localStorage.getItem('userData'))?.phoneNumber} placeholder="Enter your phone number" readOnly/>
             </FormGroup>
-            <FormGroup>
+            {/* <FormGroup>
               <Label>Password</Label>
-              <Input type="password" placeholder="Enter new password" />
-            </FormGroup>
+              <Input type="password" value={JSON.parse(localStorage.getItem('userData'))?.password} placeholder="Enter new password" />
+            </FormGroup> */}
           </FormRow>
-          <SaveButton type="submit">Save Changes</SaveButton>
+          {/* <SaveButton type="submit">Save Changes</SaveButton> */}
         </Form>
       </ProfileSection>
     </Container>

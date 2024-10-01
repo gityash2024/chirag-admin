@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
+import { addNotification } from '../../services/commonService';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans';
 `;
 
 const Header = styled.div`
@@ -53,9 +54,8 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-
   @media (min-width: 768px) {
-    flex: 0 0 30.33%; /* This makes it a third of the row, ensuring all three fields fit */
+    flex: 0 0 30.33%;
   }
 `;
 
@@ -89,16 +89,28 @@ const SaveButton = styled.button`
 
 const AddNotification = () => {
   const [description, setDescription] = useState('');
-  const [sendTo, setSendTo] = useState('Farmer');
-  const [type, setType] = useState('Discount');
-  const [frequency, setFrequency] = useState('Once');
+  const [recipientRole, setRecipientRole] = useState('farmer');
+  const [type, setType] = useState('informative');
+  const [frequency, setFrequency] = useState('once');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/notifications'); // Redirect to notification listing after saving
+    try {
+      await addNotification({
+        action: "add",
+        notificationData: {
+          description,
+          recipientRole,
+          type,
+          frequency
+        }
+      });
+      navigate('/notifications');
+    } catch (error) {
+      console.error('Error adding notification:', error);
+    }
   };
-
   return (
     <Container>
       <Header>
@@ -117,21 +129,22 @@ const AddNotification = () => {
               placeholder="Enter notification description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              required
             />
           </InputWrapper>
           <InputWrapper>
             <Label>Send to</Label>
-            <Select value={sendTo} onChange={(e) => setSendTo(e.target.value)}>
-              <option value="Farmer">Farmer</option>
-              <option value="Vendor">Vendor</option>
-              <option value="Runner">Runner</option>
+            <Select value={recipientRole} onChange={(e) => setRecipientRole(e.target.value)}>
+              <option value="farmer">Farmer</option>
+              <option value="vendor">Vendor</option>
+              <option value="runner">Runner</option>
             </Select>
           </InputWrapper>
           <InputWrapper>
             <Label>Notification Type</Label>
             <Select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="Discount">Discount</option>
-              <option value="Informative">Informative</option>
+              <option value="informative">Informative</option>
+              <option value="discount">Discount</option>
             </Select>
           </InputWrapper>
         </InputGroup>
@@ -139,9 +152,9 @@ const AddNotification = () => {
           <InputWrapper>
             <Label>Frequency</Label>
             <Select value={frequency} onChange={(e) => setFrequency(e.target.value)}>
-              <option value="Once">Once</option>
-              <option value="Weekly">Weekly</option>
-              <option value="Monthly">Monthly</option>
+              <option value="once">Once</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
             </Select>
           </InputWrapper>
         </InputGroup>
