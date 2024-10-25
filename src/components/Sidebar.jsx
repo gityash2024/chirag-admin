@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import chiragLogo from '../assets/chirag-logo.png';
+import chiragLogo from '../assets/logo-light.svg';
 import homeIcon from '../assets/home.png';
 import bookingsIcon from '../assets/bookings.png';
 import serviceHistoryIcon from '../assets/service-history.png';
@@ -17,7 +17,7 @@ import logoutIcon from '../assets/logout.png';
 const SidebarContainer = styled.div`
   background-color: #383838;
   color: white;
-  width: 300px;
+  width: 280px;
   height: 100vh;
   display: flex;
   flex-direction: column;

@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getFarmerBookings } from '../../services/commonService';
+import { getFarmerBookings,updateFarmer } from '../../services/commonService';
 import avatarImage from '../../assets/runner-avatar.png';
 import clock from '../../assets/clock.png';
 import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
+import { FiArrowLeft } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+const validateEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+};
+
+const validatePhone = (phone) => {
+  const re = /^[0-9]{10}$/;
+  return re.test(phone);
+};
 
 const Container = styled.div`
   padding: 20px;
@@ -36,22 +47,7 @@ const InputGroup = styled.div`
   flex: 1;
 `;
 
-const InputLabel = styled.label`
-  font-size: 14px;
-  color: #121212;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  display: block;
-`;
 
-const InputField = styled.input`
-  padding: 10px;
-  width: 100%;
-  border: 1px solid #F1F1F1;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #121212;
-`;
 
 const SuccessBadge = styled.div`
   display: inline-block;
@@ -160,6 +156,34 @@ const RunnerInfo = styled.div`
   margin-top: 20px;
 `;
 
+// Update the InputField component to show required indicator
+const InputField = styled.input`
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #F1F1F1;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #121212;
+  &::after {
+    content: '*';
+    color: red;
+    margin-left: 4px;
+  }
+`;
+
+// Update InputLabel to show required indicator
+const InputLabel = styled.label`
+  font-size: 14px;
+  color: #121212;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: block;
+  &::after {
+    content: ' *';
+    color: red;
+  }
+`;
+
 const RunnerAvatar = styled.img`
   width: 30px;
   height: 30px;
@@ -193,8 +217,25 @@ const AddressText = styled.p`
   font-size: 14px;
   color: #121212;
 `;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+  float: right;
+`;
 
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
+`;
 const AddFarmer = () => {
+  const [errors, setErrors] = useState({});
+
   const location = useLocation();
   const navigate = useNavigate();
   const { farmer, mode } = location.state || {};
@@ -220,20 +261,77 @@ const AddFarmer = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  
+    // Update errors as the user types
+    const newErrors = { ...errors };
+  
+    if (!value.trim()) {
+      newErrors[name] = `${name} is required`;
+    } else {
+      delete newErrors[name];
+      if (name === 'email' && !validateEmail(value)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+      if (name === 'mobileNumber' && !validatePhone(value)) {
+        newErrors.mobileNumber = 'Please enter a valid 10-digit phone number';
+      }
+    }
+  
+    setErrors(newErrors);
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const newErrors = {};
+  
+    // Check for required fields
+    const requiredFields = ['name', 'mobileNumber', 'email', 'state', 'village', 'region'];
+    requiredFields.forEach(field => {
+      if (!formData[field]?.trim()) {
+        newErrors[field] = `${field} is required`;
+      }
+    });
+  
+    // Validate email and phone
+    if (formData.email && !validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+  
+    if (formData.mobileNumber && !validatePhone(formData.mobileNumber)) {
+      newErrors.mobileNumber = 'Please enter a valid 10-digit phone number';
+    }
+  
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+  
     try {
-      // Here you would typically call an API to save the farmer data
-      console.log('Saving farmer data:', formData);
-      navigate('/manage-farmer');
+      if (mode === 'edit') {
+        const response = await updateFarmer(farmer._id, {
+          name: formData.name,
+          mobileNumber: formData.mobileNumber,
+          email: formData.email,
+          state: formData.state,
+          village: formData.village,
+          region: formData.region
+        });
+  
+        if (response.data) {
+          toast.success('Farmer updated successfully');
+          navigate('/manage-farmer');
+        }
+      }
     } catch (error) {
-      console.error('Error saving farmer data:', error);
+      setErrors({});
+      toast.error(error.response?.data?.message || 'Error updating farmer');
     }
   };
-
+  
   const handleBookingClick = (booking) => {
     if (booking.status === 'completed') {
       navigate(`/completed-booking/${booking._id}`);
@@ -246,7 +344,12 @@ const AddFarmer = () => {
 
   return (
     <Container>
-      <Header>Farmer Management / {mode === 'edit' ? 'Edit' : mode === 'view' ? 'View' : 'Add'}</Header>
+      <Header>Farmer Management / {mode === 'edit' ? 'Edit' : mode === 'view' ? 'View' : 'Add'}
+      <BackButton onClick={() => navigate('/manage-farmer')}>
+          <BackIcon />
+          Back
+        </BackButton>
+      </Header>
       <Form onSubmit={handleSubmit}>
         <FormRow>
           <InputGroup>
@@ -257,17 +360,23 @@ const AddFarmer = () => {
               onChange={handleInputChange}
               placeholder="Enter Name"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.name ? 'red' : '#F1F1F1' }}
             />
+            {errors.name && <span style={{ color: 'red', fontSize: '12px' }}>{errors.name?.toUpperCase()}</span>}
+
           </InputGroup>
           <InputGroup>
             <InputLabel>Mobile Number</InputLabel>
             <InputField
+              type="number"
               name="mobileNumber"
               value={formData.mobileNumber || ''}
               onChange={handleInputChange}
               placeholder="Enter Mobile Number"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.mobileNumber ? 'red' : '#F1F1F1' }}
             />
+            {errors.mobileNumber && <span style={{ color: 'red', fontSize: '12px' }}>{errors.mobileNumber?.toUpperCase()}</span>}
           </InputGroup>
           <InputGroup>
             <InputLabel>Email ID</InputLabel>
@@ -277,7 +386,9 @@ const AddFarmer = () => {
               onChange={handleInputChange}
               placeholder="Enter Email ID"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.email ? 'red' : '#F1F1F1' }}
             />
+            {errors.email && <span style={{ color: 'red', fontSize: '12px' }}>{errors.email?.toUpperCase()}</span>}
           </InputGroup>
         </FormRow>
         <FormRow>
@@ -289,7 +400,9 @@ const AddFarmer = () => {
               onChange={handleInputChange}
               placeholder="Enter State"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.state ? 'red' : '#F1F1F1' }}
             />
+            {errors.state && <span style={{ color: 'red', fontSize: '12px' }}>{errors.state?.toUpperCase()}</span>}
           </InputGroup>
           <InputGroup>
             <InputLabel>Village</InputLabel>
@@ -299,7 +412,9 @@ const AddFarmer = () => {
               onChange={handleInputChange}
               placeholder="Enter Village"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.village ? 'red' : '#F1F1F1' }}
             />
+            {errors.village && <span style={{ color: 'red', fontSize: '12px' }}>{errors.village?.toUpperCase()}</span>}
           </InputGroup>
           <InputGroup>
             <InputLabel>Region</InputLabel>
@@ -309,7 +424,9 @@ const AddFarmer = () => {
               onChange={handleInputChange}
               placeholder="Enter Region"
               disabled={mode === 'view'}
+              style={{ borderColor: errors.region ? 'red' : '#F1F1F1' }}
             />
+            {errors.region && <span style={{ color: 'red', fontSize: '12px' }}>{errors.region?.toUpperCase()}</span>}
           </InputGroup>
         </FormRow>
         <FormRow>
@@ -323,10 +440,10 @@ const AddFarmer = () => {
             )}
           </InputGroup>
         </FormRow>
-        {mode !== 'view' && <SubmitButton type="submit">{mode === 'edit' ? 'Save' : 'Add'}</SubmitButton>}
+        {mode !== 'view' && <SubmitButton type="submit">{mode === 'edit' ? 'Update Farmer' : 'Add Farmer'}</SubmitButton>}
       </Form>
 
-      {(mode === 'view' || mode === 'edit') && (
+      {(mode === 'view') && (
         <>
           <Header>
             <Header>Booking History</Header>

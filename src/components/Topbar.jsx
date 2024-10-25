@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import printIcon from '../assets/print-icon.png';
-import profileIcon from '../assets/profile-icon.png';
+import printIcon from '../assets/wallet.svg';
+import profileIcon from '../assets/profile.svg';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -9,7 +9,7 @@ const TopbarContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 10px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
@@ -27,8 +27,8 @@ const TopbarRight = styled.div`
 `;
 
 const TopbarIcon = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   margin-left: 20px;
   cursor: pointer;
 `;

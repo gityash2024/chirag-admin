@@ -67,7 +67,7 @@ const SearchInput = styled.input`
   padding: 8px;
   border: 1px solid #DBDADE;
   border-radius: 4px;
-  width: 200px;
+  width: 300px;
   margin-left: auto;
 `;
 
@@ -302,11 +302,11 @@ const ManageFarmer = () => {
     <Container>
       <Header>
         <Title>Manage Farmers</Title>
-        <ButtonGroup>
+        {/* <ButtonGroup>
           <Link to="/add-farmer">
             <AddFarmerButton>Add Farmer</AddFarmerButton>
           </Link>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </Header>
       <TopControls>
         <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>
@@ -317,7 +317,7 @@ const ManageFarmer = () => {
         </EntriesDropdown>
         <span style={{ fontWeight: '400', fontSize: '13px' }}>Entries</span>
         <SearchInput
-          placeholder="Search..."
+          placeholder="Search by Name, Mobile Number, State"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
