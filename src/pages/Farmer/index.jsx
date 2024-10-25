@@ -302,11 +302,11 @@ const ManageFarmer = () => {
     <Container>
       <Header>
         <Title>Manage Farmers</Title>
-        {/* <ButtonGroup>
+        <ButtonGroup>
           <Link to="/add-farmer">
             <AddFarmerButton>Add Farmer</AddFarmerButton>
           </Link>
-        </ButtonGroup> */}
+        </ButtonGroup>
       </Header>
       <TopControls>
         <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>

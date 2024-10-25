@@ -31,7 +31,7 @@ import ConfirmedBookingDetails from './pages/Bookings/ConfirmedBookingDetails';
 import RunnerReachedBookingDetail from './pages/Bookings/RunnerReachedBookingDetail';
 import RunnerCanceledBookingDetail from './pages/Bookings/RunnerCanceledBookingDetail';
 import Recommedations from './pages/Recomendations';
-
+import NotFound from './components/404';
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -75,6 +75,7 @@ function App() {
       <AppContainer>
         <Routes>
           <Route path="/login" element={<Login />} />
+          
           <Route
             path="*"
             element={
@@ -113,6 +114,7 @@ function App() {
                       <Route path="/completed-booking/:id" element={<ConfirmedBookingDetails />} />
                       <Route path="/confirm-booking-details/:id" element={<RunnerReachedBookingDetail />} />
                       <Route path="/cancelled-booking-details/:id" element={<RunnerCanceledBookingDetail />} />
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </PageContent>
                 </MainContent>

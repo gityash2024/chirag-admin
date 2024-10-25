@@ -298,7 +298,7 @@ const EmptyStateText = styled.p`
 
 const Bookings = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Requests via Contact Us');
+  const [activeTab, setActiveTab] = useState('Pending Bookings');
   const [currentPage, setCurrentPage] = useState(1);
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -310,7 +310,7 @@ const Bookings = () => {
       navigate(`/completed-booking/${booking.id}`)
     }else if(booking.status === 'Confirmed'){
       navigate(`/confirm-booking-details/${booking.id}`)
-    }else if(activeTab==='Requests via Contact Us'){
+    }else if(activeTab==='Pending Bookings'){
       return;
     }else{
       navigate(`/cancelled-booking-details/${booking.id}`)
@@ -319,7 +319,7 @@ const Bookings = () => {
     };
 
   const [bookings, setBookings] = useState({
-    'Requests via Contact Us': [
+    'Pending Bookings': [
       { id: 'AB123456333', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Sachin Doe', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', humidity: '2%', price: '₹ 20,000' },
       { id: 'AB12345783', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'John Doe', date: '14 June, 2023', time: '03:00 PM - 05:00 PM', farmArea: '22 Acres', crop: 'Crop name', temperature: '25°', location: 'Pratapgarh, Uttarpradesh', humidity: '3%', price: '₹ 22,000' },
       { id: 'AB1234589', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Jane Smith', date: '15 June, 2023', time: '04:00 PM - 06:00 PM', farmArea: '23 Acres', crop: 'Crop name', temperature: '26°', location: 'Pratapgarh, Uttarpradesh', humidity: '4%', price: '₹ 24,000' },
@@ -429,7 +429,7 @@ const Bookings = () => {
           <PriceSummary>Price Summary : {booking.price}</PriceSummary>
         }
 
-        {activeTab !== 'Requests via Contact Us'?<>
+        {activeTab !== 'Pending Bookings'?<>
           <ServiceProvider>Digital sky Drone services</ServiceProvider>
         <AssignedRunnerContainer>
           <RunnerAvatar src={avatarImage} alt="Runner Avatar" />
@@ -442,7 +442,7 @@ const Bookings = () => {
         </>:null
         }
 
-        {(activeTab === 'Requests via Contact Us' ) && (
+        {(activeTab === 'Pending Bookings' ) && (
           <ButtonContainer>
             <ActionButton onClick={() => handleDecline(booking.id)}>Decline</ActionButton>
             <ActionButton primary onClick={() => handleAssignRunner(booking.id)}>Assign Runner</ActionButton>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FaDownload } from "react-icons/fa";
 import waterIcon from "../../assets/water-icon.png";
@@ -18,6 +18,8 @@ import co2 from "../../assets/co2.png";
 import totalfarmer from "../../assets/total-farmer.png";
 import totalvendor from "../../assets/totalvendor.png";
 import totalRunner from "../../assets/totalRunner.png";
+import { getAllVendors, getFarmers,getAllRunners } from "../../services/commonService";
+import Loader from "../../components/loader";
 
 
 
@@ -120,6 +122,53 @@ const DownloadButton = styled.button`
 `;
 
 const Home = () => {
+  const [farmers, setFarmers] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [runner, setRunner] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchFarmers();
+    fetchVendors();
+    fetchRunner();
+  }, []);
+
+  const fetchRunner = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllRunners();
+      setRunner(response.data);
+    } catch (error) {
+      console.error('Error fetching farmers:', error);
+    }finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchFarmers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getFarmers();
+      setFarmers(response.data);
+    } catch (error) {
+      console.error('Error fetching farmers:', error);
+    }finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchVendors = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllVendors();
+      setVendors(response.data);
+    } catch (error) {
+      console.error('Error fetching farmers:', error);
+    }finally {
+      setIsLoading(false);
+    }
+  };
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <HomeContainer>
       <Section>
@@ -135,17 +184,17 @@ const Home = () => {
           <ReportCard>
             <ReportLabel>Total Farmer</ReportLabel>
             <ReportIcon src={totalfarmer} alt="Water saved" />
-            <ReportValue color="#07B27B">100</ReportValue>
+            <ReportValue color="#07B27B">{farmers.length}</ReportValue>
           </ReportCard>
           <ReportCard>
             <ReportLabel>Total Vendor</ReportLabel>
             <ReportIcon src={totalvendor} alt="Pesticide usage" />
-            <ReportValue color="#FF9A01">100</ReportValue>
+            <ReportValue color="#FF9A01">{vendors.length}</ReportValue>
           </ReportCard>
           <ReportCard>
             <ReportLabel>Total Runner</ReportLabel>
             <ReportIcon src={totalRunner} alt="Carbon footprint" />
-            <ReportValue color="#529DDF">100</ReportValue>
+            <ReportValue color="#529DDF">{runner.length}</ReportValue>
           </ReportCard>
          
         </EnvironmentalReportContainer>

@@ -61,7 +61,7 @@ const DashboardButton = styled(Link)`
   }
 `;
 
-const NotFound: React.FC = () => {
+const NotFound= () => {
   return (
     <NotFoundContainer>
       <Icon />

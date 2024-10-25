@@ -51,7 +51,7 @@ const MenuItem = styled(Link)`
   text-decoration: none;
   color: white;
   &.active {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #000000;
   }
   img {
     width: 30px;
@@ -183,28 +183,21 @@ const Sidebar = () => {
   ];
 
   const isActive = (item) => {
-    return item.activePaths.some(path => {
-      const currentPathParts = location.pathname.split('/');
-      const activePathParts = path.split('/');
-      
-      // Check if the number of parts is the same
-      if (currentPathParts.length !== activePathParts.length) {
-        return false;
+    const currentPath = location.pathname;
+    if (currentPath === '/' && item.path === '/') {
+      return true;
+    }
+  
+    return item.activePaths.some(activePath => {
+      if (currentPath === activePath) {
+        return true;
       }
-      
-      // Check each part of the path
-      return activePathParts.every((part, index) => {
-        // If the active path part is empty (for the initial slash), it's a match
-        if (part === '') {
-          return true;
-        }
-        // If the parts match exactly, it's a match
-        if (part === currentPathParts[index]) {
-          return true;
-        }
-        // If the active path part is not empty and doesn't match, it's not a match
-        return false;
-      });
+      if (activePath !== '/' && currentPath.startsWith(activePath)) {
+        const nextChar = currentPath.charAt(activePath.length);
+        return nextChar === '' || nextChar === '/';
+      }
+  
+      return false;
     });
   };
 

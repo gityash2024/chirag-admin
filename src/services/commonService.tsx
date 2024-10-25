@@ -90,3 +90,13 @@ export const getNotificationById = (id) => {
   const url = `${baseUrl}/notifications/${id}`;
   return instance.get(url);
 };
+export const getAllVendors = (id) => {
+  const url = `${baseUrl}/vendors`;
+  return instance.get(url);
+};
+export const getAllRunners = (id) => {
+  const url = `${baseUrl}/runners/all`;
+  return instance.get(url);
+};
+
+
