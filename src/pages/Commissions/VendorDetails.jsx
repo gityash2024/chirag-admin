@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
-
+import { toast } from 'react-toastify';
+import CloseIcon from '@mui/icons-material/Close';
+import { getVendorById, listCommissions, updateVendorCommission } from '../../services/commonService';
 
 const Container = styled.div`
   padding: 20px;
@@ -56,7 +58,8 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
-const EntriesDropdown = styled.select`
+const Select = styled.select`
+  width: 100%;
   padding: 8px;
   border: 1px solid #E3E6E8;
   border-radius: 4px;
@@ -79,9 +82,6 @@ const TableRow = styled.tr`
   &:not(:last-child) {
     border-bottom: 1px solid #E3E6E8;
   }
-  &:hover {
-    background-color: #F5F5F5;
-  }
 `;
 
 const TableHeader = styled.th`
@@ -96,15 +96,9 @@ const TableCell = styled.td`
   font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #E3E6E8;
-  font-family: 'Montserrat';
   color: #121212;
 `;
 
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-`;
 const BackButton = styled.button`
   display: flex;
   align-items: center;
@@ -120,38 +114,158 @@ const BackButton = styled.button`
 const BackIcon = styled(FiArrowLeft)`
   margin-right: 8px;
 `;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  gap: 10px;
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+`;
+
+const Checkbox = styled.input`
+  margin-right: 10px;
+`;
+
 const VendorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [vendorDetails, setVendorDetails] = useState(null);
-  const [commissions, setCommissions] = useState([]);
+  const [vendor, setVendor] = useState(null);
+  const [availableCommissions, setAvailableCommissions] = useState([]);
+  const [selectedCommissions, setSelectedCommissions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [commissionType, setCommissionType] = useState('Default');
+  const [customCommissions, setCustomCommissions] = useState([]);
 
   useEffect(() => {
-    const fetchVendorDetails = async () => {
-      const mockVendorDetails = {
-        name: 'Edgar James',
-        mobile: '+918109131542',
-        email: 'khushi.dove@etfitch.com',
-        commissionType: 'Default',
-      };
-      setVendorDetails(mockVendorDetails);
-
-      const mockCommissions = [
-        { id: 1, cropName: 'Maize', commission: '20%' },
-        { id: 2, cropName: 'Wheat', commission: '15%' },
-        { id: 3, cropName: 'Rice', commission: '18%' },
-      ];
-      setCommissions(mockCommissions);
-    };
-
-    fetchVendorDetails();
+    fetchData();
   }, [id]);
 
-  const handleDone = () => {
-    navigate(-1);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [vendorResponse, commissionsResponse] = await Promise.all([
+        getVendorById(id),
+        listCommissions()
+      ]);
+      
+      setVendor(vendorResponse.data);
+      setAvailableCommissions(commissionsResponse.data);
+      setCommissionType(vendorResponse.data.commissionType || 'Default');
+      setCustomCommissions(vendorResponse.data.customCommissions || []);
+
+      if (vendorResponse.data.customCommissions) {
+        setSelectedCommissions(vendorResponse.data.customCommissions.map(c => c._id));
+      }
+    } catch (error) {
+      toast.error('Failed to fetch details');
+      navigate('/commission-vendors');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!vendorDetails) {
+  const handleCommissionTypeChange = (e) => {
+    setCommissionType(e.target.value);
+    if (e.target.value === 'Default') {
+      setCustomCommissions([]);
+      setSelectedCommissions([]);
+    }
+  };
+
+  const handleCheckboxChange = (commissionId) => {
+    setSelectedCommissions(prev => {
+      if (prev.includes(commissionId)) {
+        return prev.filter(id => id !== commissionId);
+      } else {
+        return [...prev, commissionId];
+      }
+    });
+  };
+
+  const handleAssignCommissions = async () => {
+    try {
+      setLoading(true);
+      const selectedCommissionDetails = availableCommissions
+        .filter(commission => selectedCommissions.includes(commission._id))
+        .map(({ cropName, commissionPercentage }) => ({
+          cropName,
+          percentage: commissionPercentage
+        }));
+
+      await updateVendorCommission({
+        vendorId: id,
+        commissionType: 'Custom',
+        customCommissions: selectedCommissionDetails
+      });
+
+      toast.success('Commissions assigned successfully');
+      setShowModal(false);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to assign commissions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      await updateVendorCommission({
+        vendorId: id,
+        commissionType,
+        customCommissions: commissionType === 'Custom' ? customCommissions : []
+      });
+      toast.success('Commission settings updated successfully');
+      navigate('/commission-vendors');
+    } catch (error) {
+      toast.error('Failed to update commission settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!vendor || loading) {
     return <div>Loading...</div>;
   }
 
@@ -164,27 +278,68 @@ const VendorDetails = () => {
           Back
         </BackButton>
       </Header>
+
       <Form>
         <FormGroup>
           <Label>Name</Label>
-          <Input type="text" value={vendorDetails.name} readOnly />
+          <Input type="text" value={vendor.name} readOnly />
         </FormGroup>
         <FormGroup>
           <Label>Mobile</Label>
-          <Input type="text" value={vendorDetails.mobile} readOnly />
+          <Input type="text" value={vendor.mobileNumber} readOnly />
         </FormGroup>
         <FormGroup>
           <Label>Email ID</Label>
-          <Input type="email" value={vendorDetails.email} readOnly />
+          <Input type="email" value={vendor.email} readOnly />
         </FormGroup>
         <FormGroup>
-          <Label>Commission type</Label>
-          <EntriesDropdown value={vendorDetails.commissionType}>
-            <option>Default</option>
-            <option>Custom</option>
-          </EntriesDropdown>
+          <Label>Commission Type</Label>
+          <Select value={commissionType} onChange={handleCommissionTypeChange}>
+            <option value="Default">Default</option>
+            <option value="Custom">Custom</option>
+          </Select>
         </FormGroup>
       </Form>
+
+      <ButtonWrapper>
+        {commissionType === 'Custom' && (
+          <Button onClick={() => setShowModal(true)}>
+            Assign Commissions
+          </Button>
+        )}
+        <Button onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </ButtonWrapper>
+
+      {showModal && (
+        <Modal>
+          <ModalContent>
+            <CloseButton onClick={() => setShowModal(false)}>
+              <CloseIcon />
+            </CloseButton>
+            <h2>Select Commissions</h2>
+            {availableCommissions.map(commission => (
+              <CheckboxContainer key={commission._id}>
+                <Checkbox
+                  type="checkbox"
+                  checked={selectedCommissions.includes(commission._id)}
+                  onChange={() => handleCheckboxChange(commission._id)}
+                />
+                <Label>
+                  {commission.cropName} - {commission.commissionPercentage}%
+                </Label>
+              </CheckboxContainer>
+            ))}
+            <ButtonWrapper>
+              <Button onClick={handleAssignCommissions} disabled={loading}>
+                {loading ? 'Assigning...' : 'Assign Selected'}
+              </Button>
+            </ButtonWrapper>
+          </ModalContent>
+        </Modal>
+      )}
+
       <Table>
         <TableHead>
           <TableRow>
@@ -193,17 +348,22 @@ const VendorDetails = () => {
           </TableRow>
         </TableHead>
         <tbody>
-          {commissions.map(commission => (
-            <TableRow key={commission.id}>
-              <TableCell>{commission.cropName}</TableCell>
-              <TableCell>{commission.commission}</TableCell>
+          {customCommissions.length > 0 ? (
+            customCommissions.map((commission, index) => (
+              <TableRow key={index}>
+                <TableCell>{commission.cropName}</TableCell>
+                <TableCell>{commission.percentage}%</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={2} style={{ textAlign: 'center' }}>
+                {commissionType === 'Default' ? 'Using default commissions' : 'No commissions assigned'}
+              </TableCell>
             </TableRow>
-          ))}
+          )}
         </tbody>
       </Table>
-      <ButtonWrapper>
-        <Button onClick={handleDone}>Done</Button>
-      </ButtonWrapper>
     </Container>
   );
 };

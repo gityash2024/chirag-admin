@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FiArrowLeft } from 'react-icons/fi';
-
+import { FiArrowLeft, FiEye } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { getAllVendors } from '../../services/commonService';
 
 const Container = styled.div`
   padding: 20px;
@@ -20,15 +21,6 @@ const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
   color: #121212;
-`;
-
-const Button = styled.button`
-  padding: 8px 16px;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 `;
 
 const TopControls = styled.div`
@@ -74,17 +66,6 @@ const TableRow = styled.tr`
   }
 `;
 
-const ButtonDark = styled.button`
-  padding: 8px 16px;
-  background-color: #000000;
-  color: #ffffff;
-  border: 1px solid #000000;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-  margin-right: 10px;
-`;
-
 const TableHeader = styled.th`
   text-align: left;
   padding: 12px;
@@ -99,6 +80,31 @@ const TableCell = styled.td`
   border-bottom: 1px solid #E3E6E8;
   font-family: 'Montserrat';
   color: #121212;
+`;
+
+const ClickableRow = styled(Link)`
+  display: table-row;
+  text-decoration: none;
+  color: inherit;
+  &:hover {
+    background-color: #F5F5F5;
+  }
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #E3E6E8;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #121212;
+  font-size: 16px;
+`;
+
+const BackIcon = styled(FiArrowLeft)`
+  margin-right: 8px;
 `;
 
 const Pagination = styled.div`
@@ -129,134 +135,115 @@ const PageButton = styled.button`
   border-radius: 4px;
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 15px;
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  margin-bottom: 5px;
-  display: block;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #E3E6E8;
-  border-radius: 4px;
-`;
-
-const ClickableRow = styled(Link)`
-  display: table-row;
-  text-decoration: none;
-  color: inherit;
-  &:hover {
-    background-color: #F5F5F5;
-  }
-`;
-const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border: 1px solid #E3E6E8;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #121212;
-  font-size: 16px;
-`;
-
-const BackIcon = styled(FiArrowLeft)`
-  margin-right: 8px;
-`;
 const VendorList = () => {
-  const navigate=useNavigate();
-  const [vendors, setVendors] = useState([
-    { id: 1, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
-    { id: 2, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
-    { id: 3, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Custom' },
-    { id: 4, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
-    { id: 5, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
-    { id: 6, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Default' },
-    { id: 7, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh', commission: 'Custom' },
-  ]);
+  const navigate = useNavigate();
+  const [vendors, setVendors] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(7);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllVendors();
+      setVendors(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch vendors');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredVendors = vendors.filter(vendor => 
+    vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.mobileNumber.includes(searchTerm) ||
+    vendor.state.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastEntry = currentPage * entriesPerPage;
+  const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+  const currentEntries = filteredVendors.slice(indexOfFirstEntry, indexOfLastEntry);
 
   return (
     <Container>
       <Header>
         <Title>Commission Management &gt; Vendor</Title>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-
-        <BackButton onClick={() => navigate(-1)}>
+        <BackButton onClick={() => navigate('/commission-management')}>
           <BackIcon />
           Back
         </BackButton>
-        </div>
       </Header>
+
       <TopControls>
         <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>
-        <EntriesDropdown>
-          <option>07</option>
-          <option>14</option>
-          <option>21</option>
+        <EntriesDropdown value={entriesPerPage} onChange={(e) => setEntriesPerPage(Number(e.target.value))}>
+          <option value={7}>07</option>
+          <option value={14}>14</option>
+          <option value={21}>21</option>
         </EntriesDropdown>
         <span style={{ fontWeight: '400', fontSize: '13px' }}>Entries</span>
-        <SearchInput placeholder="Search..." />
+        <SearchInput 
+          placeholder="Search..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </TopControls>
+
       <Table>
         <TableHead>
           <TableRow>
             <TableHeader>Vendor Name</TableHeader>
             <TableHeader>Vendor Contact</TableHeader>
             <TableHeader>State</TableHeader>
-            <TableHeader>Commission</TableHeader>
+            <TableHeader>Commission Type</TableHeader>
+            <TableHeader>Action</TableHeader>
           </TableRow>
         </TableHead>
         <tbody>
-          {vendors.map(vendor => (
-            <ClickableRow key={vendor.id} to={`/commission-vendors/${vendor.id}`}>
+          {currentEntries.map(vendor => (
+            <ClickableRow key={vendor._id} to={`/commission-vendors/${vendor._id}`}>
               <TableCell>{vendor.name}</TableCell>
-              <TableCell>{vendor.contact}</TableCell>
+              <TableCell>{vendor.mobileNumber}</TableCell>
               <TableCell>{vendor.state}</TableCell>
-              <TableCell>{vendor.commission}</TableCell>
+              <TableCell>{vendor.commissionType || 'Default'}</TableCell>
+              <TableCell><FiEye title='View Commission Details'/></TableCell>
+                
             </ClickableRow>
           ))}
         </tbody>
       </Table>
+
       <Pagination>
-        <PageInfo>Showing 1 to 7 of 100 entries</PageInfo>
+        <PageInfo>
+          Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredVendors.length)} of {filteredVendors.length} entries
+        </PageInfo>
         <PageButtons>
-          <PageButton>Previous</PageButton>
-          <PageButton active>1</PageButton>
-          <PageButton>2</PageButton>
-          <PageButton>3</PageButton>
-          <PageButton>4</PageButton>
-          <PageButton>5</PageButton>
-          <PageButton>Next</PageButton>
+          <PageButton
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </PageButton>
+          {Array.from({ length: Math.ceil(filteredVendors.length / entriesPerPage) }, (_, i) => (
+            <PageButton
+              key={i + 1}
+              active={currentPage === i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </PageButton>
+          ))}
+          <PageButton
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === Math.ceil(filteredVendors.length / entriesPerPage)}
+          >
+            Next
+          </PageButton>
         </PageButtons>
       </Pagination>
     </Container>

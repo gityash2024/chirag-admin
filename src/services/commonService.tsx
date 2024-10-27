@@ -150,3 +150,29 @@ export const getVendorBookings = (vendorId) => {
   const url = `${baseUrl}/vendors/bookings/${vendorId}`;
   return instance.get(url);
 };
+
+
+export const listCommissions = () => {
+  const url = `${baseUrl}/commissions/list`;
+  return instance.get(url);
+};
+
+export const getDefaultCommissions = () => {
+  const url = `${baseUrl}/commissions/default`;
+  return instance.get(url);
+};
+
+export const manageCommission = (payload) => {
+  const url = `${baseUrl}/commissions/manage`;
+  return instance.post(url, payload);
+};
+
+export const updateVendorCommission = (payload) => {
+  const url = `${baseUrl}/commissions/vendor`;
+  return instance.post(url, payload);
+};
+
+export const getVendorCommissions = (vendorId) => {
+  const url = `${baseUrl}/vendors/${vendorId}/commissions`;
+  return instance.get(url);
+};
