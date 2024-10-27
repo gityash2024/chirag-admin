@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import viewIcon from '../../assets/view-icon.png';
 import editIcon from '../../assets/edit-icon.png';
-import deleteIcon from '../../assets/delete-icon.png';
+import blockIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
+import { getAllVendors, blockVendor, unblockVendor } from '../../services/commonService';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans';
 `;
 
 const Header = styled.div`
@@ -16,6 +18,12 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
 `;
 
 const Title = styled.h1`
@@ -28,10 +36,10 @@ const AddVendorButton = styled.button`
   display: flex;
   align-items: center;
   padding: 8px 16px;
-  background-color: transparent;
-  border: 1px solid #121212;
+  background-color: #ffff;
+  border: 1px solid #000000;
   border-radius: 6px;
-  color: #121212;
+  color: #000000;
   font-weight: 500;
   cursor: pointer;
 
@@ -51,15 +59,16 @@ const TopControls = styled.div`
 const EntriesDropdown = styled.select`
   padding: 8px;
   margin-right: 20px;
-  border: 1px solid #E3E6E8;
+  border: 1px solid #DBDADE;
   border-radius: 4px;
+  margin-left: 10px;
 `;
 
 const SearchInput = styled.input`
   padding: 8px;
   border: 1px solid #DBDADE;
   border-radius: 4px;
-  width: 200px;
+  width: 300px;
   margin-left: auto;
 `;
 
@@ -73,12 +82,12 @@ const Table = styled.table`
 `;
 
 const TableHead = styled.thead`
-  background-color: #F9FAFC;
+  background-color: #F5F6F7;
 `;
 
 const TableRow = styled.tr`
   &:not(:last-child) {
-    border-bottom: 1px solid #E3E6E8;
+    border-bottom: 1px solid #DBDADE;
   }
 `;
 
@@ -93,7 +102,7 @@ const TableCell = styled.td`
   padding: 12px;
   font-size: 16px;
   font-weight: 500;
-  border-bottom: 1px solid #E3E6E8;
+  border-bottom: 1px solid #DBDADE;
   font-family: 'Montserrat';
   color: #121212;
 `;
@@ -107,7 +116,7 @@ const VendorAvatar = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #F9FAFC;
+  background-color: #DBDADE;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -144,12 +153,13 @@ const PageButtons = styled.div`
 const PageButton = styled.button`
   padding: 5px 10px;
   margin: 0 5px;
-  border: 1px solid #E3E6E8;
-  background-color: ${props => props.active ? '#121212' : 'white'};
+  border: 1px solid #DBDADE;
+  background-color: ${props => props.active ? '#000' : 'white'};
   color: ${props => props.active ? 'white' : '#121212'};
   cursor: pointer;
   border-radius: 4px;
 `;
+
 const Modal = styled.div`
   position: fixed;
   top: 0;
@@ -193,87 +203,122 @@ const ModalButton = styled.button`
   cursor: pointer;
 `;
 
-const SuccessIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  background-color: #4CAF50;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto 20px;
-`;
-const BlockConfirmationModal = ({ onClose, onConfirm }) => (
+const BlockConfirmationModal = ({ onClose, onConfirm, vendorToBlock }) => (
   <Modal>
     <ModalContent>
       <CloseButton onClick={onClose}>&times;</CloseButton>
-      <h2>Are you sure you want to block this vendor?</h2>
+      <h2>Are you sure you want to {vendorToBlock?.isBlocked ? 'unblock' : 'block'} this vendor?</h2>
       <ModalButtons>
         <ModalButton onClick={onClose}>Cancel</ModalButton>
-        <ModalButton onClick={onConfirm} style={{ backgroundColor: 'black', color: 'white' }}>Block</ModalButton>
+        <ModalButton onClick={onConfirm} style={{ backgroundColor: 'black', color: 'white' }}>
+          {vendorToBlock?.isBlocked ? 'Unblock' : 'Block'}
+        </ModalButton>
       </ModalButtons>
     </ModalContent>
   </Modal>
 );
 
-const BlockSuccessModal = ({ onClose }) => (
+const BlockSuccessModal = ({ onClose, vendorToBlock }) => (
   <Modal>
     <ModalContent>
       <CloseButton onClick={onClose}>&times;</CloseButton>
       <div style={{ textAlign: 'center' }}>
         <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
-        </div>
-      <h3>Vendor successfully blocked</h3>
+      </div>
+      <h3>Vendor successfully {vendorToBlock?.isBlocked ? 'unblocked' : 'blocked'}</h3>
     </ModalContent>
   </Modal>
 );
+
 const ManageVendors = () => {
+  const [vendors, setVendors] = useState([]);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
   const [showBlockSuccess, setShowBlockSuccess] = useState(false);
-  const [farmerToBlock, setFarmerToBlock] = useState(null);
+  const [vendorToBlock, setVendorToBlock] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(7);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBlocked, setFilterBlocked] = useState('all');
+  const navigate = useNavigate();
 
-  const [vendors] = useState([
-    { id: 1, name: 'Jacob Jones', contact: '+91 123 456 7890', state: 'Uttar Pradesh' },
-    { id: 2, name: 'Darrell Steward', contact: '+91 123 456 7890', state: 'Chattisgarh' },
-    { id: 3, name: 'Esther Howard', contact: '+91 123 456 7890', state: 'Madhya Pradesh' },
-    { id: 4, name: 'Jane Cooper', contact: '+91 123 456 7890', state: 'Uttar Pradesh' },
-    { id: 5, name: 'Arlene McCoy', contact: '+91 123 456 7890', state: 'Madhya Pradesh' },
-    { id: 6, name: 'Jane Cooper', contact: '+91 123 456 7890', state: 'Uttar Pradesh' },
-    { id: 7, name: 'Jane Cooper', contact: '+91 123 456 7890', state: 'Chattisgarh' },
-    { id: 8, name: 'Ralph Edwards', contact: '+91 123 456 7890', state: 'Madhya Pradesh' },
-  ]);
-  const handleBlockClick = (farmer) => {
-    setFarmerToBlock(farmer);
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      const response = await getAllVendors();
+      setVendors(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch vendors');
+    }
+  };
+
+  const handleBlockClick = (vendor) => {
+    setVendorToBlock(vendor);
     setShowBlockConfirmation(true);
   };
-  
-  const handleBlockConfirm = () => {
-    // Here you would typically call an API to block the farmer
-    setShowBlockConfirmation(false);
-    setShowBlockSuccess(true);
+
+  const handleBlockConfirm = async () => {
+    try {
+      if (vendorToBlock.isBlocked) {
+        await unblockVendor(vendorToBlock._id);
+      } else {
+        await blockVendor(vendorToBlock._id);
+      }
+      setShowBlockConfirmation(false);
+      setShowBlockSuccess(true);
+      fetchVendors();
+    } catch (error) {
+      toast.error('Failed to block/unblock vendor');
+    }
   };
+
   const handleCloseModals = () => {
     setShowBlockConfirmation(false);
     setShowBlockSuccess(false);
-    setFarmerToBlock(null);
+    setVendorToBlock(null);
   };
+
+  const filteredVendors = vendors.filter(vendor =>
+    (vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.mobileNumber?.includes(searchTerm) ||
+    vendor.state?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterBlocked === 'all' || 
+    (filterBlocked === 'blocked' && vendor.isBlocked) || 
+    (filterBlocked === 'unblocked' && !vendor.isBlocked))
+  );
+
+  const indexOfLastEntry = currentPage * entriesPerPage;
+  const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+  const currentEntries = filteredVendors.slice(indexOfFirstEntry, indexOfLastEntry);
+
   return (
     <Container>
       <Header>
         <Title>Manage Vendors</Title>
-        <Link to="/add-vendor">
+        {/* <Link to="/add-vendor">
           <AddVendorButton>Add Vendor</AddVendorButton>
-        </Link>
+        </Link> */}
       </Header>
       <TopControls>
-      <span style={{ marginRight: '20px' , fontWeight: '400',fontSize: '13px'}}>Show</span>
-          <EntriesDropdown>
-            <option>07</option>
-            <option>14</option>
-            <option>21</option>
-          </EntriesDropdown>
-          <span style={{ fontWeight: '400',fontSize: '13px'}}>Entries</span>
-        <SearchInput placeholder="Search..." />
+        <span style={{ marginRight: '20px', fontWeight: '400', fontSize: '13px' }}>Show</span>
+        <EntriesDropdown value={entriesPerPage} onChange={(e) => setEntriesPerPage(Number(e.target.value))}>
+          <option value={7}>07</option>
+          <option value={14}>14</option>
+          <option value={21}>21</option>
+        </EntriesDropdown>
+        <span style={{ fontWeight: '400', fontSize: '13px' }}>Entries</span>
+        <SearchInput
+          placeholder="Search by Name, Mobile Number, State"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <EntriesDropdown value={filterBlocked} onChange={(e) => setFilterBlocked(e.target.value)}>
+          <option value="all">All Vendors</option>
+          <option value="blocked">Blocked Vendors</option>
+          <option value="unblocked">Unblocked Vendors</option>
+        </EntriesDropdown>
       </TopControls>
       <Table>
         <TableHead>
@@ -285,53 +330,80 @@ const ManageVendors = () => {
           </TableRow>
         </TableHead>
         <tbody>
-          {vendors.map(vendor => (
-            <TableRow key={vendor.id}>
+          {currentEntries.map(vendor => (
+            <TableRow key={vendor._id}>
               <TableCell>
                 <VendorCell>
                   <VendorAvatar>{vendor.name[0]}</VendorAvatar>
                   {vendor.name}
                 </VendorCell>
               </TableCell>
-              <TableCell>{vendor.contact}</TableCell>
+              <TableCell>{vendor.mobileNumber}</TableCell>
               <TableCell>{vendor.state}</TableCell>
               <TableCell>
-                <Link to={`/view-vendor/${vendor.id}`}>
-                  <ActionIcon src={viewIcon} alt="View" />
-                </Link>
-                <Link to={`/edit-vendor/${vendor.id}`}>
-                  <ActionIcon src={editIcon} alt="Edit" />
-                </Link>
-                <ActionIcon 
-  src={deleteIcon} 
-  alt="Block" 
-  onClick={() => handleBlockClick(vendor)}
-/>                </TableCell>
+                {vendor.isBlocked ? (
+                  <span>
+                    Blocked By Admin
+                    <span title="Unblock Vendor" onClick={() => handleBlockClick(vendor)} style={{cursor:"pointer", marginLeft: "10px"}}>🔓</span>
+                  </span>
+                ) : (
+                  <>
+                    <ActionIcon src={viewIcon} alt="View" onClick={() => navigate(`/view-vendor/${vendor._id}`)} />
+                    <ActionIcon src={editIcon} alt="Edit" onClick={() => navigate(`/edit-vendor/${vendor._id}`)} />
+                    <ActionIcon src={blockIcon} alt="Block" onClick={() => handleBlockClick(vendor)} />
+                  </>
+                )}
+              </TableCell>
             </TableRow>
           ))}
+          {!currentEntries.length && (
+            <TableRow>
+              <TableCell colSpan={4} style={{ textAlign: 'center' }}>No vendors found</TableCell>
+            </TableRow>
+          )}
         </tbody>
       </Table>
       <Pagination>
-        <PageInfo>Showing 1 to 7 of 100 entries</PageInfo>
+        <PageInfo>
+          Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredVendors.length)} of {filteredVendors.length} entries
+        </PageInfo>
         <PageButtons>
-          <PageButton>Previous</PageButton>
-          <PageButton active>1</PageButton>
-          <PageButton>2</PageButton>
-          <PageButton>3</PageButton>
-          <PageButton>4</PageButton>
-          <PageButton>5</PageButton>
-          <PageButton>Next</PageButton>
+          <PageButton
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </PageButton>
+          {Array.from({ length: Math.ceil(filteredVendors.length / entriesPerPage) }, (_, i) => (
+            <PageButton
+              key={i + 1}
+              active={currentPage === i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </PageButton>
+          ))}
+          <PageButton
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === Math.ceil(filteredVendors.length / entriesPerPage)}
+          >
+            Next
+          </PageButton>
         </PageButtons>
       </Pagination>
       {showBlockConfirmation && (
-      <BlockConfirmationModal 
-        onClose={handleCloseModals}
-        onConfirm={handleBlockConfirm}
-      />
-    )}
-    {showBlockSuccess && (
-      <BlockSuccessModal onClose={handleCloseModals} />
-    )}
+        <BlockConfirmationModal
+          onClose={handleCloseModals}
+          onConfirm={handleBlockConfirm}
+          vendorToBlock={vendorToBlock}
+        />
+      )}
+      {showBlockSuccess && (
+        <BlockSuccessModal
+          onClose={handleCloseModals}
+          vendorToBlock={vendorToBlock}
+        />
+      )}
     </Container>
   );
 };

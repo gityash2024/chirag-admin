@@ -120,3 +120,33 @@ export const getVendorRunners = (payload) => {
   const url = `${baseUrl}/runners/vendors/runners/${payload.id}`;
   return instance.get(url, payload);
 };
+
+export const getVendorById = (id) => {
+  const url = `${baseUrl}/vendors/${id}`;
+  return instance.get(url);
+};
+
+export const updateVendor = (id, payload) => {
+  const url = `${baseUrl}/vendors/${id}`;
+  return instance.put(url, payload);
+};
+
+export const registerVendor = (payload) => {
+  const url = `${baseUrl}/vendors/register`;
+  return instance.post(url, payload);
+};
+
+export const blockVendor = (vendorId) => {
+  const url = `${baseUrl}/vendors/block`;
+  return instance.patch(url, { vendorId });
+};
+
+export const unblockVendor = (vendorId) => {
+  const url = `${baseUrl}/vendors/unblock`;
+  return instance.patch(url, { vendorId });
+};
+
+export const getVendorBookings = (vendorId) => {
+  const url = `${baseUrl}/vendors/bookings/${vendorId}`;
+  return instance.get(url);
+};
