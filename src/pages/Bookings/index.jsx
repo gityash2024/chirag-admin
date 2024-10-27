@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import LocationOn from '@mui/icons-material/LocationOn';
-import CalendarToday from '@mui/icons-material/CalendarToday';
-import AccessTime from '@mui/icons-material/AccessTime';
-import Opacity from '@mui/icons-material/Opacity';
-import CloseIcon from '@mui/icons-material/Close';
-import successWithdrawalCheck from '../../assets/check-wallet.png';
-import noBookingsImage from '../../assets/no-booking.png';
-import avatarImage from '../../assets/runner-avatar.png';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import LocationOn from "@mui/icons-material/LocationOn";
+import CalendarToday from "@mui/icons-material/CalendarToday";
+import AccessTime from "@mui/icons-material/AccessTime";
+import Opacity from "@mui/icons-material/Opacity";
+import CloseIcon from "@mui/icons-material/Close";
+import Phone from '@mui/icons-material/Phone';
+import noBookingsImage from "../../assets/no-booking.png";
+import { getAllBookingsList, getAllVendors, assignVendorToBooking } from "../../services/commonService";
+import { toast } from "react-toastify";
 import clock from '../../assets/clock.png';
 import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
-import Phone from '@mui/icons-material/Phone';
+import { Avatar } from "@mui/material";
+import { CopyAll } from "@mui/icons-material";
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+`;
 
 const BookingsContainer = styled.div`
   padding: 20px;
@@ -49,20 +61,7 @@ const Tab = styled.button`
   cursor: pointer;
 `;
 
-const CardContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-`;
 
-const Card = styled.div`
-  background: white;
-  cursor: pointer;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
 
 const CardHeader = styled.div`
   display: flex;
@@ -88,7 +87,7 @@ const StatusBadge = styled.span`
   background-color: ${props => {
     if (props.status === 'In Progress') return '#FDF0CC';
     if (props.status === 'Confirmed') return '#C6EEFF';
-    if (props.status === 'Completed') return '#B1FF8C';
+    if (props.status === 'Confirmed') return '#B1FF8C';
     if (props.status === 'Closed') return '#DAB4FF';
     return '#E0E0E0';
   }};
@@ -162,25 +161,55 @@ const AssignedRunnerContainer = styled.div`
   align-items: center;
   margin-top: 15px;
 `;
+const RunnnerDetails = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F8F9FA;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 15px;
+`;
 
-const RunnerAvatar = styled.img`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
+const RunnerName = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const RunnerInfo = styled.div`
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  
+  span {
+    font-weight: 500;
+    color: #121212;
+  }
 `;
 
-const RunnerName = styled.span`
+const RunnerContactButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  color: #121212;
-`;
+  transition: all 0.2s ease;
 
+  &:hover {
+    background: #F8F9FA;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
 const RunnerContact = styled.span`
   font-size: 12px;
   color: #121212;
@@ -209,6 +238,12 @@ const Pagination = styled.div`
   margin-top: 20px;
 `;
 
+const RunnerDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+`;
+
 const PageButton = styled.button`
   background: ${props => props.active ? '#000' : 'white'};
   color: ${props => props.active ? 'white' : '#000'};
@@ -222,25 +257,7 @@ const PageButton = styled.button`
   }
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
 
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  position: relative;
-`;
 
 const CloseButton = styled.button`
   position: absolute;
@@ -276,12 +293,94 @@ const SuccessModal = styled(ModalContent)`
   text-align: center;
 `;
 
+const AvatarIcon = styled(Avatar)`
+  margin-right: 10px;
+`;
+
+
+
+const Card = styled.div`
+  background: white;
+  cursor: pointer;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-height: 300px;
+  padding-bottom: 70px;
+`;
+
+const ActionButtonContainer = styled.div`
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+`;
+
+const ActionButton = styled.button`
+  width: 100%;
+  padding: 10px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+
+
+const VendorList = styled.div`
+  margin-top: 20px;
+`;
+
+const VendorItem = styled.div`
+  padding: 15px;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CardContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  &:empty {
+    display: block;
+  }
+`;
+
 const EmptyStateContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 70vh;
+  width: 100%;
+  grid-column: 1 / -1;
+  margin: 0 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const EmptyStateImage = styled.img`
@@ -296,211 +395,394 @@ const EmptyStateText = styled.p`
   text-align: center;
 `;
 
+const VendorTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+`;
+
+const TableHeader = styled.th`
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #E0E0E0;
+  color: #121212;
+  font-weight: 600;
+  font-size: 14px;
+`;
+
+const TableCell = styled.td`
+  padding: 12px;
+  border-bottom: 1px solid #E0E0E0;
+  color: #121212;
+  font-size: 14px;
+`;
+
+const CopyButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: #000000;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+const MobileNumberContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const QuoteModal = styled(ModalContent)`
+  width: 400px;
+  padding: 24px;
+`;
+
+const QuotePriceInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  margin-top: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #000000;
+  }
+
+  &::placeholder {
+    color: #8D98A4;
+  }
+`;
+
+const ModalSubtitle = styled.p`
+  color: #8D98A4;
+  font-size: 14px;
+  margin-bottom: 20px;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+`;
+
+const CancelButton = styled(ActionButton)`
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+`;
+
 const Bookings = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Pending Bookings');
+  const [activeTab, setActiveTab] = useState("Pending Bookings");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showPriceModal, setShowPriceModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [price, setPrice] = useState('');
+  const [bookings, setBookings] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [showVendorModal, setShowVendorModal] = useState(false);
+  const [vendors, setVendors] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const bookingsPerPage = 9;
+// Add these new state variables to your component
+const [showQuoteModal, setShowQuoteModal] = useState(false);
+const [selectedVendor, setSelectedVendor] = useState(null);
+const [quotePrice, setQuotePrice] = useState('');
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllBookingsList();
+      const categorizedBookings = {
+        "Pending Bookings": response.data.filter(b => !b.runner && b.status !== "confirmed"),
+        "In Progress": response.data.filter(
+          b => (b.status === "confirmed"||b.status==="quote_received")&& !b.runner && !["completed", "closed"].includes(b.status)
+        ),
+        "Confirmed": response.data.filter(b => b.status === "confirmed" && b.runner ),
+        "Closed": response.data.filter(b => (b.status === "closed" ||b.status === "cancelled")),
+      };
+      setBookings(categorizedBookings);
+    } catch (error) {
+      toast.error("Failed to fetch bookings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVendors = async () => {
+    try {
+      const response = await getAllVendors();
+      setVendors(response.data);
+    } catch (error) {
+      toast.error("Failed to fetch vendors");
+    }
+  };
+
+  const handleAssignButtonClick = async (booking, e) => {
+    e.stopPropagation();
+    if (!booking.vendor) {
+      setSelectedBooking(booking);
+      await fetchVendors();
+      setShowVendorModal(true);
+    } else {
+      navigate(`/assign-runner/${booking._id}`);
+    }
+  };
+
+  const handleVendorSelect = (vendor) => {
+    setSelectedVendor(vendor);
+    setShowQuoteModal(true);
+    setShowVendorModal(false);
+  };
+  
+  const handleQuoteSubmit = async () => {
+    if (!quotePrice) {
+      toast.error('Please enter quote price');
+      return;
+    }
+    console.log({
+      id: selectedBooking._id,
+      vendor: selectedVendor._id,
+      status:'quote_received',
+      quotePrice: parseFloat(quotePrice)
+    })
+    try {
+      await assignVendorToBooking({
+        id: selectedBooking._id,
+        vendor: selectedVendor._id,
+        status:'quote_received',
+        quotePrice: parseFloat(quotePrice)
+      });
+      
+      toast.success("Vendor assigned successfully");
+      setShowQuoteModal(false);
+      setQuotePrice('');
+      setSelectedVendor(null);
+      fetchBookings();
+    } catch (error) {
+      toast.error("Failed to assign vendor");
+    }
+  };
+
 
   const handleBookingClick = (booking) => {
-    if(booking.status === 'Completed'){
-      navigate(`/completed-booking/${booking.id}`)
-    }else if(booking.status === 'Confirmed'){
-      navigate(`/confirm-booking-details/${booking.id}`)
-    }else if(activeTab==='Pending Bookings'){
-      return;
-    }else{
-      navigate(`/cancelled-booking-details/${booking.id}`)
-    
-    }
-    };
-
-  const [bookings, setBookings] = useState({
-    'Pending Bookings': [
-      { id: 'AB123456333', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Sachin Doe', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', humidity: '2%', price: '₹ 20,000' },
-      { id: 'AB12345783', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'John Doe', date: '14 June, 2023', time: '03:00 PM - 05:00 PM', farmArea: '22 Acres', crop: 'Crop name', temperature: '25°', location: 'Pratapgarh, Uttarpradesh', humidity: '3%', price: '₹ 22,000' },
-      { id: 'AB1234589', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Jane Smith', date: '15 June, 2023', time: '04:00 PM - 06:00 PM', farmArea: '23 Acres', crop: 'Crop name', temperature: '26°', location: 'Pratapgarh, Uttarpradesh', humidity: '4%', price: '₹ 24,000' },
-      { id: 'AB1234518', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Sachin Doe', date: '13 June, 2023', time: '02:00 PM - 04:00 PM', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', humidity: '2%', price: '₹ 20,000' },
-      { id: 'AB1234524', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'John Doe', date: '14 June, 2023', time: '03:00 PM - 05:00 PM', farmArea: '22 Acres', crop: 'Crop name', temperature: '25°', location: 'Pratapgarh, Uttarpradesh', humidity: '3%', price: '₹ 22,000' },
-      { id: 'AB1234532', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Jane Smith', date: '15 June, 2023', time: '04:00 PM - 06:00 PM', farmArea: '23 Acres', crop: 'Crop name', temperature: '26°', location: 'Pratapgarh, Uttarpradesh', humidity: '4%', price: '₹ 24,000' },
-    ],
-   
-    'In Progress Booking': [
-      { id: 'AB31234368', status: 'In Progress', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Ava Wilson', date: '25 June, 2023', time: '02:00 AM - 04:00 AM', farmArea: '33 Acres', crop: 'Crop name', temperature: '36°', location: 'Pratapgarh, Uttarpradesh', humidity: '14%', price: '₹ 44,000' },
-      { id: 'AB812346W9', status: 'In Progress', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Noah Martin', date: '26 June, 2023', time: '03:00 AM - 05:00 AM', farmArea: '34 Acres', crop: 'Crop name', temperature: '37°', location: 'Pratapgarh, Uttarpradesh', humidity: '15%', price: '₹ 46,000' },
-      { id: 'AB31237470', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Isabella Thompson', date: '27 June, 2023', time: '04:00 AM - 06:00 AM', farmArea: '35 Acres', crop: 'Crop name', temperature: '38°', location: 'Pratapgarh, Uttarpradesh', humidity: '16%', price: '₹ 48,000' },
-      { id: 'AB731234368', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Ava Wilson', date: '25 June, 2023', time: '02:00 AM - 04:00 AM', farmArea: '33 Acres', crop: 'Crop name', temperature: '36°', location: 'Pratapgarh, Uttarpradesh', humidity: '14%', price: '₹ 44,000' },
-      { id: 'AB8123469', status: 'In Progress', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Noah Martin', date: '26 June, 2023', time: '03:00 AM - 05:00 AM', farmArea: '34 Acres', crop: 'Crop name', temperature: '37°', location: 'Pratapgarh, Uttarpradesh', humidity: '15%', price: '₹ 46,000' },
-      { id: 'A9B1237470', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Isabella Thompson', date: '27 June, 2023', time: '04:00 AM - 06:00 AM', farmArea: '35 Acres', crop: 'Crop name', temperature: '38°', location: 'Pratapgarh, Uttarpradesh', humidity: '16%', price: '₹ 48,000' },
-    ],
-    'Completed': [
-      { id: 'AB97123474', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Charlotte Clark', date: '1 July, 2023', time: '08:00 AM - 10:00 AM', farmArea: '39 Acres', crop: 'Crop name', temperature: '42°', location: 'Pratapgarh, Uttarpradesh', humidity: '20%', price: '₹ 56,000' },
-      { id: 'AB13523475', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Mason Lewis', date: '2 July, 2023', time: '09:00 AM - 11:00 AM', farmArea: '40 Acres', crop: 'Crop name', temperature: '43°', location: 'Pratapgarh, Uttarpradesh', humidity: '21%', price: '₹ 58,000' },
-      { id: 'AB12843476', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Harper Lee', date: '3 July, 2023', time: '10:00 AM - 12:00 PM', farmArea: '41 Acres', crop: 'Crop name', temperature: '44°', location: 'Pratapgarh, Uttarpradesh', humidity: '22%', price: '₹ 60,000' },
-      { id: 'AB971230474', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Charlotte Clark', date: '1 July, 2023', time: '08:00 AM - 10:00 AM', farmArea: '39 Acres', crop: 'Crop name', temperature: '42°', location: 'Pratapgarh, Uttarpradesh', humidity: '20%', price: '₹ 56,000' },
-      { id: 'AB013523475', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Mason Lewis', date: '2 July, 2023', time: '09:00 AM - 11:00 AM', farmArea: '40 Acres', crop: 'Crop name', temperature: '43°', location: 'Pratapgarh, Uttarpradesh', humidity: '21%', price: '₹ 58,000' },
-      { id: 'AB128434076', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Harper Lee', date: '3 July, 2023', time: '10:00 AM - 12:00 PM', farmArea: '41 Acres', crop: 'Crop name', temperature: '44°', location: 'Pratapgarh, Uttarpradesh', humidity: '22%', price: '₹ 60,000' },
-    ],
-    'Closed': [
-      { id: 'AB123245480', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Michael Baker', date: '7 July, 2023', time: '02:00 PM - 04:00 PM', farmArea: '45 Acres', crop: 'Crop name', temperature: '48°', location: 'Pratapgarh, Uttarpradesh', humidity: '26%', price: '₹ 68,000' },
-      { id: 'AB12376481', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Ella Adams', date: '8 July, 2023', time: '03:00 PM - 05:00 PM', farmArea: '46 Acres', crop: 'Crop name', temperature: '49°', location: 'Pratapgarh, Uttarpradesh', humidity: '27%', price: '₹ 70,000' },
-      { id: 'A9B123482', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Daniel Nelson', date: '9 July, 2023', time: '04:00 PM - 06:00 PM', farmArea: '47 Acres', crop: 'Crop name', temperature: '50°', location: 'Pratapgarh, Uttarpradesh', humidity: '28%', price: '₹ 72,000' },
-      { id: 'AB3123245480', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Michael Baker', date: '7 July, 2023', time: '02:00 PM - 04:00 PM', farmArea: '45 Acres', crop: 'Crop name', temperature: '48°', location: 'Pratapgarh, Uttarpradesh', humidity: '26%', price: '₹ 68,000' },
-      { id: 'A5B12376481', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Ella Adams', date: '8 July, 2023', time: '03:00 PM - 05:00 PM', farmArea: '46 Acres', crop: 'Crop name', temperature: '49°', location: 'Pratapgarh, Uttarpradesh', humidity: '27%', price: '₹ 70,000' },
-      { id: 'A79B123482', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066', name: 'Daniel Nelson', date: '9 July, 2023', time: '04:00 PM - 06:00 PM', farmArea: '47 Acres', crop: 'Crop name', temperature: '50°', location: 'Pratapgarh, Uttarpradesh', humidity: '28%', price: '₹ 72,000' },
-    ],
-  });
-
-  const handleDecline = (id) => {
-    setBookings(prevBookings => ({
-      ...prevBookings,
-      [activeTab]: prevBookings[activeTab].filter(booking => booking.id !== id)
-    }));
+    navigate(`/booking-details/${booking._id}`);
   };
 
-  const handleAccept = (id) => {
-    setShowPriceModal(true);
-  };
-  const ActionButton = styled.button`
-  width: 48%;
-  padding: 10px;
-  background-color: ${props => props.primary ? '#000000' : '#FFFFFF'};
-  color: ${props => props.primary ? '#FFFFFF' : '#000000'};
-  border: ${props => props.primary ? 'none' : '1px solid #000000'};
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 15px;
-`;
-  const handlePriceSubmit = () => {
-    setShowPriceModal(false);
-    setShowSuccessModal(true);
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
-  };
-
-  const handleAssignRunner = (id) => {
-    navigate(`/assign-runner/${id}`);
+  const handleCallRunner = (e, mobileNumber) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(mobileNumber);
+    toast.info(`Copied number: ${mobileNumber}`);
   };
 
   const renderBookings = () => {
-    const currentBookings = bookings[activeTab].slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage);
-    if (currentBookings.length === 0) {
+    const currentBookings = bookings[activeTab] || [];
+    const indexOfLastItem = currentPage * bookingsPerPage;
+    const indexOfFirstItem = indexOfLastItem - bookingsPerPage;
+    const currentItems = currentBookings.slice(indexOfFirstItem, indexOfLastItem);
+
+    if (currentItems.length === 0) {
       return (
-        <>
-        <EmptyStateContainer>
-          </EmptyStateContainer>
         <EmptyStateContainer>
           <EmptyStateImage src={noBookingsImage} alt="No bookings" />
-          <EmptyStateText>Currently, no bookings available.</EmptyStateText>
+          <EmptyStateText>Currently, no bookings available for {activeTab}.</EmptyStateText>
         </EmptyStateContainer>
-        </>
       );
     }
-    return bookings[activeTab].slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage).map((booking) => (
-      <Card key={booking.id} onClick={() => handleBookingClick(booking)}>
+
+    return currentItems.map((booking) => (
+      <Card key={booking._id} onClick={() => handleBookingClick(booking)}>
         <CardHeader>
-          <BookingId>#{booking.id}</BookingId>
-          {(activeTab === 'In Progress Booking' || activeTab === 'Completed' || activeTab === 'Closed') && 
-            <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
-          }
+          <BookingId>#{booking._id}</BookingId>
+          <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
         </CardHeader>
-        <BookingDetails><img src={map} alt="Location" style={{ marginRight: '5px' }}/>{booking.address}</BookingDetails>
+        <BookingDetails>
+          <img src={map} alt="Location" style={{ marginRight: '5px' }}/>
+          {booking.farmLocation}
+        </BookingDetails>
         <DateTimeRow>
-          <BookingDetails><img src={calendar} alt="Calendar"style={{ marginRight: '5px' }} /> {booking.date}</BookingDetails>
-          <BookingDetails><img src={clock} alt="Clock" style={{ marginRight: '5px' }} /> {booking.time}</BookingDetails>
+          <BookingDetails>
+            <img src={calendar} alt="Calendar" style={{ marginRight: '5px' }}/>
+            {new Date(booking.date).toLocaleDateString()}
+          </BookingDetails>
+          <BookingDetails>
+            <img src={clock} alt="Clock" style={{ marginRight: '5px' }}/>
+            {booking.time}
+          </BookingDetails>
         </DateTimeRow>
-        <BookingDetails>Booking Name: {booking.name}</BookingDetails>
-        <BookingDetails>Farm Area: {booking.farmArea}</BookingDetails>
+        <BookingDetails>Booking Name: {booking.farmerName}</BookingDetails>
+        <BookingDetails>Farm Area: {booking.farmArea} Acres</BookingDetails>
         <TempHumidityCropRow>
           <TempHumidity>
-            <Temperature>{booking.temperature}</Temperature>
-            <Humidity><Opacity /> {booking.humidity}</Humidity>
+            <Temperature>{booking.weather}</Temperature>
+            <Humidity>
+              <Opacity /> {booking.weather}
+            </Humidity>
           </TempHumidity>
-          <Crop>Crop: {booking.crop}</Crop>
+          <Crop>Crop: {booking.cropName}</Crop>
         </TempHumidityCropRow>
-        <BookingDetails>{booking.location}</BookingDetails>
-        {(activeTab === 'In Progress Booking' || activeTab === 'Closed') && 
-          <PriceSummary>Price Summary : {booking.price}</PriceSummary>
-        }
-
-        {activeTab !== 'Pending Bookings'?<>
-          <ServiceProvider>Digital sky Drone services</ServiceProvider>
-        <AssignedRunnerContainer>
-          <RunnerAvatar src={avatarImage} alt="Runner Avatar" />
-          <RunnerInfo>
-            <RunnerName>Runner name</RunnerName>
-            <RunnerContact>Contact number: 0987654321</RunnerContact>
-          </RunnerInfo>
-          <CallButton> Call now</CallButton>
-        </AssignedRunnerContainer>
-        </>:null
-        }
-
-        {(activeTab === 'Pending Bookings' ) && (
-          <ButtonContainer>
-            <ActionButton onClick={() => handleDecline(booking.id)}>Decline</ActionButton>
-            <ActionButton primary onClick={() => handleAssignRunner(booking.id)}>Assign Runner</ActionButton>
-          </ButtonContainer>
+        {booking.quotePrice && (
+          <PriceSummary>Price: ₹{booking.quotePrice}</PriceSummary>
+        )}
+        {booking.vendor && (
+          <BookingDetails>Vendor: {booking.vendor.name}</BookingDetails>
+        )}
+       {booking.runner && (
+  <RunnnerDetails>
+    <RunnerName>
+      <RunnerInfo>
+        <Avatar sx={{ width: 40, height: 40 }} />
+        <span>{booking?.runner?.name}</span>
+      </RunnerInfo>
+    </RunnerName>
+    <RunnerContactButton onClick={(e) => handleCallRunner(e, booking?.runner?.mobileNumber)}>
+      <Phone /> Call Now
+    </RunnerContactButton>
+  </RunnnerDetails>
+)}
+        {(activeTab === "Pending Bookings" || 
+          (activeTab === "In Progress" && (!booking.vendor || !booking.runner))) && (
+          <ActionButtonContainer>
+            <ActionButton onClick={(e) => handleAssignButtonClick(booking, e)}>
+              {!booking.vendor ? 'Assign Vendor' : !booking.runner ? 'Assign Runner' : 'Assign Runner'}
+            </ActionButton>
+          </ActionButtonContainer>
         )}
       </Card>
     ));
   };
-
+const ToCapitaiseText = (text) => {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
   return (
     <BookingsContainer>
       <Title>Bookings</Title>
       <TabContainer>
         {Object.keys(bookings).map((tab) => (
-          <Tab key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
+          <Tab
+            key={tab}
+            active={activeTab === tab}
+            onClick={() => setActiveTab(tab)}
+          >
             {tab}
           </Tab>
         ))}
       </TabContainer>
-      <CardContainer>
-        {renderBookings()}
-      </CardContainer>
-      <Pagination>
-        {Array.from({ length: Math.ceil(bookings[activeTab].length / bookingsPerPage) }, (_, i) => (
-          <PageButton
-            key={i + 1}
-            onClick={() => setCurrentPage(i + 1)}
-            active={i + 1 === currentPage}
-          >
-            {i + 1}
-          </PageButton>
-        ))}
-      </Pagination>
-      {showPriceModal && (
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <CardContainer>{renderBookings()}</CardContainer>
+          <Pagination>
+            {Array.from(
+              {
+                length: Math.ceil(
+                  (bookings[activeTab] || []).length / bookingsPerPage
+                ),
+              },
+              (_, i) => (
+                <PageButton
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  active={i + 1 === currentPage}
+                >
+                  {i + 1}
+                </PageButton>
+              )
+            )}
+          </Pagination>
+        </>
+      )}
+      {showVendorModal && (
         <Modal>
           <ModalContent>
-            <CloseButton onClick={() => setShowPriceModal(false)}><CloseIcon /></CloseButton>
-            <ModalTitle>Add a Price for this booking</ModalTitle>
-            <PriceInput
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Enter price"
-            />
-            <SubmitButton onClick={handlePriceSubmit}>Submit</SubmitButton>
+            <CloseButton onClick={() => setShowVendorModal(false)}>
+              <CloseIcon />
+            </CloseButton>
+            <Title>Select Vendor</Title>
+<VendorList>
+  <VendorTable>
+    <thead>
+      <tr>
+        <TableHeader>Vendor Name</TableHeader>
+        <TableHeader>Mobile Number</TableHeader>
+        <TableHeader>Action</TableHeader>
+      </tr>
+    </thead>
+    <tbody>
+      {vendors.map(vendor => (
+        <tr key={vendor._id}>
+          <TableCell>{vendor.name}</TableCell>
+          <TableCell>
+            <MobileNumberContainer>
+              {vendor.mobileNumber}
+              <CopyButton 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(vendor.mobileNumber);
+                  toast.info('Mobile number copied!');
+                }}
+              >
+                <CopyAll />
+              </CopyButton>
+            </MobileNumberContainer>
+          </TableCell>
+          <TableCell>
+            <ActionButton onClick={() => handleVendorSelect(vendor)}>
+              Select
+            </ActionButton>
+          </TableCell>
+        </tr>
+      ))}
+    </tbody>
+  </VendorTable>
+</VendorList>
           </ModalContent>
         </Modal>
       )}
-      {showSuccessModal && (
-        <Modal>
-          <SuccessModal>
-            <CloseButton onClick={() => setShowSuccessModal(false)}><CloseIcon /></CloseButton>
-            <SuccessIcon src={successWithdrawalCheck} alt="Success" />
-            <ModalTitle>In Progress Booking</ModalTitle>
-            <p>You will get an update soon</p>
-          </SuccessModal>
-        </Modal>
-      )}
+
+{showQuoteModal && (
+  <Modal>
+    <QuoteModal>
+      <CloseButton onClick={() => {
+        setShowQuoteModal(false);
+        setQuotePrice('');
+      }}>
+        <CloseIcon />
+      </CloseButton>
+      <Title>Set Quote Price</Title>
+      <ModalSubtitle>
+        Set quote price for booking #{selectedBooking?._id} with vendor {selectedVendor?.name}
+      </ModalSubtitle>
+      <QuotePriceInput
+        type="number"
+        placeholder="Enter quote price"
+        value={quotePrice}
+        onChange={(e) => setQuotePrice(e.target.value)}
+      />
+      <ButtonGroup>
+        <CancelButton onClick={() => {
+          setShowQuoteModal(false);
+          setQuotePrice('');
+        }}>
+          Cancel
+        </CancelButton>
+        <ActionButton onClick={handleQuoteSubmit}>
+          Submit & Assign
+        </ActionButton>
+      </ButtonGroup>
+    </QuoteModal>
+  </Modal>
+)}
     </BookingsContainer>
   );
 };

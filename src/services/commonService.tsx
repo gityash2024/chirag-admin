@@ -99,4 +99,24 @@ export const getAllRunners = (id) => {
   return instance.get(url);
 };
 
+export const getAllBookingsList = () => {
+  const url = `${baseUrl}/bookings`;
+  return instance.get(url); 
+}
 
+export const assignVendorToBooking = (payload) => {
+  const url = `${baseUrl}/bookings/${payload.id}`;
+  return instance.put(url, payload);
+};
+export const assignRunnerToBooking = (payload) => {
+  const url = `${baseUrl}/bookings/${payload.id}`;
+  return instance.put(url, payload);
+};
+export const getBookingById = (payload) => {
+  const url = `${baseUrl}/bookings/${payload.id}`;
+  return instance.get(url, payload);
+};
+export const getVendorRunners = (payload) => {
+  const url = `${baseUrl}/runners/vendors/runners/${payload.id}`;
+  return instance.get(url, payload);
+};

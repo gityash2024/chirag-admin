@@ -333,13 +333,15 @@ const AddFarmer = () => {
   };
   
   const handleBookingClick = (booking) => {
-    if (booking.status === 'completed') {
-      navigate(`/completed-booking/${booking._id}`);
-    } else if (booking.status === 'confirmed') {
-      navigate(`/confirm-booking-details/${booking._id}`);
-    } else {
-      navigate(`/cancelled-booking-details/${booking._id}`);
-    }
+    // if (booking.status === 'completed') {
+    //   navigate(`/completed-booking/${booking._id}`);
+    // } else if (booking.status === 'confirmed') {
+    //   navigate(`/confirm-booking-details/${booking._id}`);
+    // } else {
+    //   navigate(`/cancelled-booking-details/${booking._id}`);
+    // }
+      navigate(`/booking-details/${booking._id}`);
+
   };
 
   return (

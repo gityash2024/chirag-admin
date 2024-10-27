@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import OpacityIcon from '@mui/icons-material/Opacity';
+import LocationOn from '@mui/icons-material/LocationOn';
+import CalendarToday from '@mui/icons-material/CalendarToday';
+import AccessTime from '@mui/icons-material/AccessTime';
+import Opacity from '@mui/icons-material/Opacity';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import successWithdrawalCheck from '../../assets/check-wallet.png';
+import successWithdrawalCheck from '../../assets/check-wallet.svg';
+import { getBookingById, getVendorRunners, assignRunnerToBooking } from '../../services/commonService';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
   padding: 20px;
-  font-family: 'Public Sans' ;
+  font-family: 'Public Sans';
   margin: 0 auto;
 `;
 
@@ -111,6 +113,10 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin: 15px auto;
   display: block;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const Modal = styled.div`
@@ -149,11 +155,13 @@ const CloseButton = styled.button`
 const RunnerTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
 `;
 
 const TableHeader = styled.th`
   text-align: left;
-  padding: 10px;
+  padding: 12px;
+  background-color: #F9FAFC;
   border-bottom: 1px solid #E0E0E0;
 `;
 
@@ -161,10 +169,13 @@ const TableRow = styled.tr`
   &:nth-child(even) {
     background-color: #F9F9F9;
   }
+  &:hover {
+    background-color: #F5F5F5;
+  }
 `;
 
 const TableCell = styled.td`
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #E0E0E0;
 `;
 
@@ -190,39 +201,74 @@ const AssignRunnerDetails = () => {
   const navigate = useNavigate();
   const [showRunnerModal, setShowRunnerModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [selectedRunner, setSelectedRunner] = useState(null);
+  const [booking, setBooking] = useState(null);
+  const [runners, setRunners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [assigningRunner, setAssigningRunner] = useState(false);
 
-  const booking = {
-    id: id,
-    address: 'Lorem ipsum dolor sit amet, street, Area, City, 560066',
-    name: 'Sachin Doe',
-    date: '13 June, 2023',
-    time: '02:00 PM - 04:00 PM',
-    contactNumber: '0987654321',
-    farmArea: '21 Acres',
-    crop: 'Crop name',
-    temperature: '24° Pratapgarh, uttrakhand',
-    humidity: '2% Mostly sunny',
+  useEffect(() => {
+    fetchBookingDetails();
+  }, [id]);
+
+  const fetchBookingDetails = async () => {
+    try {
+      const response = await getBookingById({id:id});
+      setBooking(response.data);
+      if (response.data.vendor) {
+        fetchVendorRunners(response.data.vendor._id);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch booking details');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const runners = [
-    { id: 1, name: 'John Doe', contact: '+91 1234567890', status: 'Active' },
-    { id: 2, name: 'Jane Smith', contact: '+91 9876543210', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', contact: '+91 5555555555', status: 'Inactive' },
-  ];
+  const fetchVendorRunners = async (vendorId) => {
+    try {
+      const response = await getVendorRunners({id:vendorId});
+      setRunners(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch runners');
+    }
+  };
 
   const handleAssignRunner = () => {
+    if (!booking.vendor) {
+      toast.error('Please assign a vendor first');
+      return;
+    }
     setShowRunnerModal(true);
   };
 
-  const handleRunnerSelect = (runner) => {
-    setSelectedRunner(runner);
-    setShowRunnerModal(false);
-    setShowSuccessModal(true);
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+  const handleRunnerSelect = async (runner) => {
+    try {
+      setAssigningRunner(true);
+      await assignRunnerToBooking({
+        id: booking._id,
+        runner: runner._id,
+        status:'confirmed'
+      });
+      setShowRunnerModal(false);
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate('/bookings');
+      }, 2000);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to assign runner');
+    } finally {
+      setAssigningRunner(false);
+    }
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!booking) {
+    return <p>Booking not found</p>;
+  }
 
   return (
     <Container>
@@ -234,23 +280,23 @@ const AssignRunnerDetails = () => {
           <Title>Assign Runner</Title>
         </TitleContainer>
       </Header>
-      <BookingId>#{booking.id}</BookingId>
+      <BookingId>#{booking._id}</BookingId>
       <FlexContainer>
         <BookingDetailsContainer>
           <BookingDetailsCard>
             <DetailRow>
-              <DetailLabel><LocationOnIcon /></DetailLabel>
-              <DetailValue>{booking.address}</DetailValue>
+              <DetailLabel><LocationOn /></DetailLabel>
+              <DetailValue>{booking.farmLocation}</DetailValue>
             </DetailRow>
             <DetailRow>
-              <DetailLabel><CalendarTodayIcon /></DetailLabel>
-              <DetailValue>{booking.date}</DetailValue>
-              <DetailLabel style={{ marginLeft: '20px' }}><AccessTimeIcon /></DetailLabel>
+              <DetailLabel><CalendarToday /></DetailLabel>
+              <DetailValue>{new Date(booking.date).toLocaleDateString()}</DetailValue>
+              <DetailLabel style={{ marginLeft: '20px' }}><AccessTime /></DetailLabel>
               <DetailValue>{booking.time}</DetailValue>
             </DetailRow>
             <DetailRow>
               <DetailLabel>Booking Name:</DetailLabel>
-              <DetailValue>{booking.name}</DetailValue>
+              <DetailValue>{booking.farmerName}</DetailValue>
             </DetailRow>
             <DetailRow>
               <DetailLabel>Contact number:</DetailLabel>
@@ -258,81 +304,105 @@ const AssignRunnerDetails = () => {
             </DetailRow>
             <DetailRow>
               <DetailLabel>Farm Area:</DetailLabel>
-              <DetailValue>{booking.farmArea}</DetailValue>
+              <DetailValue>{booking.farmArea} Acres</DetailValue>
             </DetailRow>
             <DetailRow>
               <DetailLabel>Crop:</DetailLabel>
-              <DetailValue>{booking.crop}</DetailValue>
+              <DetailValue>{booking.cropName}</DetailValue>
             </DetailRow>
+            {booking.vendor && (
+              <DetailRow>
+                <DetailLabel>Assigned Vendor:</DetailLabel>
+                <DetailValue>{booking.vendor.name}</DetailValue>
+              </DetailRow>
+            )}
             <HorizontalLine />
             <DetailRow>
-              <DetailLabel>{booking.temperature}</DetailLabel>
+              <DetailLabel>{booking.weather}</DetailLabel>
             </DetailRow>
             <DetailRow>
-              <DetailLabel><OpacityIcon /> {booking.humidity}</DetailLabel>
+              <DetailLabel><Opacity /> {booking.weather}</DetailLabel>
             </DetailRow>
           </BookingDetailsCard>
+          <ActionButton onClick={handleAssignRunner} disabled={!booking.vendor}>
+            Assign Runner
+          </ActionButton>
         </BookingDetailsContainer>
         <PaymentSummary>
           <h3>Payment Summary</h3>
           <DetailRow>
-            <DetailLabel>Estimated Total:</DetailLabel>
-            <DetailValue>₹2589</DetailValue>
+            <DetailLabel>Quoted Price:</DetailLabel>
+            <DetailValue>₹{booking.quotePrice || 0}</DetailValue>
           </DetailRow>
           <HorizontalLine />
           <PaymentRow>
-            <DetailLabel>Estimated Total</DetailLabel>
-            <DetailValue>₹1999</DetailValue>
+            <DetailLabel>Service Charge</DetailLabel>
+            <DetailValue>₹{Math.round(booking.quotePrice * 0.1) || 0}</DetailValue>
           </PaymentRow>
           <PaymentRow>
-            <DetailLabel>Taxes and fee</DetailLabel>
-            <DetailValue>₹199</DetailValue>
+            <DetailLabel>Taxes</DetailLabel>
+            <DetailValue>₹{Math.round(booking.quotePrice * 0.18) || 0}</DetailValue>
           </PaymentRow>
           <HorizontalLine />
           <PaymentRow>
-            <DetailLabel>Total</DetailLabel>
-            <DetailValue>₹2198</DetailValue>
+            <DetailLabel>Total Amount</DetailLabel>
+            <DetailValue>₹{Math.round(booking.quotePrice * 1.28) || 0}</DetailValue>
           </PaymentRow>
         </PaymentSummary>
       </FlexContainer>
-      <ActionButton onClick={handleAssignRunner}>Assign Runner</ActionButton>
+
       {showRunnerModal && (
         <Modal>
           <ModalContent>
-            <CloseButton onClick={() => setShowRunnerModal(false)}><CloseIcon /></CloseButton>
-            <Title>Select a Runner</Title>
+            <CloseButton onClick={() => setShowRunnerModal(false)}>
+              <CloseIcon />
+            </CloseButton>
+            <Title>Select Runner</Title>
             <RunnerTable>
               <thead>
                 <tr>
                   <TableHeader>Runner Name</TableHeader>
-                  <TableHeader>Runner Contact</TableHeader>
-                  <TableHeader>Status</TableHeader>
+                  <TableHeader>Contact</TableHeader>
                   <TableHeader>Action</TableHeader>
                 </tr>
               </thead>
               <tbody>
                 {runners.map(runner => (
-                  <TableRow key={runner.id}>
+                  <TableRow key={runner._id}>
                     <TableCell>{runner.name}</TableCell>
-                    <TableCell>{runner.contact}</TableCell>
-                    <TableCell>{runner.status}</TableCell>
+                    <TableCell>{runner.mobileNumber}</TableCell>
                     <TableCell>
-                      <ActionButton onClick={() => handleRunnerSelect(runner)}>Select</ActionButton>
+                      <ActionButton 
+                        onClick={() => handleRunnerSelect(runner)}
+                        disabled={assigningRunner}
+                      >
+                        Select
+                      </ActionButton>
                     </TableCell>
                   </TableRow>
                 ))}
+                {!runners.length && (
+                  <TableRow>
+                    <TableCell></TableCell>  
+                    <TableCell >No runners found for {booking.vendor.name||'--'}</TableCell>
+                    <TableCell></TableCell>  
+                  </TableRow>
+                )}
               </tbody>
             </RunnerTable>
           </ModalContent>
         </Modal>
       )}
+
       {showSuccessModal && (
         <Modal>
           <SuccessModal>
-            <CloseButton onClick={() => setShowSuccessModal(false)}><CloseIcon /></CloseButton>
+            <CloseButton onClick={() => setShowSuccessModal(false)}>
+              <CloseIcon />
+            </CloseButton>
             <SuccessIcon src={successWithdrawalCheck} alt="Success" />
-            <Title>Request sent to runner</Title>
-            <p>You will get an update soon</p>
+            <Title>Runner Assigned Successfully</Title>
+            <p>Booking has been assigned to the runner</p>
           </SuccessModal>
         </Modal>
       )}

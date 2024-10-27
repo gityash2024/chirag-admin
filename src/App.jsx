@@ -109,11 +109,13 @@ function App() {
                       <Route path="/edit-vendor/:id" element={<Vendor mode="edit" />} />
                       <Route path="/manage-farmer" element={<ManageFarmer />} />
                       <Route path="/add-farmer" element={<AddFarmer />} />
-<Route path="/edit-farmer" element={<AddFarmer />} />
-<Route path="/view-farmer" element={<AddFarmer />} />
+                      <Route path="/edit-farmer" element={<AddFarmer />} />
+                      <Route path="/view-farmer" element={<AddFarmer />} />
                       <Route path="/completed-booking/:id" element={<ConfirmedBookingDetails />} />
                       <Route path="/confirm-booking-details/:id" element={<RunnerReachedBookingDetail />} />
                       <Route path="/cancelled-booking-details/:id" element={<RunnerCanceledBookingDetail />} />
+                      <Route path="/booking-details/:id" element={<ConfirmedBookingDetails />} />
+
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </PageContent>

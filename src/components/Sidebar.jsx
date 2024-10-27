@@ -28,7 +28,7 @@ const Logo = styled.div`
   padding: 20px;
   img {
     width: 100%;
-    max-width: 150px;
+    max-width: 300px;
   }
 `;
 
