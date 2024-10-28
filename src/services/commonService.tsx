@@ -176,3 +176,53 @@ export const getVendorCommissions = (vendorId) => {
   const url = `${baseUrl}/vendors/${vendorId}/commissions`;
   return instance.get(url);
 };
+
+export const getWalletBalance = () => {
+  const url = `${baseUrl}/wallet/balance`;
+  return instance.get(url);
+};
+
+export const getTransactionHistory = () => {
+  const url = `${baseUrl}/wallet/transactions`;
+  return instance.get(url);
+};
+
+export const requestWithdrawal = (payload) => {
+  const url = `${baseUrl}/wallet/request-withdrawal`;
+  return instance.post(url, payload);
+};
+
+export const getWithdrawalRequests = () => {
+  const url = `${baseUrl}/wallet/withdrawal-requests`;
+  return instance.get(url);
+};
+
+export const approveWithdrawal = (requestId, payload) => {
+  const url = `${baseUrl}/wallet/approve-withdrawal/${requestId}`;
+  return instance.post(url, payload);
+};
+
+export const getAdminWallet = () => {
+  const url = `${baseUrl}/wallet/admin-wallet`;
+  return instance.get(url);
+};
+
+export const deductCommission = (payload) => {
+  const url = `${baseUrl}/wallet/deduct-commission`;
+  return instance.post(url, payload);
+};
+
+export const getWalletStats = () => {
+  const url = `${baseUrl}/wallet/stats`;
+  return instance.get(url);
+};
+
+export const processWithdrawalRequest = (requestId, payload) => {
+  const url = `${baseUrl}/wallet/withdrawal-request/${requestId}/process`;
+  return instance.post(url, payload);
+};
+
+export const cancelWithdrawalRequest = (requestId) => {
+  const url = `${baseUrl}/wallet/withdrawal-request/${requestId}`;
+  return instance.delete(url);
+};

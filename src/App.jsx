@@ -100,7 +100,7 @@ function App() {
                       <Route path="/commission-management" element={<CommissionManagement />} />
                       <Route path="/commission-vendors" element={<VendorList />} />
                       <Route path="/commission-vendors/:id" element={<VendorDetails />} />
-                      <Route path="/approve-withdrawal" element={<ApproveWithdrawal />} />
+                      <Route path="/approve-withdrawal/:requestId" element={<ApproveWithdrawal />} />
                       <Route path="/add-vendor" element={<Vendor mode="add" />} />
                       <Route path="/add-testimonial" element={<AddTestimonial />} />
                       <Route path="/add-testimonial/:id" element={<AddTestimonial />} />

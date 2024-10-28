@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import successWithdrawalCheck from '../../assets/check-wallet.png';
 import CloseIcon from '@material-ui/icons/Close';
-
+import { toast } from 'react-toastify';
+import CircularProgress from '@mui/material/CircularProgress';
+import { 
+  getAdminWallet, 
+  deductCommission, 
+  getWalletStats
+} from '../../services/commonService';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -203,7 +209,57 @@ const SuccessIcon = styled.img`
   height: 50px;
   margin-bottom: 15px;
 `;
+const InputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
+
+const Label = styled.label`
+  font-size: 14px;
+  margin-bottom: 5px;
+`;
+
+const Input = styled.input`
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+`;
+
+const TextArea = styled.textarea`
+  grid-column: span 2;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 100px;
+`;
+
+
+
+const TransactionDate = styled.div`
+  font-size: 14px;
+  color: #8d98a4;
+`;
+
+const SubmitButton = styled.button`
+  width: 200px;
+  grid-column: span 2;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #555;
+  }
+`;
 const CloseButton = styled.button`
   position: absolute;
   top: 10px;
@@ -211,6 +267,30 @@ const CloseButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
+`;
+const ActionButton = styled.button`
+  width: 200px;
+  padding: 10px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 15px auto;
+  display: block;
+`;
+const TransactionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const TransactionTitle = styled.div`
+  font-weight: 600;
+  color: #383838;
 `;
 
 const HistoryItem = styled.div`
@@ -228,126 +308,220 @@ const HistoryAmount = styled.div`
   color: #41B079;
   font-weight: bold;
 `;
+const LoadingSpinner = styled(CircularProgress)`
+  &.MuiCircularProgress-root {
+    color: #383838;
+  }
+`;
 
+const ErrorMessage = styled.div`
+  color: #dc3545;
+  font-size: 14px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+`;
 const Wallet = () => {
+  const [loading, setLoading] = useState(true);
+  const [walletData, setWalletData] = useState({
+    balance: 0,
+    transactions: [],
+    totalCommission: 0
+  });
   const [activeTab, setActiveTab] = useState('commission');
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [showRequestSentModal, setShowRequestSentModal] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [showDeductModal, setShowDeductModal] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState(null);
+  const [deductionAmount, setDeductionAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
 
-  const transactions = [
-    { id: 'AB123456', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', price: 20000, commission: 2500, earning: 17500 },
-    { id: 'AB123457', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', price: 20000, commission: 2500, earning: 17500 },
-    { id: 'AB123458', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', price: 20000, commission: 2500, earning: 17500 },
-  ];
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
 
-  const historyItems = [
-    { id: 'H1', description: 'Added Money', date: '24/08/2024 2:00 Pm', amount: 2300 },
-    { id: 'H2', description: 'Added Money', date: '24/08/2024 2:00 Pm', amount: 2300 },
-    { id: 'H3', description: 'Added Money', date: '24/08/2024 2:00 Pm', amount: 2300 },
-    { id: 'H4', description: 'Added Money', date: '24/08/2024 2:00 Pm', amount: 2300 },
-  ];
-
-  const handleWithdraw = () => {
-    setShowWithdrawModal(true);
+  const fetchWalletData = async () => {
+    try {
+      setLoading(true);
+      const [walletResponse, statsResponse] = await Promise.all([
+        getAdminWallet(),
+        getWalletStats()
+      ]);
+      
+      setWalletData({
+        balance: walletResponse.data.adminWallet.balance,
+        transactions: walletResponse.data.adminWallet.transactions,
+        totalCommission: walletResponse.data.totalCommissionCollected,
+        vendorBalances: walletResponse.data.vendorBalances
+      });
+    } catch (error) {
+      toast.error('Failed to fetch wallet data');
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleWithdrawSubmit = () => {
-    setShowWithdrawModal(false);
-    setShowRequestSentModal(true);
-    setTimeout(() => setShowRequestSentModal(false), 3000);
+  const handleDeductCommission = async () => {
+    try {
+      if (!selectedVendor || !deductionAmount || !description) {
+        setError('Please fill all fields');
+        return;
+      }
+
+      setLoading(true);
+      await deductCommission({
+        vendorId: selectedVendor.vendorId,
+        amount: Number(deductionAmount),
+        description
+      });
+
+      toast.success('Commission deducted successfully');
+      setShowDeductModal(false);
+      fetchWalletData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to deduct commission');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading && !walletData.transactions.length) {
+    return (
+      <Container style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+        <LoadingSpinner />
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      <Header>My Earnings</Header>
+      <Header>Admin Wallet</Header>
+
       <EarningsOverview>
         <EarningItem>
-          <EarningValue>Rs. 5000</EarningValue>
+          <EarningValue>₹ {walletData.balance.toFixed(2)}</EarningValue>
           <EarningLabel>Available Balance</EarningLabel>
         </EarningItem>
         <EarningItem>
-          <EarningValue>345</EarningValue>
-          <EarningLabel>Total Bookings</EarningLabel>
+          <EarningValue>₹ {walletData.totalCommission.toFixed(2)}</EarningValue>
+          <EarningLabel>Total Commission Collected</EarningLabel>
         </EarningItem>
         <EarningItem>
-          <Dropdown>
-            <option value="monthly">Monthly</option>
-            <option value="weekly">Weekly</option>
-            <option value="daily">Daily</option>
-          </Dropdown>
-          <EarningValue>Rs. 3000</EarningValue>
-          <EarningLabel>This Month Earnings</EarningLabel>
+          <EarningValue>
+            {walletData.transactions.filter(t => t.type === 'commission').length}
+          </EarningValue>
+          <EarningLabel>Total Commission Transactions</EarningLabel>
         </EarningItem>
       </EarningsOverview>
-      <WithdrawButton onClick={handleWithdraw}>Withdraw Money</WithdrawButton>
+
       <Tabs>
-        <Tab active={activeTab === 'commission'} onClick={() => setActiveTab('commission')}>Commission</Tab>
-        <Tab active={activeTab === 'sent'} onClick={() => setActiveTab('sent')}>Sent</Tab>
+        <Tab 
+          active={activeTab === 'commission'} 
+          onClick={() => setActiveTab('commission')}
+        >
+          Commission History
+        </Tab>
+        <Tab 
+          active={activeTab === 'vendors'} 
+          onClick={() => setActiveTab('vendors')}
+        >
+          Vendor Balances
+        </Tab>
       </Tabs>
-      <TransactionList>
-        {activeTab === 'sent' ? (
-          transactions.map(transaction => (
-            <TransactionItem key={transaction.id}>
-              <TransactionId>{transaction.id}</TransactionId>
-              <TransactionDetails>{transaction.address}</TransactionDetails>
-              <TransactionAmount>
-                <div>
-                  <div style={{marginBottom: '10px'}}>Price Summary: ₹{transaction.price}</div>
-                  <div style={{marginBottom: '10px'}}>Admin's Commission: ₹{transaction.commission}</div>
-                  <div style={{marginBottom: '10px'}}>Your Earning: ₹{transaction.earning}</div>
-                </div>
-                <TransactionStatus>Completed</TransactionStatus>
-              </TransactionAmount>
-            </TransactionItem>
-          ))
-        ) : (
-          historyItems.map(item => (
-            <HistoryItem key={item.id}>
-              <HistoryDetails>
-                <div style={{marginBottom: '10px'}}>{item.description}</div>
-                <div style={{marginBottom: '10px'}}>{item.date}</div>
-              </HistoryDetails>
-              <HistoryAmount>+₹{item.amount}</HistoryAmount>
-            </HistoryItem>
-          ))
-        )}
-      </TransactionList>
-      <Pagination>
-        <PageInfo>1-10 of 10</PageInfo>
-        <PageButton>&lt;</PageButton>
-        <PageButton active>1</PageButton>
-        <PageButton>2</PageButton>
-        <PageButton>3</PageButton>
-        <PageButton>&gt;</PageButton>
-      </Pagination>
-      {showWithdrawModal && (
+
+      {activeTab === 'commission' ? (
+        <TransactionList>
+          {walletData.transactions
+            .filter(t => t.type === 'commission')
+            .map((transaction, index) => (
+              <TransactionItem key={index}>
+                <TransactionHeader>
+                  <TransactionTitle>Commission Transaction</TransactionTitle>
+                  <TransactionDate>
+                    {new Date(transaction.date).toLocaleString()}
+                  </TransactionDate>
+                </TransactionHeader>
+                <TransactionDetails>
+                  <div>{transaction.description}</div>
+                  <TransactionAmount>₹ {transaction.amount.toFixed(2)}</TransactionAmount>
+                </TransactionDetails>
+              </TransactionItem>
+            ))}
+        </TransactionList>
+      ) : (
+        <TransactionList>
+        {walletData.vendorBalances?.map((vendor, index) => (
+  <TransactionItem key={index}>
+    <TransactionHeader>
+      <TransactionTitle>{vendor.name}</TransactionTitle>
+      <ActionButton 
+        onClick={() => {
+          setSelectedVendor(vendor);
+          setShowDeductModal(true);
+        }}
+        disabled={!vendor.balance || vendor.balance <= 0}
+        style={{ opacity: (!vendor.balance || vendor.balance <= 0) ? 0.5 : 1 }}
+      >
+        Deduct Commission
+      </ActionButton>
+    </TransactionHeader>
+    <TransactionDetails>
+      <div>Available Balance: ₹ {vendor.balance?.toFixed(2) || "0.00"}</div>
+      <div>Total Commission Paid: ₹ {vendor.totalCommissionPaid?.toFixed(2) || "0.00"}</div>
+      {(!vendor.balance || vendor.balance <= 0) && (
+        <div style={{ color: '#666', fontSize: '12px', marginTop: '5px' }}>
+          Insufficient balance for commission deduction
+        </div>
+      )}
+    </TransactionDetails>
+  </TransactionItem>
+))}
+        </TransactionList>
+      )}
+
+      {showDeductModal && (
         <Modal>
           <ModalContent>
-            <CloseButton onClick={() => setShowWithdrawModal(false)}>
+            <CloseButton onClick={() => setShowDeductModal(false)}>
               <CloseIcon />
             </CloseButton>
-            <ModalTitle>Enter Amount</ModalTitle>
-            <ModalInput
-              type="number"
-              placeholder="Enter amount"
-              value={withdrawAmount}
-              onChange={(e) => setWithdrawAmount(e.target.value)}
-            />
-            <ModalButton onClick={handleWithdrawSubmit}>Submit</ModalButton>
+            <ModalTitle>Deduct Commission</ModalTitle>
+            <InputGroup>
+              <Label>Vendor Name</Label>
+              <Input
+                type="text"
+                value={selectedVendor?.name}
+                disabled
+              />
+            </InputGroup>
+            <InputGroup>
+              <Label>Amount</Label>
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                value={deductionAmount}
+                onChange={(e) => setDeductionAmount(e.target.value)}
+                max={selectedVendor?.balance}
+              />
+            </InputGroup>
+            <InputGroup>
+              <Label>Description</Label>
+              <Input
+                type="text"
+                placeholder="Enter description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </InputGroup>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            <ModalButton 
+              onClick={handleDeductCommission}
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : 'Deduct Commission'}
+            </ModalButton>
           </ModalContent>
-        </Modal>
-      )}
-      {showRequestSentModal && (
-        <Modal>
-          <SuccessModal>
-            <CloseButton onClick={() => setShowRequestSentModal(false)}>
-              <CloseIcon />
-            </CloseButton>
-            <SuccessIcon src={successWithdrawalCheck} alt="Success" />
-            <ModalTitle>Request sent</ModalTitle>
-            <p>Request sent to admin, you will get an update soon</p>
-          </SuccessModal>
         </Modal>
       )}
     </Container>

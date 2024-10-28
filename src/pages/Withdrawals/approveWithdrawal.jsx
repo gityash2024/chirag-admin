@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import { FiArrowLeft } from 'react-icons/fi';
+import { 
+  getWithdrawalRequests, 
+  approveWithdrawal,
+  getTransactionHistory 
+} from '../../services/commonService';
+import { toast } from 'react-toastify';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import CloseIcon from '@mui/icons-material/Close';
 import successWithdrawalCheck from '../../assets/check-wallet.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -260,31 +267,88 @@ const BackButton = styled.button`
 const BackIcon = styled(FiArrowLeft)`
   margin-right: 8px;
 `;
+const LoadingWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+`;
 
 const ApproveWithdrawal = () => {
+  const { requestId } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [withdrawalData, setWithdrawalData] = useState(null);
   const [activeTab, setActiveTab] = useState('History');
+  const [transactions, setTransactions] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const navigate = useNavigate();
 
-  const handleApproveClick = () => {
-    setShowConfirmModal(true);
+  useEffect(() => {
+    fetchWithdrawalData();
+  }, [requestId]);
+
+  const fetchWithdrawalData = async () => {
+    try {
+      setLoading(true);
+      const [requestsResponse, historyResponse] = await Promise.all([
+        getWithdrawalRequests(),
+        getTransactionHistory()
+      ]);
+
+      console.log(requestsResponse.data,'withdrawalRequest')
+      console.log(requestId,'requestId')
+
+      const withdrawalRequest = requestsResponse.data.find(
+        request => request.requestId === requestId
+      );
+
+      if (!withdrawalRequest) {
+        toast.error('Withdrawal request not found');
+        navigate(-1);
+        return;
+      }
+
+      setWithdrawalData(withdrawalRequest);
+      setTransactions(historyResponse.data);
+    } catch (error) {
+      toast.error('Failed to fetch withdrawal details');
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleConfirmApprove = () => {
-    setShowConfirmModal(false);
-    setShowSuccessModal(true);
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+  const handleApprove = async () => {
+    try {
+      setLoading(true);
+      await approveWithdrawal(requestId);
+      setShowConfirmModal(false);
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate('/withdrawals');
+      }, 2000);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to approve withdrawal');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading && !withdrawalData) {
+    return (
+      <LoadingWrapper>
+        <CircularProgress />
+      </LoadingWrapper>
+    );
+  }
 
   return (
     <Container>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px' }}>
-
-      <Header>Withdrawal Requests </Header>
-      <BackButton onClick={() => navigate(-1)}>
+        <Header>Withdrawal Request Details</Header>
+        <BackButton onClick={() => navigate(-1)}>
           <BackIcon />
           Back
         </BackButton>
@@ -293,218 +357,121 @@ const ApproveWithdrawal = () => {
       <FormGroup>
         <InputWrapper>
           <Label>Bank Account Number</Label>
-          <Input type="text" value="1009 6789 8765 2453" readOnly />
+          <Input type="text" value={withdrawalData?.bankDetails?.accountNumber} readOnly />
         </InputWrapper>
         <InputWrapper>
           <Label>IFSC code</Label>
-          <Input type="text" value="INSE837729" readOnly />
+          <Input type="text" value={withdrawalData?.bankDetails?.ifscCode} readOnly />
         </InputWrapper>
         <InputWrapper>
           <Label>Account Holder Name</Label>
-          <Input type="text" value="Khushi Doe" readOnly />
+          <Input type="text" value={withdrawalData?.bankDetails?.accountHolderName} readOnly />
         </InputWrapper>
       </FormGroup>
 
       <FormGroup>
         <InputWrapper>
           <Label>Withdrawal Amount</Label>
-          <Input type="text" value="₹ 2600" readOnly />
+          <Input type="text" value={`₹ ${withdrawalData?.amount.toFixed(2)}`} readOnly />
         </InputWrapper>
         <InputWrapper>
-          <Label>Available Balance</Label>
-          <Input type="text" value="₹ 2600" readOnly />
+          <Label>Request Date</Label>
+          <Input 
+            type="text" 
+            value={new Date(withdrawalData?.requestDate).toLocaleString()} 
+            readOnly 
+          />
         </InputWrapper>
       </FormGroup>
 
-      <ApproveButton onClick={handleApproveClick}>Approve</ApproveButton>
+      <ApproveButton 
+        onClick={() => setShowConfirmModal(true)}
+        disabled={loading}
+      >
+        Approve
+      </ApproveButton>
 
       <SectionTitle>Vendor details</SectionTitle>
 
       <FormGroup>
         <InputWrapper>
           <Label>Name</Label>
-          <Input type="text" value="Edgar James" readOnly />
+          <Input type="text" value={withdrawalData?.vendor?.name} readOnly />
         </InputWrapper>
         <InputWrapper>
           <Label>Mobile</Label>
-          <Input type="text" value="+918169131542" readOnly />
+          <Input type="text" value={withdrawalData?.vendor?.mobileNumber} readOnly />
         </InputWrapper>
         <InputWrapper>
           <Label>Email id</Label>
-          <Input type="text" value="khushi.doe@jithitech.com" readOnly />
-        </InputWrapper>
-      </FormGroup>
-
-      <FormGroup>
-        <InputWrapper>
-          <Label>State</Label>
-          <Input type="text" value="Maharashtra" readOnly />
-        </InputWrapper>
-        <InputWrapper>
-          <Label>City</Label>
-          <Input type="text" value="Mumbai" readOnly />
-        </InputWrapper>
-        <InputWrapper>
-          <Label>Region</Label>
-          <Input type="text" value="XYZ" readOnly />
-        </InputWrapper>
-      </FormGroup>
-
-      <FormGroup>
-        <InputWrapper>
-          <Label>UIN number</Label>
-          <Input type="text" value="23JH13988" readOnly />
-        </InputWrapper>
-        <InputWrapper>
-          <Label>Drone Pilot Licence</Label>
-          <Input type="text" value="DL09876532" readOnly />
-        </InputWrapper>
-        <InputWrapper>
-          <Label>Work experience (in years)</Label>
-          <Input type="text" value="6" readOnly />
-        </InputWrapper>
-      </FormGroup>
-
-      <FormGroup>
-        <InputWrapper>
-          <Label>Approx Pricing for 1 acre of land service for general crop</Label>
-          <Input type="text" value="₹ 23JH13988" readOnly />
-        </InputWrapper>
-        <InputWrapper>
-        <Label>Aadhaar authentication</Label>
-          <SuccessBadge>Successful</SuccessBadge>
+          <Input type="text" value={withdrawalData?.vendor?.email} readOnly />
         </InputWrapper>
       </FormGroup>
 
       <TabContainer>
         <div>
-          <Tab active={activeTab === 'History'} onClick={() => setActiveTab('History')}>History</Tab>
-          <Tab active={activeTab === 'Commissions'} onClick={() => setActiveTab('Commissions')}>Commissions</Tab>
+          <Tab 
+            active={activeTab === 'History'} 
+            onClick={() => setActiveTab('History')}
+          >
+            History
+          </Tab>
+          <Tab 
+            active={activeTab === 'Commissions'} 
+            onClick={() => setActiveTab('Commissions')}
+          >
+            Commissions
+          </Tab>
         </div>
         <SortControls>
           <SortLabel>Sort by</SortLabel>
           <SortDropdown>
-            <option value="page">Page</option>
             <option value="date">Date</option>
+            <option value="amount">Amount</option>
           </SortDropdown>
         </SortControls>
       </TabContainer>
 
-      {activeTab === 'History' && (
-        <HistoryList>
-          {/* Row 1 */}
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Added Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Added Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Added Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Added Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Added Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-         
-        </HistoryList>
-      )}
-      
-      {/* Additional Content for Commissions */}
-      {activeTab === 'Commissions' && (
-        <HistoryList>
-          {/* Row 1 */}
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Commission Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Commission Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Commission Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Commission Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-          <HistoryItem>
-            <HistoryDetails>
-              <div style={{marginBottom:"5px"}}>Commission Money</div>
-              <div style={{marginBottom:"5px"}}>24/08/2024 2:00 Pm</div>
-              <div style={{marginBottom:"5px",fontSize:"12px"}}>Via UPI</div>
-            </HistoryDetails>
-            <HistoryAmount>+ ₹ 2300</HistoryAmount>
-          </HistoryItem>
-         
-        </HistoryList>
-      )}
-      <HorizontalRule />
+      <HistoryList>
+        {transactions
+          .filter(transaction => 
+            activeTab === 'History' 
+              ? transaction.type !== 'commission'
+              : transaction.type === 'commission'
+          )
+          .map((transaction, index) => (
+            <HistoryItem key={index}>
+              <HistoryDetails>
+                <div style={{marginBottom:"5px"}}>{transaction.description}</div>
+                <div style={{marginBottom:"5px"}}>
+                  {new Date(transaction.date).toLocaleString()}
+                </div>
+                <div style={{marginBottom:"5px",fontSize:"12px"}}>
+                  {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                </div>
+              </HistoryDetails>
+              <HistoryAmount>
+                {transaction.amount > 0 ? '+' : ''} ₹ {transaction.amount.toFixed(2)}
+              </HistoryAmount>
+            </HistoryItem>
+          ))}
+      </HistoryList>
 
-      <PaginationContainer>
-        <PageInfo>Showing 1 to 2 of 10 entries</PageInfo>
-        <PageButtons>
-          <PageButton>&lt;</PageButton>
-          <PageButton active>1</PageButton>
-          <PageButton>2</PageButton>
-          <PageButton>3</PageButton>
-          <PageButton>&gt;</PageButton>
-        </PageButtons>
-      </PaginationContainer>
       {showConfirmModal && (
         <Modal>
           <ModalContent>
-            <CloseButton onClick={() => setShowConfirmModal(false)}><CloseIcon /></CloseButton>
+            <CloseButton onClick={() => setShowConfirmModal(false)}>
+              <CloseIcon />
+            </CloseButton>
             <ModalTitle>Confirm Approval</ModalTitle>
             <p>Are you sure you want to approve this withdrawal?</p>
             <ModalButtons>
-              <CancelButton onClick={() => setShowConfirmModal(false)}>No</CancelButton>
-              <ConfirmButton onClick={handleConfirmApprove}>Yes</ConfirmButton>
+              <CancelButton onClick={() => setShowConfirmModal(false)}>
+                No
+              </CancelButton>
+              <ConfirmButton onClick={handleApprove} disabled={loading}>
+                Yes
+              </ConfirmButton>
             </ModalButtons>
           </ModalContent>
         </Modal>
@@ -513,7 +480,9 @@ const ApproveWithdrawal = () => {
       {showSuccessModal && (
         <Modal>
           <SuccessModal>
-            <CloseButton onClick={() => setShowSuccessModal(false)}><CloseIcon /></CloseButton>
+            <CloseButton onClick={() => setShowSuccessModal(false)}>
+              <CloseIcon />
+            </CloseButton>
             <SuccessIcon src={successWithdrawalCheck} alt="Success" />
             <ModalTitle>Withdrawal Approved</ModalTitle>
             <p>The withdrawal has been successfully approved.</p>
