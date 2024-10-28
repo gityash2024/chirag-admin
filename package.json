@@ -34,7 +34,8 @@
     "react-week-picker": "^1.1.4",
     "redux-persist": "^6.0.0",
     "socket.io-client": "^4.8.0",
-    "styled-components": "^6.1.13"
+    "styled-components": "^6.1.13",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
