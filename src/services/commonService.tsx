@@ -112,6 +112,10 @@ export const assignRunnerToBooking = (payload) => {
   const url = `${baseUrl}/bookings/${payload.id}`;
   return instance.put(url, payload);
 };
+export const updateBooking = (payload) => {
+  const url = `${baseUrl}/bookings/${payload.id}`;
+  return instance.put(url, payload);
+};
 export const getBookingById = (payload) => {
   const url = `${baseUrl}/bookings/${payload.id}`;
   return instance.get(url, payload);

@@ -8,7 +8,7 @@ import Opacity from "@mui/icons-material/Opacity";
 import CloseIcon from "@mui/icons-material/Close";
 import Phone from '@mui/icons-material/Phone';
 import noBookingsImage from "../../assets/no-booking.png";
-import { getAllBookingsList, getAllVendors, assignVendorToBooking } from "../../services/commonService";
+import { getAllBookingsList, getAllVendors, assignVendorToBooking, updateBooking } from "../../services/commonService";
 import { toast } from "react-toastify";
 import clock from '../../assets/clock.png';
 import calendar from '../../assets/calendar-event.png';
@@ -479,6 +479,23 @@ const CancelButton = styled(ActionButton)`
   border: 1px solid black;
 `;
 
+const StatusDropdown = styled.select`
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #E0E0E0;
+  background-color: white;
+  font-size: 14px;
+  width: 100%;
+  margin-top: 10px;
+`;
+
+const RejectionReason = styled.p`
+  color: #FF0000;
+  font-size: 14px;
+  margin-top: 10px;
+  font-weight: 500;
+`;
+
 const Bookings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Pending Bookings");
@@ -493,6 +510,8 @@ const Bookings = () => {
 const [showQuoteModal, setShowQuoteModal] = useState(false);
 const [selectedVendor, setSelectedVendor] = useState(null);
 const [quotePrice, setQuotePrice] = useState('');
+const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+const [selectedStatus, setSelectedStatus] = useState('');
 
   useEffect(() => {
     fetchBookings();
@@ -505,10 +524,11 @@ const [quotePrice, setQuotePrice] = useState('');
       const categorizedBookings = {
         "Pending Bookings": response.data.filter(b => !b.runner && b.status !== "confirmed"),
         "In Progress": response.data.filter(
-          b => (b.status === "confirmed"||b.status==="quote_received")&& !b.runner && !["completed", "closed"].includes(b.status)
+          b => (b.status === "confirmed"||b.status==="quote_received")&& !b.runner && !["completed", "closed", "cancelled"].includes(b.status)
         ),
         "Confirmed": response.data.filter(b => b.status === "confirmed" && b.runner ),
-        "Closed": response.data.filter(b => (b.status === "closed" ||b.status === "cancelled")),
+        "Cancelled": response.data.filter(b => b.status === "cancelled"),
+        "Closed": response.data.filter(b => b.status === "closed"),
       };
       setBookings(categorizedBookings);
     } catch (error) {
@@ -517,6 +537,38 @@ const [quotePrice, setQuotePrice] = useState('');
       setLoading(false);
     }
   };
+
+
+// Add new function to handle status change
+const handleStatusChange = async (booking, newStatus) => {
+  setSelectedBooking(booking);
+  setSelectedStatus(newStatus);
+  setShowConfirmationModal(true);
+};
+
+// Add function to handle confirmation
+const handleConfirmStatusChange = async () => {
+  try {
+    const updateData = {
+      id: selectedBooking._id,
+      status: selectedStatus,
+      vendor: null,
+      runner: null
+    };
+    
+    if (selectedStatus === 'requested') {
+      updateData.quotePrice = null;
+    }
+    
+    await updateBooking(updateData);
+    toast.success(`Booking status updated to ${selectedStatus}`);
+    setShowConfirmationModal(false);
+    fetchBookings();
+  } catch (error) {
+    toast.error("Failed to update booking status");
+  }
+};
+
 
   const fetchVendors = async () => {
     try {
@@ -649,6 +701,24 @@ const [quotePrice, setQuotePrice] = useState('');
     </RunnerContactButton>
   </RunnnerDetails>
 )}
+{booking.status === "cancelled" && (
+  <>
+    {(booking.reason || booking.rejectedByRunnerReason) && (
+      <RejectionReason>
+        Reason: {booking.reason || booking.rejectedByRunnerReason}
+      </RejectionReason>
+    )}
+    <StatusDropdown
+      value=""
+      onChange={(e) => handleStatusChange(booking, e.target.value)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <option value="">Change Status</option>
+      <option value="requested">Requested</option>
+      <option value="quote_received">Quote Received</option>
+    </StatusDropdown>
+  </>
+)}
         {(activeTab === "Pending Bookings" || 
           (activeTab === "In Progress" && (!booking.vendor || !booking.runner))) && (
           <ActionButtonContainer>
@@ -778,6 +848,32 @@ const ToCapitaiseText = (text) => {
         </CancelButton>
         <ActionButton onClick={handleQuoteSubmit}>
           Submit & Assign
+        </ActionButton>
+      </ButtonGroup>
+    </QuoteModal>
+  </Modal>
+)}
+
+
+
+{showConfirmationModal && (
+  <Modal>
+    <QuoteModal>
+      <CloseButton onClick={() => setShowConfirmationModal(false)}>
+        <CloseIcon />
+      </CloseButton>
+      <Title>Confirm Status Change</Title>
+      <ModalSubtitle>
+        {selectedStatus === 'requested' ? 
+          'The assigned vendor and runner will be removed, but the quote price will remain the same.' :
+          'The assigned vendor, runner, and quote price will be removed from this booking.'}
+      </ModalSubtitle>
+      <ButtonGroup>
+        <CancelButton onClick={() => setShowConfirmationModal(false)}>
+          Cancel
+        </CancelButton>
+        <ActionButton onClick={handleConfirmStatusChange}>
+          Confirm
         </ActionButton>
       </ButtonGroup>
     </QuoteModal>
