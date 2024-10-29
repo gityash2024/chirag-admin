@@ -419,6 +419,17 @@ const Vendor = ({ mode }) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  const handleBookingClick = (booking) => {
+    // if (booking.status === 'completed') {
+    //   navigate(`/completed-booking/${booking._id}`);
+    // } else if (booking.status === 'confirmed') {
+    //   navigate(`/confirm-booking-details/${booking._id}`);
+    // } else {
+    //   navigate(`/cancelled-booking-details/${booking._id}`);
+    // }
+      navigate(`/booking-details/${booking._id}`);
+
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -802,7 +813,7 @@ const Vendor = ({ mode }) => {
           <BookingHistoryContainer>
             {bookingsList.length > 0 ? (
               bookingsList.map((booking, index) => (
-                <BookingCard key={index}>
+                <BookingCard key={booking._id} onClick={() => handleBookingClick(booking)}>
                   <BookingHeader>
                     <BookingId>#{booking._id}</BookingId>
                     <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
