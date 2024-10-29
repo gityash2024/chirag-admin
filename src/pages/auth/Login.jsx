@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import loginImage from '../../assets/login-image.png';
-import chiragLogo from '../../assets/chirag-logo-dark.png';
+import chiragLogo from '../../assets/logo-dark.svg';
 import { loginAdmin } from '../../services/commonService';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
@@ -23,7 +23,7 @@ const ImageSection = styled.div`
 
 const Image = styled.img`
   width: 50vw;
-  height: 80vh;
+  height: 100vh;
   object-fit: contain;
 `;
 
@@ -42,8 +42,9 @@ const LogoContainer = styled.div`
 `;
 
 const Logo = styled.img`
-  width: 250px;
+  width: 300px;
   margin-right: 70px;
+  margin-bottom: 70px;
 `;
 
 const Title = styled.h2`
@@ -67,7 +68,8 @@ const Input = styled.input`
   font-family: 'Public Sans';
   font-weight: 400;
   padding: 10px;
-  margin-bottom: 20px;
+  margin-top: 6px;
+  margin-bottom: 10px;
   border: 1px solid #DBDADE;
   border-radius: 4px;
   align-self: center;
