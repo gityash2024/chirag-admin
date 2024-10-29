@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
 import { FiArrowLeft } from 'react-icons/fi';
 
+
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans', sans-serif;
@@ -276,12 +277,14 @@ const ConfirmBookingDetails = () => {
             </DetailRow>
             <DetailRow>
               <DetailLabel>Taxes and fee</DetailLabel>
-              <DetailValue>₹{Math.round(booking.quotePrice * 0.1)}</DetailValue>
+              <DetailValue>₹{0}</DetailValue>
+              {/* <DetailValue>₹{Math.round(booking.quotePrice * 0.1)}</DetailValue> */}
             </DetailRow>
             <HorizontalLine />
             <DetailRow>
               <DetailLabel>Total</DetailLabel>
-              <DetailValue>₹{Math.round(booking.quotePrice * 1.1)}</DetailValue>
+              <DetailValue>₹{Math.round(booking.quotePrice)}</DetailValue>
+              {/* <DetailValue>₹{Math.round(booking.quotePrice * 1.1)}</DetailValue> */}
             </DetailRow>
           </PaymentSummary>
         )}
