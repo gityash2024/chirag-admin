@@ -209,7 +209,7 @@ const Recommendations = () => {
   const renderInitialScreen = () => (
     <>
       <Title>Spray Guide</Title>
-      <p>Please select the crop</p>
+      <p style={{ marginBottom: "20px" }}>Please select the crop</p>
       <CropGrid>
         {cropList.map((crop, index) => (
         <CropCard
