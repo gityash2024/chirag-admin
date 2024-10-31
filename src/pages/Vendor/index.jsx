@@ -5,7 +5,7 @@ import viewIcon from '../../assets/view-icon.png';
 import editIcon from '../../assets/edit-icon.png';
 import blockIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
-import { getAllVendors, blockVendor, unblockVendor } from '../../services/commonService';
+import { getAllVendors, blockVendor, unblockVendor,updateVendorDroneVerification } from '../../services/commonService';
 import { toast } from 'react-toastify';
 
 const Container = styled.div`
@@ -202,7 +202,62 @@ const ModalButton = styled.button`
   background-color: ${props => props.backgroundColor || 'white'};
   cursor: pointer;
 `;
+const ToggleSwitch = styled.label`
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  margin-right: 10px;
+  
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+`;
 
+const Slider = styled.span`
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+  
+  &:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + & {
+    background-color: #000000;
+  }
+  
+  input:checked + &:before {
+    transform: translateX(26px);
+  }
+`;
+
+const VerificationStatus = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const StatusText = styled.span`
+  font-size: 14px;
+  color: ${props => props.verified ? '#2E7D32' : '#757575'};
+`;
 const BlockConfirmationModal = ({ onClose, onConfirm, vendorToBlock }) => (
   <Modal>
     <ModalContent>
@@ -279,7 +334,15 @@ const ManageVendors = () => {
     setShowBlockSuccess(false);
     setVendorToBlock(null);
   };
-
+  const handleDroneVerification = async (vendor) => {
+    try {
+      await updateVendorDroneVerification(vendor._id, !vendor.vendorDroneVerified);
+      toast.success(`Drone license ${!vendor.vendorDroneVerified ? 'verified' : 'unverified'} successfully`);
+      fetchVendors(); // Refresh the vendor list
+    } catch (error) {
+      toast.error('Failed to update drone verification status');
+    }
+  };
   const filteredVendors = vendors.filter(vendor =>
     (vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vendor.mobileNumber?.includes(searchTerm) ||
@@ -321,47 +384,83 @@ const ManageVendors = () => {
         </EntriesDropdown>
       </TopControls>
       <Table>
-        <TableHead>
-          <TableRow>
-            <TableHeader>Vendor Name</TableHeader>
-            <TableHeader>Vendor Contact</TableHeader>
-            <TableHeader>State</TableHeader>
-            <TableHeader>Actions</TableHeader>
-          </TableRow>
-        </TableHead>
-        <tbody>
-          {currentEntries.map(vendor => (
-            <TableRow key={vendor._id}>
-              <TableCell>
-                <VendorCell>
-                  <VendorAvatar>{vendor.name[0]}</VendorAvatar>
-                  {vendor.name}
-                </VendorCell>
-              </TableCell>
-              <TableCell>{vendor.mobileNumber}</TableCell>
-              <TableCell>{vendor.state}</TableCell>
-              <TableCell>
-                {vendor.isBlocked ? (
-                  <span>
-                    Blocked By Admin
-                    <span title="Unblock Vendor" onClick={() => handleBlockClick(vendor)} style={{cursor:"pointer", marginLeft: "10px"}}>🔓</span>
-                  </span>
-                ) : (
-                  <>
-                    <ActionIcon src={viewIcon} alt="View" onClick={() => navigate(`/view-vendor/${vendor._id}`)} />
-                    <ActionIcon src={editIcon} alt="Edit" onClick={() => navigate(`/edit-vendor/${vendor._id}`)} />
-                    <ActionIcon src={blockIcon} alt="Block" onClick={() => handleBlockClick(vendor)} />
-                  </>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          {!currentEntries.length && (
-            <TableRow>
-              <TableCell colSpan={4} style={{ textAlign: 'center' }}>No vendors found</TableCell>
-            </TableRow>
-          )}
-        </tbody>
+      <TableHead>
+  <TableRow>
+    <TableHeader>Vendor Name</TableHeader>
+    <TableHeader>Vendor Contact</TableHeader>
+    <TableHeader>State</TableHeader>
+    <TableHeader>Drone License</TableHeader>
+    <TableHeader>Actions</TableHeader>
+  </TableRow>
+</TableHead>
+<tbody>
+  {currentEntries.map(vendor => (
+    <TableRow key={vendor._id}>
+      <TableCell>
+        <VendorCell>
+          <VendorAvatar>{vendor.name[0]}</VendorAvatar>
+          {vendor.name}
+        </VendorCell>
+      </TableCell>
+      <TableCell>{vendor.mobileNumber}</TableCell>
+      <TableCell>{vendor.state}</TableCell>
+      <TableCell>
+        <VerificationStatus>
+          <ToggleSwitch>
+            <input
+              type="checkbox"
+              checked={vendor.vendorDroneVerified}
+              onChange={() => handleDroneVerification(vendor)}
+            />
+            <Slider />
+          </ToggleSwitch>
+          <StatusText verified={vendor.vendorDroneVerified}>
+            {vendor.vendorDroneVerified ? 'Verified' : 'Not Verified'}
+          </StatusText>
+        </VerificationStatus>
+      </TableCell>
+      <TableCell>
+        {vendor.isBlocked ? (
+          <span>
+            Blocked By Admin
+            <span 
+              title="Unblock Vendor" 
+              onClick={() => handleBlockClick(vendor)} 
+              style={{cursor:"pointer", marginLeft: "10px"}}
+            >
+              🔓
+            </span>
+          </span>
+        ) : (
+          <>
+            <ActionIcon 
+              src={viewIcon} 
+              alt="View" 
+              onClick={() => navigate(`/view-vendor/${vendor._id}`)} 
+            />
+            <ActionIcon 
+              src={editIcon} 
+              alt="Edit" 
+              onClick={() => navigate(`/edit-vendor/${vendor._id}`)} 
+            />
+            <ActionIcon 
+              src={blockIcon} 
+              alt="Block" 
+              onClick={() => handleBlockClick(vendor)} 
+            />
+          </>
+        )}
+      </TableCell>
+    </TableRow>
+  ))}
+  {!currentEntries.length && (
+    <TableRow>
+      <TableCell colSpan={5} style={{ textAlign: 'center' }}>
+        No vendors found
+      </TableCell>
+    </TableRow>
+  )}
+</tbody>
       </Table>
       <Pagination>
         <PageInfo>

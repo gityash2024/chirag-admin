@@ -230,3 +230,8 @@ export const cancelWithdrawalRequest = (requestId) => {
   const url = `${baseUrl}/wallet/withdrawal-request/${requestId}`;
   return instance.delete(url);
 };
+
+export const updateVendorDroneVerification = (vendorId, isVerified) => {
+  const url = `${baseUrl}/vendors/update-drone-verification`;
+  return instance.post(url, { vendorId, isVerified });
+};
