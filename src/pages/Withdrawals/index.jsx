@@ -166,9 +166,9 @@ const Withdrawals = () => {
 
   const filterWithdrawals = () => {
     const filtered = withdrawals.filter(withdrawal => 
-      withdrawal.vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      withdrawal.vendor.contact.includes(searchTerm) ||
-      withdrawal.amount.toString().includes(searchTerm)
+      withdrawal.vendor.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+      withdrawal.vendor.contact?.includes(searchTerm) ||
+      withdrawal.amount?.toString()?.includes(searchTerm)
     );
     setFilteredWithdrawals(filtered);
     setCurrentPage(1);

@@ -160,9 +160,9 @@ const VendorList = () => {
   };
 
   const filteredVendors = vendors.filter(vendor => 
-    vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.name.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
     vendor.mobileNumber.includes(searchTerm) ||
-    vendor.state.toLowerCase().includes(searchTerm.toLowerCase())
+    vendor.state.toLowerCase()?.includes(searchTerm?.toLowerCase())
   );
 
   const indexOfLastEntry = currentPage * entriesPerPage;

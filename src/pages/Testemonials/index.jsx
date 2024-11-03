@@ -281,7 +281,7 @@ const Testimonials = () => {
       (testimonial) =>
         testimonial.farmerName
           ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) &&
+          .includes(searchTerm?.toLowerCase()) &&
         (!fromDate || new Date(testimonial.createdAt) >= new Date(fromDate)) &&
         (!toDate || new Date(testimonial.createdAt) <= new Date(toDate))
     );

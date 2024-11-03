@@ -296,7 +296,7 @@ const Home = () => {
       .filter(booking => booking.status === "completed" || booking.status === "closed");
     
     if (filteredBookings.length === 0) {
-      toast.info("No KPI data available for the selected period");
+      toast.info("No KPI data available for the selected period, please select a different period.");
       return;
     }
 

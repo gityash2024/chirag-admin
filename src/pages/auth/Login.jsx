@@ -70,9 +70,17 @@ const Input = styled.input`
   padding: 10px;
   margin-top: 6px;
   margin-bottom: 10px;
-  border: 1px solid #DBDADE;
+  border: 1px solid ${props => props.error ? '#FF4D4F' : '#DBDADE'};
   border-radius: 4px;
   align-self: center;
+`;
+
+const ErrorMessage = styled.span`
+  color: #FF4D4F;
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-family: 'Public Sans';
+  display: block;
 `;
 
 const Button = styled.button`
@@ -84,22 +92,46 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   align-self: center;
+  opacity: ${props => props.disabled ? 0.7 : 1};
 `;
 
 const Login = () => {
   const [adminId, setAdminId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setAdminId(email);
+    
+    if (email && !validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(adminId)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const response = await loginAdmin({ email: adminId, password, role: 'admin'});
       if (response.data.token) {
-        toast.success('Login successful');
+        toast.success('Welcome to CHIRAG Admin Panel');
         console.log(response.data);
         localStorage.setItem('userData', JSON.stringify(response.data));
         navigate('/');
@@ -123,17 +155,19 @@ const Login = () => {
         <LogoContainer>
           <Logo src={chiragLogo} alt="CHIRAG Logo" />
         </LogoContainer>
-        <Title>Please login with your registered <br />Admin Id</Title>
+        <Title>Please login with your registered Admin Email</Title>
         <form onSubmit={handleSubmit}>
-          <Label htmlFor="adminId">Admin Id</Label>
+          <Label htmlFor="adminId">Admin Email</Label>
           <Input
             id="adminId"
-            type="text"
-            placeholder="Enter Admin Id"
+            type="email"
+            placeholder="Enter Admin Email"
             value={adminId}
-            onChange={(e) => setAdminId(e.target.value)}
+            onChange={handleEmailChange}
+            error={!!emailError}
             required
           />
+          {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
@@ -143,7 +177,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !!emailError}>
             {isLoading ? 'Logging in...' : 'Login'}
           </Button>
         </form>

@@ -282,9 +282,9 @@ const ManageFarmer = () => {
   };
 
   const filteredFarmers = farmers.filter(farmer =>
-    (farmer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    farmer.mobileNumber.includes(searchTerm) ||
-    farmer.state.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (farmer?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+    farmer?.mobileNumber.includes(searchTerm) ||
+    farmer?.state?.toLowerCase().includes(searchTerm?.toLowerCase())) &&
     (filterBlocked === 'all' || (filterBlocked === 'blocked' && farmer.isBlocked) || (filterBlocked === 'unblocked' && !farmer.isBlocked))
   );
 
@@ -341,12 +341,12 @@ const ManageFarmer = () => {
             <TableRow key={farmer._id}>
               <TableCell>
                 <FarmerCell>
-                  <FarmerAvatar>{farmer.name[0]}</FarmerAvatar>
-                  {farmer.name}
+                  <FarmerAvatar>{farmer.name?.[0]||'--'}</FarmerAvatar>
+                  {farmer.name||'--'}
                 </FarmerCell>
               </TableCell>
-              <TableCell>{farmer.mobileNumber}</TableCell>
-              <TableCell>{farmer.state}</TableCell>
+              <TableCell>{farmer.mobileNumber||'--'}</TableCell>
+              <TableCell>{farmer.state||'--'}</TableCell>
               <TableCell>
                 {farmer.isBlocked ? (
                   <span>
