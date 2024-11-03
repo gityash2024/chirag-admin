@@ -9,6 +9,30 @@ import { getTestemonials, deleteFarmer } from "../../services/commonService";
 import { toast } from "react-toastify";
 import Loader from "../../components/loader";
 
+const PlayIcon = styled.div`
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  border-radius: 50%;
+  padding: 5px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: white;
+  }
+`;
+
+const VideoFrame = styled.video`
+  width: 100%;
+  height: 100%;
+  background: black;
+  object-fit: contain;
+`;
 const Container = styled.div`
   padding: 20px;
   font-family: "Public Sans";
@@ -147,6 +171,7 @@ const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 `;
 
 const ModalContent = styled.div`
@@ -225,16 +250,46 @@ const EmptyStateText = styled.p`
   text-align: center;
 `;
 
+const VideoModal = styled(Modal)`
+  background-color: rgba(0, 0, 0, 0.8);
+`;
+
+const VideoContainer = styled.div`
+  width: 80vw;
+  height: 80vh;
+  max-width: 1200px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+`;
+
+
+const CloseVideoButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 1000;
+`;
+
 const BlockConfirmationModal = ({ onClose, onConfirm }) => (
   <Modal>
     <ModalContent2>
-        <h2>Are you sure you want to delete this testimonial?</h2>
+      <h2>Are you sure you want to delete this testimonial?</h2>
       <ModalButtons>
         <ModalButton onClick={onClose}>Cancel</ModalButton>
-        <ModalButton
-          onClick={onConfirm}
-          style={{ backgroundColor: "black", color: "white" }}
-        >
+        <ModalButton onClick={onConfirm} style={{ backgroundColor: "black", color: "white" }}>
           Delete
         </ModalButton>
       </ModalButtons>
@@ -246,11 +301,7 @@ const BlockSuccessModal = ({ onClose }) => (
   <Modal>
     <ModalContent2>
       <div style={{ textAlign: "center" }}>
-        <img
-          src={successIcon}
-          style={{ width: "50px", height: "50px", marginBottom: "20px" }}
-          alt="Success"
-        />
+        <img src={successIcon} style={{ width: "50px", height: "50px", marginBottom: "20px" }} alt="Success" />
       </div>
       <h3>Testimonial successfully deleted</h3>
     </ModalContent2>
@@ -260,6 +311,8 @@ const BlockSuccessModal = ({ onClose }) => (
 const Testimonials = () => {
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
   const [showBlockSuccess, setShowBlockSuccess] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState("");
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState([]);
   const [filteredTestimonials, setFilteredTestimonials] = useState([]);
@@ -277,18 +330,26 @@ const Testimonials = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = testimonials.filter(
-      (testimonial) =>
-        testimonial.farmerName
-          ?.toLowerCase()
-          .includes(searchTerm?.toLowerCase()) &&
-        (!fromDate || new Date(testimonial.createdAt) >= new Date(fromDate)) &&
-        (!toDate || new Date(testimonial.createdAt) <= new Date(toDate))
-    );
+    const filtered = testimonials.filter((testimonial) => {
+      const testimonialDate = new Date(testimonial.createdAt);
+      testimonialDate.setHours(0, 0, 0, 0);
+  
+      const fromDateObj = fromDate ? new Date(fromDate) : null;
+      const toDateObj = toDate ? new Date(toDate) : null;
+      
+      if (fromDateObj) fromDateObj.setHours(0, 0, 0, 0);
+      if (toDateObj) toDateObj.setHours(23, 59, 59, 999);
+  
+      return (
+        testimonial.farmerName?.toLowerCase().includes(searchTerm?.toLowerCase()) &&
+        (!fromDateObj || testimonialDate >= fromDateObj) &&
+        (!toDateObj || testimonialDate <= toDateObj)
+      );
+    });
+    
     setFilteredTestimonials(filtered);
     setCurrentPage(1);
   }, [searchTerm, fromDate, toDate, testimonials]);
-
   const fetchTestimonials = async () => {
     setIsLoading(true);
     try {
@@ -312,11 +373,9 @@ const Testimonials = () => {
     try {
       await deleteFarmer(farmerToBlock._id);
       setShowBlockConfirmation(false);
-
       setShowBlockSuccess(true);
       setTimeout(() => {
-      setShowBlockSuccess(false);
-
+        setShowBlockSuccess(false);
       }, 1000);
       fetchTestimonials();
       toast.success("Testimonial deleted successfully");
@@ -333,6 +392,16 @@ const Testimonials = () => {
     setFarmerToBlock(null);
   };
 
+  const handleVideoClick = (url) => {
+    setSelectedVideo(url);
+    setShowVideoModal(true);
+  };
+
+  const closeVideoModal = () => {
+    setShowVideoModal(false);
+    setSelectedVideo("");
+  };
+
   const openModal = (testimonial) => {
     setSelectedTestimonial(testimonial);
   };
@@ -343,10 +412,7 @@ const Testimonials = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredTestimonials.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentItems = filteredTestimonials.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -370,15 +436,8 @@ const Testimonials = () => {
         <AddButton to="/add-testimonial">Add Testimonial</AddButton>
       </Header>
       <TopControls>
-        <span
-          style={{ marginRight: "20px", fontWeight: "400", fontSize: "13px" }}
-        >
-          Show
-        </span>
-        <EntriesDropdown
-          value={itemsPerPage}
-          onChange={(e) => setItemsPerPage(Number(e.target.value))}
-        >
+        <span style={{ marginRight: "20px", fontWeight: "400", fontSize: "13px" }}>Show</span>
+        <EntriesDropdown value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
           <option value={7}>07</option>
           <option value={14}>14</option>
           <option value={21}>21</option>
@@ -401,12 +460,32 @@ const Testimonials = () => {
           onChange={(e) => setToDate(e.target.value)}
           placeholder="To Date"
         />
-       { (searchTerm||fromDate||toDate) ?<button style={{marginLeft:"10px", cursor:"pointer", fontWeight:"400", fontSize:"13px",border:"1px solid #000", padding:"5px", borderRadius:"5px"}} onClick={() =>{setSearchTerm(""); setFromDate(""); setToDate("")}}>Clear</button>:null}
+        {(searchTerm || fromDate || toDate) && (
+          <button
+            style={{
+              marginLeft: "10px",
+              cursor: "pointer",
+              fontWeight: "400",
+              fontSize: "13px",
+              border: "1px solid #000",
+              padding: "5px",
+              borderRadius: "5px",
+            }}
+            onClick={() => {
+              setSearchTerm("");
+              setFromDate("");
+              setToDate("");
+            }}
+          >
+            Clear
+          </button>
+        )}
       </TopControls>
       <Table>
         <TableHead>
           <TableRow>
             <TableHeader>Testimonial Url</TableHeader>
+            <TableHeader>View Testimonial</TableHeader>
             <TableHeader>Farmer name</TableHeader>
             <TableHeader>Rating</TableHeader>
             <TableHeader>Upload date</TableHeader>
@@ -417,31 +496,26 @@ const Testimonials = () => {
           {currentItems.map((testimonial) => (
             <TableRow key={testimonial._id}>
               <TableCell>
-                <a
-                  href={testimonial.testimonialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={testimonial.testimonialUrl} target="_blank" rel="noopener noreferrer">
                   {testimonial.testimonialUrl}
                 </a>
               </TableCell>
+              <TableCell>
+  <PlayIcon onClick={() => handleVideoClick(testimonial.testimonialUrl)}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
+    </svg>
+  </PlayIcon>
+</TableCell>
               <TableCell>{testimonial.farmerName?.toUpperCase()}</TableCell>
               <TableCell>{testimonial.rating}</TableCell>
+              <TableCell>{new Date(testimonial.createdAt).toLocaleString()}</TableCell>
               <TableCell>
-                {new Date(testimonial.createdAt).toLocaleString()}
-              </TableCell>
-              <TableCell>
+                <ActionIcon src={viewIcon} alt="View" onClick={() => openModal(testimonial)} />
                 <ActionIcon
-                  src={viewIcon}
-                  alt="View"
-                  onClick={() => openModal(testimonial)}
-                />
-                <ActionIcon
-                  onClick={() =>
-                    navigate(`/add-testimonial/${testimonial._id}`)
-                  }
                   src={editIcon}
                   alt="Edit"
+                  onClick={() => navigate(`/add-testimonial/${testimonial._id}`)}
                 />
                 <ActionIcon
                   src={deleteIcon}
@@ -455,8 +529,7 @@ const Testimonials = () => {
       </Table>
       <Pagination>
         <PageInfo>
-          Showing {indexOfFirstItem + 1} to{" "}
-          {Math.min(indexOfLastItem, filteredTestimonials.length)} of{" "}
+          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredTestimonials.length)} of{" "}
           {filteredTestimonials.length} entries
         </PageInfo>
         <PageButtons>
@@ -466,11 +539,7 @@ const Testimonials = () => {
           >
             Previous
           </PageButton>
-          {[
-            ...Array(
-              Math.ceil(filteredTestimonials.length / itemsPerPage)
-            ).keys(),
-          ].map((number) => (
+          {[...Array(Math.ceil(filteredTestimonials.length / itemsPerPage)).keys()].map((number) => (
             <PageButton
               key={number + 1}
               active={currentPage === number + 1}
@@ -481,15 +550,13 @@ const Testimonials = () => {
           ))}
           <PageButton
             onClick={() => paginate(currentPage + 1)}
-            disabled={
-              currentPage ===
-              Math.ceil(filteredTestimonials.length / itemsPerPage)
-            }
+            disabled={currentPage === Math.ceil(filteredTestimonials.length / itemsPerPage)}
           >
             Next
           </PageButton>
         </PageButtons>
       </Pagination>
+
       {selectedTestimonial && (
         <Modal>
           <ModalContent>
@@ -500,58 +567,61 @@ const Testimonials = () => {
             <ModalTable>
               <tbody>
                 <ModalRow>
-                  <ModalCell>
-                    <strong>ID:</strong>
-                  </ModalCell>
+                  <ModalCell><strong>ID:</strong></ModalCell>
                   <ModalCell>{selectedTestimonial._id}</ModalCell>
                 </ModalRow>
                 <ModalRow>
+                  <ModalCell><strong>File:</strong></ModalCell>
                   <ModalCell>
-                    <strong>File:</strong>
-                  </ModalCell>
-                  <ModalCell>
-                    <a
-                      href={selectedTestimonial.testimonialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={selectedTestimonial.testimonialUrl} target="_blank" rel="noopener noreferrer">
                       {selectedTestimonial.testimonialUrl}
                     </a>
                   </ModalCell>
                 </ModalRow>
                 <ModalRow>
-                  <ModalCell>
-                    <strong>Farmer Name:</strong>
-                  </ModalCell>
+                  <ModalCell><strong>Farmer Name:</strong></ModalCell>
                   <ModalCell>{selectedTestimonial.farmerName}</ModalCell>
                 </ModalRow>
                 <ModalRow>
-                  <ModalCell>
-                    <strong>Rating:</strong>
-                  </ModalCell>
+                  <ModalCell><strong>Rating:</strong></ModalCell>
                   <ModalCell>{selectedTestimonial.rating}</ModalCell>
                 </ModalRow>
                 <ModalRow>
-                  <ModalCell>
-                    <strong>Upload Date:</strong>
-                  </ModalCell>
-                  <ModalCell>
-                    {new Date(selectedTestimonial.createdAt).toLocaleString()}
-                  </ModalCell>
+                  <ModalCell><strong>Upload Date:</strong></ModalCell>
+                  <ModalCell>{new Date(selectedTestimonial.createdAt).toLocaleString()}</ModalCell>
                 </ModalRow>
               </tbody>
             </ModalTable>
           </ModalContent>
         </Modal>
       )}
+
+{showVideoModal && (
+  <VideoModal>
+    <VideoContainer>
+      <CloseVideoButton onClick={closeVideoModal}>&times;</CloseVideoButton>
+      <VideoFrame
+        controls
+        autoPlay
+        src={selectedVideo}
+      >
+        <source src={selectedVideo} type="video/mp4" />
+        Your browser does not support the video tag.
+      </VideoFrame>
+    </VideoContainer>
+  </VideoModal>
+)}
+
       {showBlockConfirmation && (
         <BlockConfirmationModal
           onClose={handleCloseModals}
           onConfirm={handleBlockConfirm}
         />
       )}
+      
       {showBlockSuccess && <BlockSuccessModal onClose={handleCloseModals} />}
     </Container>
   );
 };
+
 export default Testimonials;

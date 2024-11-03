@@ -23,11 +23,14 @@ export const editFarmer = (farmerId) => {
   const url = `${baseUrl}/testimonials/${farmerId}`;
   return instance.put(url);
 }
-
-export const uploadTos3=(payload)=>{
+export const uploadTos3 = (formData) => {
   const url = `${baseUrl}/files/upload`;
-  return instance.post(url,payload);
-}
+  return instance.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
 
 export const getFarmers = () => {
   const url = `${baseUrl}/farmers/list`;

@@ -190,6 +190,8 @@ const PageButton = styled.button`
   border-radius: 4px;
 `;
 
+
+
 const CommissionManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [commissions, setCommissions] = useState([]);

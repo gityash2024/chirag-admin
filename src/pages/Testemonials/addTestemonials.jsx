@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiX } from 'react-icons/fi';
 import { addTestemonial, uploadTos3, getTestemonials, editFarmer } from '../../services/commonService';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
+
 
 const Container = styled.div`
   padding: 20px;
@@ -49,6 +50,7 @@ const Form = styled.form`
 const ImageUploadArea = styled.div`
   display: flex;
   gap: 20px;
+  align-items: center;
 `;
 
 const ImageUploadBox = styled.label`
@@ -59,6 +61,7 @@ const ImageUploadBox = styled.label`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  position: relative;
 `;
 
 const HiddenFileInput = styled.input`
@@ -116,13 +119,59 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
+const VideoPreview = styled.video`
+  max-width: 200px;
+  max-height: 200px;
+  margin-left: 20px;
+`;
+
+const FileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+
+  span {
+    font-size: 14px;
+    color: #666;
+  }
+`;
+const RemoveButton = styled.button`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  z-index: 1;
+
+  &:hover {
+    background: #ff0000;
+  }
+`;
+
+const FileContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
 const AddTestimonial = () => {
   const [farmerName, setFarmerName] = useState('');
   const [rating, setRating] = useState('');
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
+  const [filePreview, setFilePreview] = useState('');
   const [existingFileUrl, setExistingFileUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showUpload, setShowUpload] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -131,6 +180,14 @@ const AddTestimonial = () => {
       fetchTestimonial();
     }
   }, [id]);
+
+  useEffect(() => {
+    return () => {
+      if (filePreview) {
+        URL.revokeObjectURL(filePreview);
+      }
+    };
+  }, [filePreview]);
 
   const fetchTestimonial = async () => {
     setIsLoading(true);
@@ -142,6 +199,7 @@ const AddTestimonial = () => {
         setRating(testimonial.rating.toString());
         setExistingFileUrl(testimonial.testimonialUrl);
         setFileName(testimonial.testimonialUrl.split('/').pop());
+        setShowUpload(false);
       }
     } catch (error) {
       toast.error('Failed to fetch testimonial');
@@ -153,15 +211,33 @@ const AddTestimonial = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      setFile(selectedFile);
-      setFileName(selectedFile.name);
+      if (selectedFile.type.startsWith('video/')) {
+        setFile(selectedFile);
+        setFileName(selectedFile.name);
+        setFilePreview(URL.createObjectURL(selectedFile));
+        setShowUpload(false);
+      } else {
+        toast.error('Please upload a video file');
+        e.target.value = null;
+      }
     }
+  };
+
+  const handleRemoveFile = () => {
+    if (filePreview) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setFile(null);
+    setFileName('');
+    setFilePreview('');
+    setExistingFileUrl('');
+    setShowUpload(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!farmerName || !rating || (!file && !existingFileUrl)) {
-      toast.error('Please fill all fields and upload a file');
+      toast.error('Please fill all fields and upload a video');
       return;
     }
 
@@ -170,8 +246,12 @@ const AddTestimonial = () => {
       let fileUrl = existingFileUrl;
       if (file) {
         const formData = new FormData();
-        formData.append('file', file);
-        const uploadResponse = await uploadTos3({file: formData});
+        formData.append('file', file, file.name);
+        
+        const uploadResponse = await uploadTos3(formData);
+        if (!uploadResponse.data || !uploadResponse.data.fileUrl) {
+          throw new Error('Failed to get file URL from upload response');
+        }
         fileUrl = uploadResponse.data.fileUrl;
       }
 
@@ -180,8 +260,6 @@ const AddTestimonial = () => {
         rating: Number(rating),
         testimonialUrl: fileUrl
       };
-
-      console.log('Submitting data:', testimonialData);
 
       if (id) {
         await editFarmer(id, testimonialData);
@@ -192,7 +270,7 @@ const AddTestimonial = () => {
       }
       navigate('/testemonials');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Upload error:', error);
       toast.error(id ? 'Failed to update testimonial' : 'Failed to add testimonial');
     } finally {
       setIsLoading(false);
@@ -242,11 +320,38 @@ const AddTestimonial = () => {
           </div>
         </InputGroup>
         <ImageUploadArea>
-          <ImageUploadBox>
-            +
-            <HiddenFileInput type="file" onChange={handleFileChange} accept="image/*,video/*,audio/*" />
-          </ImageUploadBox>
-          {fileName && <span>{fileName}</span>}
+          {showUpload && (
+            <ImageUploadBox>
+              +
+              <HiddenFileInput 
+                type="file" 
+                onChange={handleFileChange} 
+                accept="video/mp4,video/x-m4v,video/*"
+              />
+            </ImageUploadBox>
+          )}
+          {(fileName || filePreview || existingFileUrl) && (
+            <FileContainer>
+              <RemoveButton onClick={handleRemoveFile}>
+                <FiX size={16} />
+              </RemoveButton>
+              <FileInfo>
+                <span>{fileName}</span>
+                {filePreview && (
+                  <VideoPreview controls>
+                    <source src={filePreview} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </VideoPreview>
+                )}
+                {existingFileUrl && !filePreview && (
+                  <VideoPreview controls>
+                    <source src={existingFileUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </VideoPreview>
+                )}
+              </FileInfo>
+            </FileContainer>
+          )}
         </ImageUploadArea>
         <SaveButton type="submit">{id ? 'Update' : 'Save'}</SaveButton>
       </Form>

@@ -322,6 +322,12 @@ const ErrorMessage = styled.div`
   align-items: center;
   gap: 5px;
 `;
+
+const NoTransactions = styled.div`
+  text-align: center;
+  font-size: 14px;
+  color: #8d98a4;
+`;
 const Wallet = () => {
   const [loading, setLoading] = useState(true);
   const [walletData, setWalletData] = useState({
@@ -448,6 +454,7 @@ const Wallet = () => {
                 </TransactionDetails>
               </TransactionItem>
             ))}
+            {!walletData?.transactions?.length && <NoTransactions>No commission transactions found</NoTransactions>}
         </TransactionList>
       ) : (
         <TransactionList>

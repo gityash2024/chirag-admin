@@ -337,7 +337,7 @@ const ManageVendors = () => {
   const handleDroneVerification = async (vendor) => {
     try {
       await updateVendorDroneVerification(vendor._id, !vendor.vendorDroneVerified);
-      toast.success(`Drone license ${!vendor.vendorDroneVerified ? 'verified' : 'unverified'} successfully`);
+      toast.success(`Drone UIN ${!vendor.vendorDroneVerified ? 'verified' : 'unverified'} successfully`);
       fetchVendors(); // Refresh the vendor list
     } catch (error) {
       toast.error('Failed to update drone verification status');
@@ -389,7 +389,7 @@ const ManageVendors = () => {
     <TableHeader>Vendor Name</TableHeader>
     <TableHeader>Vendor Contact</TableHeader>
     <TableHeader>State</TableHeader>
-    <TableHeader>Drone License</TableHeader>
+    <TableHeader>Drone UIN</TableHeader>
     <TableHeader>Actions</TableHeader>
   </TableRow>
 </TableHead>
