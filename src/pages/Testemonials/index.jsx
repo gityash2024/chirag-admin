@@ -525,6 +525,11 @@ const Testimonials = () => {
               </TableCell>
             </TableRow>
           ))}
+          {!currentItems.length && (
+            <TableRow>
+              <TableCell style={{ textAlign: "center" }} colSpan={6}>No testimonials found.</TableCell>
+            </TableRow>
+          )}
         </tbody>
       </Table>
       <Pagination>
