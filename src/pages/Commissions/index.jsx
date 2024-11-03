@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { listCommissions, manageCommission } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -215,6 +216,7 @@ const CommissionManagement = () => {
   };
 
   const handleAddCommission = async (e) => {
+    setLoading(true);
     e.preventDefault();
     try {
       await manageCommission({
@@ -229,6 +231,8 @@ const CommissionManagement = () => {
       fetchCommissions();
     } catch (error) {
       toast.error('Failed to add commission');
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -251,6 +255,7 @@ const CommissionManagement = () => {
 
   return (
     <Container>
+      {loading && <Loader/>}
       <Header>
         <Title>Commission Management</Title>
         <div>

@@ -7,6 +7,7 @@ import blockIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
 import { getAllVendors, blockVendor, unblockVendor,updateVendorDroneVerification } from '../../services/commonService';
 import { toast } from 'react-toastify';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -293,6 +294,7 @@ const ManageVendors = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(7);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading]= useState(false);
   const [filterBlocked, setFilterBlocked] = useState('all');
   const navigate = useNavigate();
 
@@ -301,11 +303,14 @@ const ManageVendors = () => {
   }, []);
 
   const fetchVendors = async () => {
+    setLoading(true);
     try {
       const response = await getAllVendors();
       setVendors(response.data);
     } catch (error) {
       toast.error('Failed to fetch vendors');
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -315,6 +320,7 @@ const ManageVendors = () => {
   };
 
   const handleBlockConfirm = async () => {
+    setIsLoading(true);
     try {
       if (vendorToBlock.isBlocked) {
         await unblockVendor(vendorToBlock._id);
@@ -326,6 +332,8 @@ const ManageVendors = () => {
       fetchVendors();
     } catch (error) {
       toast.error('Failed to block/unblock vendor');
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -358,6 +366,7 @@ const ManageVendors = () => {
 
   return (
     <Container>
+      {loading && <Loader />}
       <Header>
         <Title>Manage Vendors</Title>
         {/* <Link to="/add-vendor">

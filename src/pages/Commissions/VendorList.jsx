@@ -4,6 +4,7 @@ import { FiArrowLeft, FiEye } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getAllVendors } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -171,6 +172,7 @@ const VendorList = () => {
 
   return (
     <Container>
+      {loading && <Loader/>}
       <Header>
         <Title>Commission Management &gt; Vendor</Title>
         <BackButton onClick={() => navigate('/commission-management')}>

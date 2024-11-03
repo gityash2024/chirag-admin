@@ -6,6 +6,7 @@ import editIcon from '../../assets/edit-icon.png';
 import deleteIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
 import { getNotifications, deleteNotification } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -216,18 +217,21 @@ const Notifications = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(7);
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     fetchNotifications();
   }, [currentPage, entriesPerPage, searchTerm]);
 
   const fetchNotifications = async () => {
+    setLoading(true);
     try {
       const response = await getNotifications(currentPage, entriesPerPage, searchTerm);
       setNotifications(response.data.notifications);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -238,6 +242,7 @@ const Notifications = () => {
   };
 
   const handleDeleteConfirm = async () => {
+    setLoading(true);
     try {
       await deleteNotification(selectedNotification._id);
       setShowDeleteConfirmation(false);
@@ -247,6 +252,8 @@ const Notifications = () => {
       fetchNotifications();
     } catch (error) {
       console.error('Error deleting notification:', error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -266,6 +273,7 @@ const Notifications = () => {
 
   return (
     <Container>
+      {loading && <Loader />}
       <Header>
         <Title>Notification Management</Title>
         <AddButton to="/add-notification">Add Notification</AddButton>

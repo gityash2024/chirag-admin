@@ -5,6 +5,7 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import CloseIcon from '@mui/icons-material/Close';
 import { getVendorById, listCommissions, updateVendorCommission } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -266,7 +267,7 @@ const VendorDetails = () => {
   };
 
   if (!vendor || loading) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   return (

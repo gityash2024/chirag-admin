@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { addNotification } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -93,9 +94,11 @@ const AddNotification = () => {
   const [type, setType] = useState('informative');
   const [frequency, setFrequency] = useState('once');
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await addNotification({
         action: "add",
@@ -109,10 +112,13 @@ const AddNotification = () => {
       navigate('/notifications');
     } catch (error) {
       console.error('Error adding notification:', error);
+    }finally{
+      setLoading(false);
     }
   };
   return (
     <Container>
+      {loading && <Loader />}
       <Header>
         <Title>Notification Management / Add</Title>
         <BackButton onClick={() => navigate('/notifications')}>

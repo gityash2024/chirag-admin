@@ -6,6 +6,7 @@ import editIcon from '../../assets/edit-icon.png';
 import blockIcon from '../../assets/delete-icon.png';
 import successIcon from '../../assets/check-wallet.png';
 import { getFarmers, blockFarmer, unblockFarmer } from '../../services/commonService';
+import Loader from '../../components/loader';
 
 const Container = styled.div`
   padding: 20px;
@@ -213,6 +214,7 @@ const ManageFarmer = () => {
   const [entriesPerPage, setEntriesPerPage] = useState(7);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBlocked, setFilterBlocked] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const BlockConfirmationModal = ({ onClose, onConfirm }) => (
@@ -249,11 +251,15 @@ const ManageFarmer = () => {
   }, []);
 
   const fetchFarmers = async () => {
+    setIsLoading(true);
     try {
       const response = await getFarmers();
       setFarmers(response.data);
     } catch (error) {
       console.error('Error fetching farmers:', error);
+    }finally{
+    setIsLoading(false);
+
     }
   };
 
@@ -263,6 +269,7 @@ const ManageFarmer = () => {
   };
 
   const handleBlockConfirm = async () => {
+    setIsLoading(true);
     try {
       if (farmerToBlock.isBlocked) {
         await unblockFarmer(farmerToBlock._id);
@@ -274,6 +281,8 @@ const ManageFarmer = () => {
       fetchFarmers();
     } catch (error) {
       console.error('Error blocking/unblocking farmer:', error);
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -302,6 +311,7 @@ const ManageFarmer = () => {
 
   return (
     <Container>
+      {isLoading && <Loader/>}
       <Header>
         <Title>Manage Farmers</Title>
         {/* <ButtonGroup>

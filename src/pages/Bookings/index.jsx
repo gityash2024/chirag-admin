@@ -15,6 +15,7 @@ import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
 import { Avatar } from "@mui/material";
 import { CopyAll } from "@mui/icons-material";
+import Loader from "../../components/loader";
 
 const ModalContent = styled.div`
   background-color: white;
@@ -375,7 +376,7 @@ const EmptyStateContainer = styled.div`
   align-items: center;
   justify-content: center;
   height: 70vh;
-  width: 100%;
+  width: 50%;
   grid-column: 1 / -1;
   margin: 0 auto;
   position: absolute;
@@ -748,8 +749,7 @@ const ToCapitaiseText = (text) => {
         ))}
       </TabContainer>
       {loading ? (
-        <p>Loading...</p>
-      ) : (
+        <Loader/>      ) : (
         <>
           <CardContainer>{renderBookings()}</CardContainer>
           <Pagination>
