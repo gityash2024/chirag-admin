@@ -192,13 +192,16 @@ const RunnerAvatar = styled.img`
   border-radius: 50%;
 `;
 
+
 const RunnerName = styled.span`
   font-weight: 500;
 `;
 
+
 const AddressContainer = styled.div`
   margin-top: 20px;
 `;
+
 
 const AddressTitle = styled.h2`
   font-size: 20px;
@@ -207,6 +210,7 @@ const AddressTitle = styled.h2`
   margin-bottom: 15px;
 `;
 
+
 const AddressCard = styled.div`
   box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.06);
   border: 1px solid #E8E8E8;
@@ -214,7 +218,8 @@ const AddressCard = styled.div`
   padding: 15px;
   margin-bottom: 15px;
 `;
-// Update the EmptyStateContainer styled component
+
+
 const EmptyStateContainer = styled.div`
   display: flex;
   flex-direction: column;
