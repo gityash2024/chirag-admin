@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import farmerAvatar from '../../assets/farmer.png';
+import { ArrowLeft } from '@material-ui/icons';
+import { useNavigate } from 'react-router-dom';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans' ;
@@ -8,12 +10,7 @@ const Container = styled.div`
   height: 100%;
 `;
 
-const Header = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #121212;
-  margin-bottom: 20px;
-`;
+
 
 const ProfileSection = styled.div`
   background-color: #F9FAFC;
@@ -121,9 +118,34 @@ const SaveButton = styled.button`
   }
 `;
 
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #121212;
+  margin-bottom: 20px;
+`;
+
+const RightButton = styled.button`
+  padding: 10px 20px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    font-size: 20px;
+  }
+`;
 const Profile = () => {
   const [profilePic, setProfilePic] = useState(farmerAvatar); // Placeholder image
-
+const navigate=useNavigate();
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -142,7 +164,12 @@ const Profile = () => {
 
   return (
     <Container>
-      <Header>Admin Profile</Header>
+      <Header>
+      <span>Admin Profile</span>
+      <RightButton onClick={() => navigate('/')}>
+        <ArrowLeft /> Go To Dashboard
+      </RightButton>
+    </Header>
       <ProfileSection>
         {/* Profile Picture Section */}
         <ProfileHeader>
