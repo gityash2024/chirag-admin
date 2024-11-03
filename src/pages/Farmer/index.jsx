@@ -67,7 +67,7 @@ const SearchInput = styled.input`
   padding: 8px;
   border: 1px solid #DBDADE;
   border-radius: 4px;
-  width: 300px;
+  width: 320px;
   margin-left: auto;
 `;
 
@@ -175,7 +175,7 @@ const ModalContent = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
+  width: 320px;
   position: relative;
 `;
 
@@ -200,7 +200,9 @@ const ModalButton = styled.button`
   border-radius: 4px;
   background-color: ${props => props.backgroundColor || 'white'};
   cursor: pointer;
+  margin: 2px;
 `;
+
 
 const ManageFarmer = () => {
   const [farmers, setFarmers] = useState([]);
@@ -237,7 +239,7 @@ const ManageFarmer = () => {
         <div style={{ textAlign: 'center' }}>
           <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
         </div>
-        <h4>Farmer successfully {farmerToBlock.isBlocked ? 'unblocked' : 'blocked'}</h4>
+        <h4  style={{ textAlign: 'center' }}>Farmer successfully {farmerToBlock.isBlocked ? 'unblocked' : 'blocked'}</h4>
       </ModalContent>
     </Modal>
   );

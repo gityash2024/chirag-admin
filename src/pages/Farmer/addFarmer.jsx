@@ -8,6 +8,8 @@ import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
 import { FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import noBookingsImage from "../../assets/no-booking.png";
+
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -212,6 +214,31 @@ const AddressCard = styled.div`
   padding: 15px;
   margin-bottom: 15px;
 `;
+// Update the EmptyStateContainer styled component
+const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px; // Set a fixed minimum height
+  width: 100%;
+  grid-column: 1 / -1;
+  margin: 20px 0; // Add margin top and bottom
+  position: relative; // Changed from absolute
+`;
+
+const EmptyStateImage = styled.img`
+  width: 200px;
+  height: 200px; // Reduced height to make it more compact
+  object-fit: contain;
+  margin-bottom: 20px;
+`;
+
+const EmptyStateText = styled.p`
+ color: #666;
+  font-size: 16px;
+  margin-top: 16px;
+`;
 
 const AddressText = styled.p`
   font-size: 14px;
@@ -232,6 +259,23 @@ const BackButton = styled.button`
 
 const BackIcon = styled(FiArrowLeft)`
   margin-right: 8px;
+`;
+
+const NoAddressContainer = styled(EmptyStateContainer)`
+  min-height: 300px; // Slightly smaller than the booking empty state
+  background-color: #FFFFFF;
+  margin: 10px 0;
+`;
+
+const NoAddressImage = styled(EmptyStateImage)`
+  width: 150px;
+  height: 150px;
+`;
+
+const NoAddressText = styled(EmptyStateText)`
+  color: #666;
+  font-size: 16px;
+  margin-top: 16px;
 `;
 const AddFarmer = () => {
   const [errors, setErrors] = useState({});
@@ -472,17 +516,38 @@ const AddFarmer = () => {
               </BookingCard>
             ))}
           </BookingHistoryContainer>
-            {!bookings.length && <AddressText style={{ textAlign: 'center' }}>No bookings found</AddressText>}
-
-          <AddressContainer>
+            {/* {!bookings.length && <AddressText style={{ textAlign: 'center' }}>No bookings found</AddressText>} */}
+      { !bookings.length ?   
+        <EmptyStateContainer>
+          <EmptyStateImage src={noBookingsImage} alt="No bookings" />
+          <EmptyStateText>No bookings found for this farmer.</EmptyStateText>
+        </EmptyStateContainer>:null}
+      
+  
             <Header>Addresses</Header>
+         {formData.addresses?.length ? <AddressContainer>
             {formData.addresses && formData.addresses.map((address, index) => (
               <AddressCard key={index}>
                 <AddressText>{`${address.street}, ${address.city}, ${address.state}, ${address.postalCode}, ${address.country}`}</AddressText>
               </AddressCard>
             ))}
-            {!formData.addresses?.length && <AddressText style={{ textAlign: 'center' }}>No addresses found</AddressText>}
-          </AddressContainer>
+            {!formData.addresses?.length && <AddressText style={{ textAlign: 'center' }}>No addresses found for this farmer.</AddressText>}
+          </AddressContainer>:
+           <NoAddressContainer>
+           <NoAddressImage as="svg" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+             {/* Copy the SVG content from above here */}
+             <circle cx="120" cy="120" r="100" fill="#F5F5F5"/>
+             <path d="M80 140h80v50H80z" fill="#E0E0E0"/>
+             <path d="M70 140L120 90l50 50H70z" fill="#BDBDBD"/>
+             <path d="M110 160h20v30h-20z" fill="#9E9E9E"/>
+             <rect x="90" y="155" width="15" height="15" fill="#9E9E9E"/>
+             <rect x="135" y="155" width="15" height="15" fill="#9E9E9E"/>
+             <circle cx="120" cy="120" r="8" fill="#FF5252" opacity="0.8"/>
+             <path d="M120 90c-16.6 0-30 13.4-30 30 0 20 30 50 30 50s30-30 30-50c0-16.6-13.4-30-30-30zm0 40c-5.5 0-10-4.5-10-10s4.5-10 10-10 10 4.5 10 10-4.5 10-10 10z" fill="#FF5252"/>
+             <line x1="60" y1="60" x2="180" y2="180" stroke="#FF5252" stroke-width="4" stroke-linecap="round"/>
+           </NoAddressImage>
+           <NoAddressText>No addresses found for this farmer.</NoAddressText>
+         </NoAddressContainer>}
         </>
       )}
     </Container>
