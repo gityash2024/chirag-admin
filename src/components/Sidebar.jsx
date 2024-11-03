@@ -87,6 +87,7 @@ const ModalOverlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
 `;
 
 const ModalContent = styled.div`
@@ -94,6 +95,8 @@ const ModalContent = styled.div`
   padding: 20px;
   border-radius: 5px;
   text-align: center;
+  position: relative;
+  z-index: 10000;
 `;
 
 const ModalText = styled.p`
@@ -184,19 +187,25 @@ const Sidebar = () => {
 
   const isActive = (item) => {
     const currentPath = location.pathname;
-    if (currentPath === '/' && item.path === '/') {
+    
+    // Exact match for home
+    if (item.path === '/' && currentPath === '/') {
       return true;
     }
-  
+    
     return item.activePaths.some(activePath => {
+      // Exact match
       if (currentPath === activePath) {
         return true;
       }
+      
+      // Partial match for sub-routes
       if (activePath !== '/' && currentPath.startsWith(activePath)) {
-        const nextChar = currentPath.charAt(activePath.length);
-        return nextChar === '' || nextChar === '/';
+        // Check if the next character is either end of string or a slash
+        const remainingPath = currentPath.slice(activePath.length);
+        return remainingPath === '' || remainingPath.startsWith('/');
       }
-  
+      
       return false;
     });
   };

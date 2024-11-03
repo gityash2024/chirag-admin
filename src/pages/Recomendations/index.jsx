@@ -34,6 +34,8 @@ import litchiImage from "../../assets/litchi.png";
 const Container = styled.div`
   padding: 20px;
   font-family: "Public Sans", sans-serif;
+  position: relative;
+  z-index: 1;
 `;
 const CropCard = styled.div`
   border: 1px solid #EEEEEE;
@@ -167,7 +169,7 @@ const CropName = styled.p`
 `;
 
 const Recommendations = () => {
-  const [selectedCrop, setSelectedCrop] = useState("Maize");
+  const [selectedCrop, setSelectedCrop] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
@@ -225,7 +227,7 @@ const Recommendations = () => {
       </CropCard>
         ))}
       </CropGrid>
-      <Button onClick={handleViewRecommendations}>Next</Button>
+      <Button style={{disabled: !selectedCrop,cursor: !selectedCrop ? "not-allowed" : "pointer"}} onClick={handleViewRecommendations}>Next</Button>
     </>
   );
 
