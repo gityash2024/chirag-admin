@@ -490,7 +490,42 @@ const AddFarmer = () => {
               </>
             )}
           </InputGroup>
+          <InputGroup>
+          {mode === 'view' && (
+            <>
+            <InputLabel>Aadhar Number</InputLabel>
+            <InputField
+              name="aadhaarNumber"
+              value={formData.aadhaarNumber || ''}
+              // onChange={handleInputChange}
+              placeholder="Enter Aadhar Number"
+              disabled
+              style={{ borderColor: errors.aadhaarNumber ? 'red' : '#F1F1F1' }}
+            />
+            </>
+          )}
+
+        </InputGroup>
+          <InputGroup>
+          {mode === 'view' && (
+            <>
+            <InputLabel>Aadhar Front</InputLabel>
+             <img style={{ width: '200px', height: '200px' }} src={formData?.aadhaarFront} alt="Aadhar Front" />
+            </>
+          )}
+
+        </InputGroup>
+          <InputGroup>
+          {mode === 'view' && (
+            <>
+            <InputLabel>Aadhar Back</InputLabel>
+             <img style={{ width: '200px', height: '200px' }} src={formData?.aadhaarBack} alt="Aadhar Front" />
+            </>
+          )}
+
+        </InputGroup>
         </FormRow>
+        
         {mode !== 'view' && <SubmitButton type="submit">{mode === 'edit' ? 'Update Farmer' : 'Add Farmer'}</SubmitButton>}
       </Form>
 
