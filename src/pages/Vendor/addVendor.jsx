@@ -11,7 +11,8 @@ import calendar from '../../assets/calendar-event.png';
 import map from '../../assets/map-pin.png';
 import { toast } from 'react-toastify';
 import { getVendorById, updateVendor, registerVendor, getAllBookingsList, getVendorRunners } from '../../services/commonService';
-
+import Loader from '../../components/loader';
+import { FiCopy } from 'react-icons/fi';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans';
@@ -246,6 +247,24 @@ const ActionIcon = styled.img`
   cursor: pointer;
 `;
 
+const CopyIconContainer = styled.div`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 5px;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
 const Vendor = ({ mode }) => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -296,6 +315,12 @@ const Vendor = ({ mode }) => {
       toast.error("Failed to fetch vendor details");
       navigate('/manage-vendor');
     }
+  };
+
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('UIN Number copied to clipboard!');
   };
 
   const fetchBookingDetails = async () => {
@@ -463,6 +488,7 @@ const Vendor = ({ mode }) => {
 
   return (
     <Container>
+      {loading && <Loader />}
       <Header>
         <Title>Vendor Management / {mode === 'edit' ? 'Edit' : mode === 'view' ? 'View' : 'Add'}</Title>
         <BackButton onClick={() => navigate('/manage-vendor')}>
@@ -549,17 +575,22 @@ const Vendor = ({ mode }) => {
 
         <FormRow>
           <InputGroup>
-            <InputLabel>UIN Number</InputLabel>
-            <InputField
-              name="uinNumber"
-              value={formData.uinNumber}
-              onChange={handleInputChange}
-              placeholder="Enter UIN Number"
-              disabled={mode === 'view'}
-              style={{ borderColor: errors.uinNumber ? 'red' : '#F1F1F1' }}
-            />
-            {errors.uinNumber && <span style={{ color: 'red', fontSize: '12px' }}>{errors.uinNumber}</span>}
-          </InputGroup>
+  <InputLabel>UIN Number</InputLabel>
+  <InputWrapper>
+    <InputField
+      name="uinNumber"
+      value={formData.uinNumber}
+      onChange={handleInputChange}
+      placeholder="Enter UIN Number"
+      disabled={mode === 'view'}
+      style={{ borderColor: errors.uinNumber ? 'red' : '#F1F1F1' }}
+    />
+    <CopyIconContainer onClick={() => copyToClipboard(formData.uinNumber)}>
+      <FiCopy size={16} />
+    </CopyIconContainer>
+  </InputWrapper>
+  {errors.uinNumber && <span style={{ color: 'red', fontSize: '12px' }}>{errors.uinNumber}</span>}
+</InputGroup>
           <InputGroup>
             <InputLabel>Drone Pilot License</InputLabel>
             <InputField
