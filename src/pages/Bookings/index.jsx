@@ -105,6 +105,18 @@ const BookingDetails = styled.p`
     margin-right: 5px;
   }
 `;
+const BookingDetails2 = styled.a`
+  font-size: 14px;
+  font-weight: 400;
+  color: #121212;
+  margin-bottom: 5px;
+  display: flex;
+  text-decoration: underline;
+  align-items: center;
+  svg {
+    margin-right: 5px;
+  }
+`;
 
 const DateTimeRow = styled.div`
   display: flex;
@@ -606,6 +618,7 @@ const handleConfirmStatusChange = async () => {
       id: selectedBooking._id,
       vendor: selectedVendor._id,
       status:'quote_received',
+      requestViaAdmin:true,
       quotePrice: parseFloat(quotePrice)
     })
     try {
@@ -652,6 +665,14 @@ const handleConfirmStatusChange = async () => {
       );
     }
 
+    const redirectToLocation = (e, coordinatesArray) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (coordinatesArray?.length) {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${coordinatesArray[0]},${coordinatesArray[1]}`, '_blank');
+      }
+    };
+
     return currentItems.map((booking) => (
       <Card key={booking._id} onClick={() => handleBookingClick(booking)}>
         <CardHeader>
@@ -662,6 +683,12 @@ const handleConfirmStatusChange = async () => {
           <img src={map} alt="Location" style={{ marginRight: '5px' }}/>
           {booking.farmLocation}
         </BookingDetails>
+        <BookingDetails2 
+  href="#" 
+  onClick={(e) => redirectToLocation(e, booking?.location?.coordinates)}
+>
+  {booking?.location?.coordinates?.[0]}, {booking?.location?.coordinates?.[1]}
+</BookingDetails2>
         <DateTimeRow>
           <BookingDetails>
             <img src={calendar} alt="Calendar" style={{ marginRight: '5px' }}/>
