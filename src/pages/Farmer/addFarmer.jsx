@@ -168,7 +168,7 @@ const InputField = styled.input`
   color: #121212;
   &::after {
     content: '*';
-    color: red;
+    color: red; 
     margin-left: 4px;
   }
 `;

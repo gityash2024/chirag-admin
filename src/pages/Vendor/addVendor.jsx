@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import { getVendorById, updateVendor, registerVendor, getAllBookingsList, getVendorRunners } from '../../services/commonService';
 import Loader from '../../components/loader';
 import { FiCopy } from 'react-icons/fi';
+import { Eye } from 'lucide-react';
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans';
@@ -265,7 +266,98 @@ const InputWrapper = styled.div`
   width: 100%;
 `;
 
+const SlidePanel = styled.div`
+  position: fixed;
+  top: 0;
+  right: ${props => props.isOpen ? '0' : '-100%'};
+  width: 600px;
+  height: 100vh;
+  background: #FFFFFF;
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+  overflow-y: auto;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: ${props => props.isOpen ? 1 : 0};
+  visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+  transition: opacity 0.3s ease-in-out;
+  z-index: 999;
+`;
+
+const PanelHeader = styled.div`
+  padding: 20px;
+  border-bottom: 1px solid #E8E8E8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+`;
+
+const PanelContent = styled.div`
+  padding: 24px;
+`;
+
+const Section = styled.div`
+  margin-bottom: 24px;
+`;
+
+const Label = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 8px;
+`;
+
+const Value = styled.div`
+  font-size: 16px;
+  color: #121212;
+  margin-bottom: 16px;
+`;
+
+const ImageGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+`;
+
+const ImageContainer = styled.div`
+  border: 1px solid #E8E8E8;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+const Image = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+
+const ImagePlaceholder = styled.div`
+  width: 100%;
+  height: 200px;
+  background: #F5F5F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+`;
+
 const Vendor = ({ mode }) => {
+  const [selectedRunner, setSelectedRunner] = useState(null);
+const [isPanelOpen, setIsPanelOpen] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [droneSpecs, setDroneSpecs] = useState([{}]);
@@ -295,6 +387,11 @@ const Vendor = ({ mode }) => {
   const [runners, setRunners] = useState([]);
   const [errors, setErrors] = useState({});
 
+
+  const viewRunnerDetails = (runner) => {
+    setSelectedRunner(runner);
+    setIsPanelOpen(true);
+  };
   useEffect(() => {
     if (id && (mode === 'view' || mode === 'edit')) {
       fetchVendorDetails();
@@ -898,15 +995,13 @@ const Vendor = ({ mode }) => {
                           marginRight: '10px'
                         }}
                       />
-                      {runner.name}
+                      {runner.name||'--'}
                     </div>
                   </TableCell>
-                  <TableCell>{runner.contact}</TableCell>
-                  <TableCell>{runner.state}</TableCell>
+                  <TableCell>{runner.mobileNumber||'--'}</TableCell>
+                  <TableCell>{runner.state||'--'}</TableCell>
                   <TableCell>
-                    <ActionIcon src={rating} alt="Rating" />
-                    <ActionIcon src={rating} alt="Rating" />
-                    <ActionIcon src={rating} alt="Rating" />
+                   <Eye style={{ cursor: 'pointer' }} onClick={() => viewRunnerDetails(runner)} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -921,6 +1016,52 @@ const Vendor = ({ mode }) => {
           </Table>
         </>
       )}
+
+      {/* Runner Details Panel */}
+<Overlay isOpen={isPanelOpen} onClick={() => setIsPanelOpen(false)} />
+<SlidePanel isOpen={isPanelOpen}>
+  <PanelHeader>
+    <Title>Runner Details</Title>
+    <BackButton onClick={() => setIsPanelOpen(false)}>
+      <BackIcon />
+      Close
+    </BackButton>
+  </PanelHeader>
+  
+  <PanelContent>
+    <Section>
+      <Label>Aadhaar Number</Label>
+      <Value>{selectedRunner?.aadhaarNumber || '--'}</Value>
+    </Section>
+
+    <Section>
+      <Label>Aadhaar Images</Label>
+      <ImageGrid>
+        <div>
+          <Label>Front Side</Label>
+          <ImageContainer>
+            {selectedRunner?.aadhaarFront ? (
+              <Image src={selectedRunner.aadhaarFront} alt="Aadhaar Front" />
+            ) : (
+              <ImagePlaceholder>No image available</ImagePlaceholder>
+            )}
+          </ImageContainer>
+        </div>
+        
+        <div>
+          <Label>Back Side</Label>
+          <ImageContainer>
+            {selectedRunner?.aadhaarBack ? (
+              <Image src={selectedRunner.aadhaarBack} alt="Aadhaar Back" />
+            ) : (
+              <ImagePlaceholder>No image available</ImagePlaceholder>
+            )}
+          </ImageContainer>
+        </div>
+      </ImageGrid>
+    </Section>
+  </PanelContent>
+</SlidePanel>
     </Container>
   );
 };
