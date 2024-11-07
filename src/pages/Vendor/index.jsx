@@ -407,6 +407,7 @@ const copyToClipboard = (text) => {
   </TableRow>
 </TableHead>
 <tbody>
+
   {currentEntries.map(vendor => (
     <TableRow key={vendor._id}>
       <TableCell>
