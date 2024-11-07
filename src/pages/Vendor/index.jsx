@@ -8,6 +8,7 @@ import successIcon from '../../assets/check-wallet.png';
 import { getAllVendors, blockVendor, unblockVendor,updateVendorDroneVerification } from '../../services/commonService';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
+import { Copy } from 'lucide-react';
 
 const Container = styled.div`
   padding: 20px;
@@ -363,7 +364,10 @@ const ManageVendors = () => {
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
   const currentEntries = filteredVendors.slice(indexOfFirstEntry, indexOfLastEntry);
-
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text);
+  toast.success('Contact Number copied to clipboard!');
+}
   return (
     <Container>
       {loading && <Loader />}
@@ -411,7 +415,7 @@ const ManageVendors = () => {
           {vendor.name}
         </VendorCell>
       </TableCell>
-      <TableCell>{vendor.mobileNumber}</TableCell>
+      <TableCell>{vendor.mobileNumber}<Copy style={{cursor:"pointer", marginLeft: "10px"}} onClick={() => copyToClipboard(vendor.mobileNumber)} /></TableCell>
       <TableCell>{vendor.state}</TableCell>
       <TableCell>
         <VerificationStatus>
