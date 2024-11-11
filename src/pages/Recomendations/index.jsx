@@ -31,6 +31,7 @@ import mangoImage from "../../assets/mango.png";
 import papayaImage from "../../assets/papaya.png";
 import appleImage from "../../assets/apple.png";
 import litchiImage from "../../assets/litchi.png";
+import { toast } from "react-toastify";
 const Container = styled.div`
   padding: 20px;
   font-family: "Public Sans", sans-serif;
@@ -174,6 +175,10 @@ const Recommendations = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleViewRecommendations = () => {
+    if(!selectedCrop){
+      toast.info('Please select a crop');
+      return
+    }
     setShowRecommendations(true);
   };
 
