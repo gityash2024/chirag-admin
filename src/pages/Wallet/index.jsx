@@ -435,7 +435,6 @@ const Wallet = () => {
           Vendor Balances
         </Tab>
       </Tabs>
-
       {activeTab === 'commission' ? (
         <TransactionList>
           {walletData.transactions
