@@ -10,13 +10,30 @@ import Phone from '@mui/icons-material/Phone';
 import noBookingsImage from "../../assets/no-booking.png";
 import { getAllBookingsList, getAllVendors, assignVendorToBooking, updateBooking } from "../../services/commonService";
 import { toast } from "react-toastify";
-import clock from '../../assets/clock.png';
-import calendar from '../../assets/calendar-event.png';
-import map from '../../assets/map-pin.png';
+import clock from '../../assets/clock.svg';
+import calendar from '../../assets/calendar.svg';
+import map from '../../assets/location-icon.svg';
 import { Avatar } from "@mui/material";
 import { CopyAll } from "@mui/icons-material";
 import Loader from "../../components/loader";
+import avatarImage from '../../assets/runner-avatar.png';
 
+const ActionButton = styled.button`
+  width: 100%;
+  padding: 10px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #333333;
+  }
+`;
 const ModalContent = styled.div`
   background-color: white;
   padding: 30px;
@@ -78,33 +95,9 @@ const BookingId = styled.h3`
   margin: 0;
 `;
 
-const StatusBadge = styled.span`
-  display: inline-block;
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #000000;
-  background-color: ${props => {
-    if (props.status === 'In Progress') return '#FDF0CC';
-    if (props.status === 'Confirmed') return '#C6EEFF';
-    if (props.status === 'Confirmed') return '#B1FF8C';
-    if (props.status === 'Closed') return '#DAB4FF';
-    return '#E0E0E0';
-  }};
-`;
 
-const BookingDetails = styled.p`
-  font-size: 14px;
-  font-weight: 400;
-  color: #121212;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  svg {
-    margin-right: 5px;
-  }
-`;
+
+
 const BookingDetails2 = styled.a`
   font-size: 14px;
   font-weight: 400;
@@ -116,43 +109,6 @@ const BookingDetails2 = styled.a`
   svg {
     margin-right: 5px;
   }
-`;
-
-const DateTimeRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const TempHumidityCropRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-`;
-
-const TempHumidity = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Temperature = styled.span`
-  font-size: 16px;
-  font-weight: 600;
-  margin-right: 10px;
-`;
-
-const Humidity = styled.span`
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 400;
-  color: #121212;
-`;
-
-const Crop = styled.span`
-  font-size: 14px;
-  font-weight: 400;
-  color: #121212;
 `;
 
 const PriceSummary = styled.p`
@@ -174,15 +130,6 @@ const AssignedRunnerContainer = styled.div`
   align-items: center;
   margin-top: 15px;
 `;
-const RunnnerDetails = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #F8F9FA;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-top: 15px;
-`;
 
 const RunnerName = styled.div`
   display: flex;
@@ -201,28 +148,7 @@ const RunnerInfo = styled.div`
   }
 `;
 
-const RunnerContactButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #FFFFFF;
-  color: #000000;
-  border: 1px solid #000000;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
 
-  &:hover {
-    background: #F8F9FA;
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
 const RunnerContact = styled.span`
   font-size: 12px;
   color: #121212;
@@ -282,9 +208,6 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-const ModalTitle = styled.h3`
-  margin-bottom: 15px;
-`;
 
 const PriceInput = styled.input`
   width: 90%;
@@ -292,15 +215,6 @@ const PriceInput = styled.input`
   margin-bottom: 15px;
 `;
 
-const SubmitButton = styled.button`
-  width: 100%;
-  padding: 10px;
-  background-color: #000;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-`;
 
 const SuccessModal = styled(ModalContent)`
   text-align: center;
@@ -311,50 +225,6 @@ const AvatarIcon = styled(Avatar)`
 `;
 
 
-
-const Card = styled.div`
-  background: white;
-  cursor: pointer;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  min-height: 300px;
-  padding-bottom: 70px;
-`;
-
-const ActionButtonContainer = styled.div`
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-`;
-
-const ActionButton = styled.button`
-  width: 100%;
-  padding: 10px;
-  background-color: #000000;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
 
 
 
@@ -450,29 +320,7 @@ const MobileNumberContainer = styled.div`
   gap: 8px;
 `;
 
-const QuoteModal = styled(ModalContent)`
-  width: 400px;
-  padding: 24px;
-`;
 
-const QuotePriceInput = styled.input`
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
-  margin-top: 12px;
-  margin-bottom: 20px;
-  font-size: 14px;
-
-  &:focus {
-    outline: none;
-    border-color: #000000;
-  }
-
-  &::placeholder {
-    color: #8D98A4;
-  }
-`;
 
 const ModalSubtitle = styled.p`
   color: #8D98A4;
@@ -507,6 +355,197 @@ const RejectionReason = styled.p`
   font-size: 14px;
   margin-top: 10px;
   font-weight: 500;
+`;
+
+
+
+const Card = styled.div`
+  background: white;
+  cursor: pointer;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+
+  ${props => props.hasActionButtons && `
+    height: 300px;
+    padding-bottom: 70px;
+  `}
+`;
+
+const BookingDetails = styled.p`
+  font-size: 14px;
+  font-weight: 400;
+  color: #121212CC;
+  margin-bottom: 5px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  img {
+    width: 16px;
+    height: 16px;
+    margin-right: 15px;
+  }
+`;
+
+const DateTimeRow = styled.div`
+  display: flex;
+`;
+
+const TempHumidityCropRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const TempHumidity = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Temperature = styled.span`
+  font-size: 20px;
+  font-weight: 600;
+  margin-right: 10px;
+  &:after {
+    content: '°';
+  }
+`;
+
+const Humidity = styled.span`
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 400;
+  color: #666;
+`;
+
+const Crop = styled.span`
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+`;
+
+const RunnnerDetails = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 10px;
+`;
+
+const RunnerContactButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #F8F9FA;
+    color: #000000;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const StatusBadge = styled.span`
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #000000;
+   background-color: ${props => {
+    if (props.status === "requested") return "#FEB89C";
+    if (props.status === "quote_received") return "#FDF0CC";
+    if (props.status === "confirmed") return "#BEF991";
+    if (props.status === "closed") return "#DAB4FF";
+    return "#E0E0E0";
+  }};
+`;
+
+const ActionButtonContainer = styled.div`
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+`;
+
+
+
+// Update the Modal styles
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const QuoteModal = styled.div`
+  background-color: white;
+  padding: 38px;
+  border-radius: 16px;
+  width: 478px;
+  position: relative;
+  font-family: Montserrat;
+`;
+
+const ModalTitle = styled.h3`
+  margin-bottom: 15px;
+  font-size: 28px;
+  line-height: 38px;
+  font-weight: 600;
+  font-family: Montserrat;
+`;
+
+const QuotePriceInput = styled.input`
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #EEF0F3;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #000000;
+  }
+`;
+
+const SubmitButton = styled.button`
+  width: 40%;
+  padding: 15px;
+  background-color: rgba(56, 56, 56, 1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 16.24px;
+  font-weight: 600;
+  font-family: Montserrat;
 `;
 
 const Bookings = () => {
@@ -673,90 +712,89 @@ const handleConfirmStatusChange = async () => {
       }
     };
 
-    return currentItems.map((booking) => (
-      <Card key={booking._id} onClick={() => handleBookingClick(booking)}>
-        <CardHeader>
-          <BookingId>#{booking._id}</BookingId>
-          <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
-        </CardHeader>
-        <BookingDetails>
-          <img src={map} alt="Location" style={{ marginRight: '5px' }}/>
-          {booking.farmLocation}
-        </BookingDetails>
-        <BookingDetails2 
-  href="#" 
-  onClick={(e) => redirectToLocation(e, booking?.location?.coordinates)}
->
-  {booking?.location?.coordinates?.[0]}, {booking?.location?.coordinates?.[1]}
-</BookingDetails2>
-        <DateTimeRow>
-          <BookingDetails>
-            <img src={calendar} alt="Calendar" style={{ marginRight: '5px' }}/>
-            {new Date(booking.date).toLocaleDateString()}
-          </BookingDetails>
-          <BookingDetails>
-            <img src={clock} alt="Clock" style={{ marginRight: '5px' }}/>
-            {booking.time}
-          </BookingDetails>
-        </DateTimeRow>
-        <BookingDetails>Booking Name: {booking.farmerName}</BookingDetails>
-        <BookingDetails>Farm Area: {booking.farmArea} Acres</BookingDetails>
-        <TempHumidityCropRow>
-          <TempHumidity>
-            <Temperature>{booking.weather}</Temperature>
-            <Humidity>
-              <Opacity /> {booking.weather}
-            </Humidity>
-          </TempHumidity>
-          <Crop>Crop: {booking.cropName}</Crop>
-        </TempHumidityCropRow>
-        {booking.quotePrice && (
-          <PriceSummary>Price: ₹{booking.quotePrice}</PriceSummary>
-        )}
-        {booking.vendor && (
-          <BookingDetails>Vendor: {booking.vendor.name}</BookingDetails>
-        )}
-       {booking.runner && (
-  <RunnnerDetails>
-    <RunnerName>
-      <RunnerInfo>
-        <Avatar sx={{ width: 40, height: 40 }} />
-        <span>{booking?.runner?.name}</span>
-      </RunnerInfo>
-    </RunnerName>
-    <RunnerContactButton onClick={(e) => handleCallRunner(e, booking?.runner?.mobileNumber)}>
-      <Phone /> Call Now
-    </RunnerContactButton>
-  </RunnnerDetails>
-)}
-{booking.status === "cancelled" && (
-  <>
-    {(booking.reason || booking.rejectedByRunnerReason) && (
-      <RejectionReason>
-        Reason: {booking.reason || booking.rejectedByRunnerReason}
-      </RejectionReason>
-    )}
-    <StatusDropdown
-      value=""
-      onChange={(e) => handleStatusChange(booking, e.target.value)}
-      onClick={(e) => e.stopPropagation()}
+   
+  return currentItems.map((booking) => (
+    <Card 
+      key={booking._id} 
+      onClick={() => handleBookingClick(booking)}
+      hasActionButtons={activeTab === "Pending Bookings" || 
+        (activeTab === "In Progress" && (!booking.vendor || !booking.runner))}
     >
-      <option value="">Change Status</option>
-      <option value="requested">Requested</option>
-      <option value="quote_received">Quote Received</option>
-    </StatusDropdown>
-  </>
-)}
-        {(activeTab === "Pending Bookings" || 
-          (activeTab === "In Progress" && (!booking.vendor || !booking.runner))) && (
-          <ActionButtonContainer>
-            <ActionButton onClick={(e) => handleAssignButtonClick(booking, e)}>
-              {!booking.vendor ? 'Assign Vendor' : !booking.runner ? 'Assign Runner' : 'Assign Runner'}
-            </ActionButton>
-          </ActionButtonContainer>
-        )}
-      </Card>
-    ));
+      <CardHeader>
+        <BookingId>#{booking._id}</BookingId>
+        <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
+      </CardHeader>
+      <BookingDetails>
+        <img src={map} alt="Location" />
+        {booking.farmLocation}
+        <a 
+          href={`https://maps.google.com/?q=${booking?.location?.coordinates[0]},${booking?.location?.coordinates[1]}`}
+          title="Open in Google Maps"
+          style={{marginLeft: "15px", textDecoration: "none"}}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          🔗
+        </a>
+      </BookingDetails>
+      <DateTimeRow>
+        <BookingDetails>
+          <img src={calendar} alt="Calendar" />
+          {new Date(booking.date).toLocaleDateString()}
+        </BookingDetails>
+        <BookingDetails>
+          <img 
+            src={clock} 
+            alt="Time"
+            style={{marginLeft: "15px"}}
+          />
+          {booking.time}
+        </BookingDetails>
+      </DateTimeRow>
+      <BookingDetails>
+        Booking Name: {booking.farmerName}
+      </BookingDetails>
+      <BookingDetails>
+        Farm Area: {booking.farmArea} Acres
+      </BookingDetails>
+      <TempHumidityCropRow>
+        <TempHumidity>
+          <Temperature>{booking.weather}</Temperature>
+          <Humidity>{booking.farmLocation || 'N/A'}</Humidity>
+        </TempHumidity>
+        <Crop>
+          Crop: {booking.cropName}
+        </Crop>
+      </TempHumidityCropRow>
+      {booking.quotePrice && (
+        <PriceSummary>
+          Price: ₹{booking.quotePrice}
+        </PriceSummary>
+      )}
+      {booking.runner && (
+        <RunnnerDetails>
+          <RunnerName>
+            <img src={booking?.runner?.profilePic||avatarImage} alt="profile pic" style={{width:"50px",height:"50px",borderRadius:"50%"}} />
+            <span>{booking.runner.name}</span>
+          </RunnerName>
+          <RunnerContactButton
+            onClick={(e) => handleCallRunner(e, booking.runner.mobileNumber)}
+          >
+            <Phone /> Call Now
+          </RunnerContactButton>
+        </RunnnerDetails>
+      )}
+      {(activeTab === "Pending Bookings" || 
+        (activeTab === "In Progress" && (!booking.vendor || !booking.runner))) && (
+        <ActionButtonContainer>
+          <ActionButton onClick={(e) => handleAssignButtonClick(booking, e)}>
+            {!booking.vendor ? 'Assign Vendor' : 'Assign Runner'}
+          </ActionButton>
+        </ActionButtonContainer>
+      )}
+    </Card>
+  ));
   };
 const ToCapitaiseText = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1);

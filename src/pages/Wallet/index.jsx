@@ -458,31 +458,33 @@ const Wallet = () => {
         </TransactionList>
       ) : (
         <TransactionList>
-        {walletData.vendorBalances?.map((vendor, index) => (
-  <TransactionItem key={index}>
-    <TransactionHeader>
-      <TransactionTitle>{vendor.name}</TransactionTitle>
-      <ActionButton 
-        onClick={() => {
-          setSelectedVendor(vendor);
-          setShowDeductModal(true);
-        }}
-        disabled={!vendor.balance || vendor.balance <= 0}
-        style={{ opacity: (!vendor.balance || vendor.balance <= 0) ? 0.5 : 1 }}
-      >
-        Deduct Commission
-      </ActionButton>
-    </TransactionHeader>
-    <TransactionDetails>
-      <div>Available Balance: ₹ {vendor.balance?.toFixed(2) || "0.00"}</div>
-      <div>Total Commission Paid: ₹ {vendor.totalCommissionPaid?.toFixed(2) || "0.00"}</div>
-      {(!vendor.balance || vendor.balance <= 0) && (
-        <div style={{ color: '#666', fontSize: '12px', marginTop: '5px' }}>
-          Insufficient balance for commission deduction
-        </div>
-      )}
-    </TransactionDetails>
-  </TransactionItem>
+    {walletData.vendorBalances?.map((vendor, index) => (
+  vendor?.name ? (
+    <TransactionItem key={index}>
+      <TransactionHeader>
+        <TransactionTitle>{vendor.name}</TransactionTitle>
+        <ActionButton 
+          onClick={() => {
+            setSelectedVendor(vendor);
+            setShowDeductModal(true);
+          }}
+          disabled={!vendor.balance || vendor.balance <= 0}
+          style={{ opacity: (!vendor.balance || vendor.balance <= 0) ? 0.5 : 1 }}
+        >
+          Deduct Commission
+        </ActionButton>
+      </TransactionHeader>
+      <TransactionDetails>
+        <div>Available Balance: ₹ {vendor.balance?.toFixed(2) || "0.00"}</div>
+        <div>Total Commission Paid: ₹ {vendor.totalCommissionPaid?.toFixed(2) || "0.00"}</div>
+        {(!vendor.balance || vendor.balance <= 0) && (
+          <div style={{ color: '#666', fontSize: '12px', marginTop: '5px' }}>
+            Insufficient balance for commission deduction
+          </div>
+        )}
+      </TransactionDetails>
+    </TransactionItem>
+  ) : null
 ))}
         </TransactionList>
       )}

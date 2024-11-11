@@ -178,8 +178,12 @@ const ModalContent = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
+  width: 400px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const CloseButton = styled.button`
@@ -260,6 +264,37 @@ const StatusText = styled.span`
   font-size: 14px;
   color: ${props => props.verified ? '#2E7D32' : '#757575'};
 `;
+
+const DroneVerificationModal = ({ onClose, onConfirm, vendor, newStatus }) => (
+  <Modal>
+    <ModalContent>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <h2 style={{ marginBottom: '20px',fontFamily: 'Montserrat', fontWeight: '500', color: '#000000' }}>Confirm Drone UIN Status Change</h2>
+      <p style={{ marginBottom: '20px',fontFamily: 'Montserrat', fontWeight: '400', color: '#121212' }}>Are you sure you want to {newStatus ? 'verify' : 'unverify'} the drone UIN for vendor {vendor.name}?</p>
+      <ModalButtons>
+        <ModalButton onClick={onClose}>Cancel</ModalButton>
+        <ModalButton 
+          onClick={onConfirm} 
+          style={{ backgroundColor: 'black', color: 'white',marginLeft: '5px' }}
+        >
+          Confirm 
+        </ModalButton>
+      </ModalButtons>
+    </ModalContent>
+  </Modal>
+);
+
+const DroneVerificationSuccessModal = ({ onClose, isVerified }) => (
+  <Modal>
+    <ModalContent>
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <div style={{ textAlign: 'center' }}>
+        <img src={successIcon} style={{ width: '50px', height: '50px', marginBottom: '20px' }} alt="Success" />
+      </div>
+      <h3>Drone UIN successfully {isVerified ? 'verified' : 'unverified'}</h3>
+    </ModalContent>
+  </Modal>
+);
 const BlockConfirmationModal = ({ onClose, onConfirm, vendorToBlock }) => (
   <Modal>
     <ModalContent>
@@ -298,7 +333,34 @@ const ManageVendors = () => {
   const [loading, setLoading]= useState(false);
   const [filterBlocked, setFilterBlocked] = useState('all');
   const navigate = useNavigate();
+  const [showDroneVerificationModal, setShowDroneVerificationModal] = useState(false);
+  const [showDroneVerificationSuccess, setShowDroneVerificationSuccess] = useState(false);
+  const [vendorToVerify, setVendorToVerify] = useState(null);
+  const [newVerificationStatus, setNewVerificationStatus] = useState(false);
 
+
+  const handleDroneVerificationClick = (vendor, newStatus) => {
+    setVendorToVerify(vendor);
+    setNewVerificationStatus(newStatus);
+    setShowDroneVerificationModal(true);
+  };
+
+  const handleDroneVerificationConfirm = async () => {
+    try {
+      await updateVendorDroneVerification(vendorToVerify._id, newVerificationStatus);
+      setShowDroneVerificationModal(false);
+      setShowDroneVerificationSuccess(true);
+      fetchVendors();
+    } catch (error) {
+      toast.error('Failed to update drone verification status');
+    }
+  };
+
+  const handleCloseDroneModals = () => {
+    setShowDroneVerificationModal(false);
+    setShowDroneVerificationSuccess(false);
+    setVendorToVerify(null);
+  };
   useEffect(() => {
     fetchVendors();
   }, []);
@@ -424,7 +486,7 @@ const copyToClipboard = (text) => {
             <input
               type="checkbox"
               checked={vendor.vendorDroneVerified}
-              onChange={() => handleDroneVerification(vendor)}
+              onChange={() => handleDroneVerificationClick(vendor, !vendor.vendorDroneVerified)}
             />
             <Slider />
           </ToggleSwitch>
@@ -515,6 +577,21 @@ const copyToClipboard = (text) => {
         <BlockSuccessModal
           onClose={handleCloseModals}
           vendorToBlock={vendorToBlock}
+        />
+      )}
+
+{showDroneVerificationModal && (
+        <DroneVerificationModal
+          onClose={handleCloseDroneModals}
+          onConfirm={handleDroneVerificationConfirm}
+          vendor={vendorToVerify}
+          newStatus={newVerificationStatus}
+        />
+      )}
+      {showDroneVerificationSuccess && (
+        <DroneVerificationSuccessModal
+          onClose={handleCloseDroneModals}
+          isVerified={newVerificationStatus}
         />
       )}
     </Container>

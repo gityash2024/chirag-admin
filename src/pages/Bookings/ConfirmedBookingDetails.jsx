@@ -5,13 +5,23 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import OpacityIcon from '@mui/icons-material/Opacity';
+import Opacity from "@mui/icons-material/Opacity";
 import PhoneIcon from '@mui/icons-material/Phone';
 import StarIcon from '@mui/icons-material/Star';
 import { getAllBookingsList } from '../../services/commonService';
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
 import { FiArrowLeft } from 'react-icons/fi';
-
+import avatarImage from '../../assets/runner-avatar.png';
+import waterIcon from '../../assets/water-icon.png';
+import pesticideIcon from '../../assets/pesticide-icon.png';
+import carbonFootprintIcon from '../../assets/carbon-footprint-icon.png';
+import droneSprayingIcon from '../../assets/drone-spraying.png';
+import batteryEfficiencyIcon from '../../assets/battery-efficiency.png';
+import droneRoiIcon from '../../assets/drone-roi.png';
+import locationIcon from '../../assets/location-icon.svg';
+import calendarIcon from '../../assets/calendar.svg';
+import timeIcon from '../../assets/clock.svg';
 
 const Container = styled.div`
   padding: 20px;
@@ -26,8 +36,43 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 
+const TempHumidityCropRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const TempHumidity = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Temperature = styled.span`
+  font-size: 20px;
+  font-weight: 600;
+  margin-right: 10px;
+  &:after {
+    content: '°';
+  }
+`;
+
+const Humidity = styled.span`
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 400;
+  color: #666;
+`;
+
+const Crop = styled.span`
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+`;
+
 const BookingId = styled.h3`
-  font-size: 32px;
+  font-size: 24px;
   color: #333;
   margin-bottom: 10px;
   font-weight: 600;
@@ -43,15 +88,11 @@ const StatusBadge = styled.span`
   font-weight: 500;
   color: #000;
   background-color: ${props => {
-    switch(props.status) {
-      case 'requested': return '#FDF0CC';
-      case 'quote_received': return '#CDCCFD';
-      case 'confirmed': return '#E8FFF3';
-      case 'completed': return '#B1FF8C';
-      case 'closed': return '#E0E0E0';
-      case 'cancelled': return '#FFF0F1';
-      default: return '#E0E0E0';
-    }
+    if (props.status === "requested") return "#FEB89C";
+    if (props.status === "quote_received") return "#FDF0CC";
+    if (props.status === "confirmed") return "#BEF991";
+    if (props.status === "closed") return "#DAB4FF";
+    return "#E0E0E0";
   }};
   margin-bottom: 20px;
 `;
@@ -69,6 +110,11 @@ const BookingDetails = styled.div`
   border-radius: 8px;
   padding: 20px;
   flex: 7;
+  line-height: 1.5;
+`;
+
+const DateTimeRow = styled.div`
+  display: flex;
 `;
 
 const PaymentSummary = styled.div`
@@ -78,6 +124,26 @@ const PaymentSummary = styled.div`
   border-radius: 8px;
   padding: 20px;
   flex: 3;
+  justify-content: space-between;
+  margin-bottom: 20px;
+`;
+
+const PaymentDetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+`;
+
+const PaymentLabel = styled.span`
+  font-weight: 500;
+  color: #666;
+`;
+
+const PaymentValue = styled.span`
+  font-weight: 500;
+  color: #333;
+  text-align: right;
 `;
 
 const DetailRow = styled.div`
@@ -104,50 +170,19 @@ const HorizontalLine = styled.hr`
   margin: 15px 0;
 `;
 
-const RunnerCard = styled.div`
-  background: white;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
-  padding: 20px;
-  margin-bottom: 20px;
-  width: 30%;
-`;
-
-const RunnerInfo = styled.div`
+const ServicesContainer = styled.div`
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const RunnerAvatar = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #ccc;
-  margin-right: 10px;
-`;
-
-const CallButton = styled.button`
-  background-color: white;
-  color: black;
-  border: 1px solid black;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
 `;
 
 const ServiceCard = styled.div`
+  flex: 1;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
   background: white;
   border: 1px solid #E0E0E0;
   border-radius: 8px;
   padding: 20px;
-  width: 31%;
-  margin-bottom: 20px;
 `;
 
 const ImageContainer = styled.div`
@@ -168,6 +203,7 @@ const RatingContainer = styled.div`
   align-items: center;
   margin-bottom: 20px;
 `;
+
 const BackButton = styled.button`
   display: flex;
   align-items: center;
@@ -184,11 +220,97 @@ const BackButton = styled.button`
 const BackIcon = styled(FiArrowLeft)`
   margin-right: 8px;
 `;
+
+const RunnerCard = styled.div`
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-top: 20px;
+  width: 30%;
+`;
+
+const RunnerDetails = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+`;
+
+const RunnerInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+`;
+
+const CallButton = styled.button`
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
+const ViewDetailsButton = styled.button`
+  width: 60%;
+  padding: 10px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const KPISection = styled.div`
+  margin-top: 30px;
+`;
+
+const KPIGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+`;
+
+const KPICard = styled.div`
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.06);
+`;
+
+const KPIValue = styled.div`
+  font-size: 24px;
+  font-weight: 600;
+  color: ${props => props.color || '#333'};
+  margin: 10px 0;
+`;
+
+const KPILabel = styled.div`
+  font-size: 14px;
+  color: #666;
+`;
+
 const ConfirmBookingDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+
   useEffect(() => {
     fetchBookingDetails();
   }, [id]);
@@ -226,23 +348,36 @@ const ConfirmBookingDetails = () => {
     <Container>
       <Title>Bookings</Title>
       <BackButton onClick={() => navigate(-1)}>
-          <BackIcon />
-          Back
-        </BackButton>
+        <BackIcon />
+        Back
+      </BackButton>
       <BookingId>#{booking._id}</BookingId>
       <StatusBadge status={booking.status}>{booking.status}</StatusBadge>
       <FlexContainer>
         <BookingDetails>
           <DetailRow>
-            <DetailLabel><LocationOnIcon /> </DetailLabel>
-            <DetailValue>{booking.farmLocation}</DetailValue>
+            <img style={{ width: "16px", height: "16px", marginRight: "15px" }} src={locationIcon} alt="Location" />
+            {booking.farmLocation}
+            <a 
+              href={`https://maps.google.com/?q=${booking?.location?.coordinates[0]},${booking?.location?.coordinates[1]}`}
+              title="Open in Maps"
+              style={{marginLeft:"15px",textDecoration:"none"}}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              🔗
+            </a>
           </DetailRow>
-          <DetailRow>
-            <DetailLabel><CalendarTodayIcon /> </DetailLabel>
-            <DetailValue>{new Date(booking.date).toLocaleDateString()}</DetailValue>
-            <DetailLabel><AccessTimeIcon /> </DetailLabel>
-            <DetailValue>{booking.time}</DetailValue>
-          </DetailRow>
+          <DateTimeRow>
+            <DetailRow>
+              <img style={{ width: "16px", height: "16px", marginRight: "15px" }} src={calendarIcon} alt="Calendar" />
+              {new Date(booking.date).toLocaleDateString()}
+            </DetailRow>
+            <DetailRow>
+              <img style={{ width: "16px", height: "16px", marginRight: "15px", marginLeft: "15px" }} src={timeIcon} alt="Time" />
+              {booking.time}
+            </DetailRow>
+          </DateTimeRow>
           <DetailRow>
             <DetailLabel>Booking Name:</DetailLabel>
             <DetailValue>{booking.farmerName}</DetailValue>
@@ -255,88 +390,82 @@ const ConfirmBookingDetails = () => {
             <DetailLabel>Farm Area:</DetailLabel>
             <DetailValue>{booking.farmArea} Acres</DetailValue>
           </DetailRow>
-          <DetailRow>
-            <DetailLabel>Crop:</DetailLabel>
-            <DetailValue>{booking.cropName}</DetailValue>
-          </DetailRow>
-          <DetailRow>
-            <DetailLabel>{booking.weather}</DetailLabel>
-            <DetailLabel><OpacityIcon /> {booking.weather}</DetailLabel>
-          </DetailRow>
+          <TempHumidityCropRow>
+            <TempHumidity>
+              <Temperature>{booking.weather}</Temperature>
+              <Humidity>
+                <Opacity /> {booking.farmLocation || 'N/A'}
+              </Humidity>
+            </TempHumidity>
+            <Crop>
+              Crop: {booking.cropName}
+            </Crop>
+          </TempHumidityCropRow>
         </BookingDetails>
         {booking.status !== 'requested' && (
           <PaymentSummary>
-            <h3>Payment Summary</h3>
-            <DetailRow>
-              <DetailLabel>Estimated Total:</DetailLabel>
-              <DetailValue>₹{booking.quotePrice}</DetailValue>
-            </DetailRow>
-            <DetailRow>
-              <DetailLabel>Estimated Total</DetailLabel>
-              <DetailValue>₹{booking.quotePrice}</DetailValue>
-            </DetailRow>
-            <DetailRow>
-              <DetailLabel>Taxes and fee</DetailLabel>
-              <DetailValue>₹{0}</DetailValue>
-              {/* <DetailValue>₹{Math.round(booking.quotePrice * 0.1)}</DetailValue> */}
-            </DetailRow>
+            <h3 style={{ marginBottom: '20px' }}>Payment Summary</h3>
+            <PaymentDetailRow>
+              <PaymentLabel>Estimated Total</PaymentLabel>
+              <PaymentValue>₹{booking.quotePrice}</PaymentValue>
+            </PaymentDetailRow>
+            <PaymentDetailRow>
+              <PaymentLabel>Taxes and fee</PaymentLabel>
+              <PaymentValue>₹{0}</PaymentValue>
+            </PaymentDetailRow>
             <HorizontalLine />
-            <DetailRow>
-              <DetailLabel>Total</DetailLabel>
-              <DetailValue>₹{Math.round(booking.quotePrice)}</DetailValue>
-              {/* <DetailValue>₹{Math.round(booking.quotePrice * 1.1)}</DetailValue> */}
-            </DetailRow>
+            <PaymentDetailRow>
+              <PaymentLabel>Total</PaymentLabel>
+              <PaymentValue>₹{Math.round(booking.quotePrice)}</PaymentValue>
+            </PaymentDetailRow>
           </PaymentSummary>
         )}
       </FlexContainer>
       {booking.status !== 'requested' && booking.status !== 'quote_received' && booking.runner && (
         <RunnerCard>
-          <h3>Runner Assigned</h3>
-          <RunnerInfo>
-            <RunnerAvatar />
-            <div>
-              <div>{booking.runner.name}</div>
-              <div>Contact number: {booking.runner.mobileNumber}</div>
-            </div>
-          </RunnerInfo>
-          <CallButton onClick={() => toast.info(`Calling ${booking.runner.mobileNumber}`)}>
-            <PhoneIcon /> Call Now
-          </CallButton>
+          <RunnerDetails>
+            <RunnerInfo>
+              <img src={booking?.runner?.profilePic || avatarImage} alt="profile pic" style={{width:"50px",height:"50px",borderRadius:"50%"}} />
+              <div>
+                <h3>{booking.runner.name}</h3>
+                <p>{booking.runner.mobileNumber}</p>
+              </div>
+            </RunnerInfo>
+            <CallButton onClick={() => {
+              navigator.clipboard.writeText(booking.runner.mobileNumber);
+              toast.success('Phone number copied to clipboard');
+            }}>
+              <PhoneIcon /> Call Now
+            </CallButton>
+          </RunnerDetails>
+          <ViewDetailsButton onClick={() => navigate(`/view-vendor/${booking.vendor._id}`)}>
+            View Details
+          </ViewDetailsButton>
         </RunnerCard>
       )}
-      {(booking.status === 'completed' || booking.status === 'closed') && (
-        <>
-          {booking.startFieldImages && booking.startFieldImages.length > 0 && (
-            <ServiceCard>
-              <h3>Service started</h3>
-              <DetailRow>
-                <DetailLabel>Set of battery available:</DetailLabel>
-                <DetailValue>{booking.batterySetAvailable}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>Current Image of the field:</DetailLabel>
-              </DetailRow>
-              <ImageContainer>
-                {booking.startFieldImages.map((image, index) => (
-                  <FieldImage key={index} src={image} alt="Field" />
-                ))}
-              </ImageContainer>
-            </ServiceCard>
-          )}
-          {booking.endFieldImages && booking.endFieldImages.length > 0 && (
-            <ServiceCard>
-              <h3>Service completed</h3>
-              <DetailRow>
-                <DetailLabel>Image of the field after the service completed:</DetailLabel>
-              </DetailRow>
-              <ImageContainer>
-                {booking.endFieldImages.map((image, index) => (
-                  <FieldImage key={index} src={image} alt="Field" />
-                ))}
-              </ImageContainer>
-            </ServiceCard>
-          )}
-        </>
+      {((booking.status === 'completed' || booking.status === 'closed') && booking?.startFieldImages?.length) && (
+        <ServicesContainer>
+          <ServiceCard>
+            <h3>Service started</h3>
+            <DetailRow>
+              <DetailLabel>Set of battery available:</DetailLabel>
+              <DetailValue>{booking.batterySetAvailable}</DetailValue>
+            </DetailRow>
+            <ImageContainer>
+              {booking.startFieldImages?.map((image, index) => (
+                <FieldImage key={index} src={image} alt="Field" />
+              ))}
+            </ImageContainer>
+          </ServiceCard>
+          <ServiceCard>
+            <h3>Service completed</h3>
+            <ImageContainer>
+              {booking.endFieldImages?.map((image, index) => (
+                <FieldImage key={index} src={image} alt="Field" />
+              ))}
+            </ImageContainer>
+          </ServiceCard>
+        </ServicesContainer>
       )}
       {averageRating && (
         <>
@@ -348,6 +477,56 @@ const ConfirmBookingDetails = () => {
             <span>{averageRating}</span>
           </RatingContainer>
         </>
+      )}
+      {(booking.status === 'closed' && booking.droneWaterUsage && booking.dronePesticideUsage && booking.emissionSavedPerHectare) && (
+        <KPISection>
+          <h3>Environmental Impact Report</h3>
+          <KPIGrid>
+            <KPICard>
+              <img src={waterIcon} alt="Water saved" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#5CBEFF">{booking.droneWaterUsage || 0}</KPIValue>
+              <KPILabel>Water Saved</KPILabel>
+            </KPICard>
+            <KPICard>
+              <img src={pesticideIcon} alt="Pesticide saved" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#FF826E">{booking.dronePesticideUsage || 0}%</KPIValue>
+              <KPILabel>Pesticide Saved</KPILabel>
+            </KPICard>
+            <KPICard>
+              <img src={carbonFootprintIcon} alt="Carbon footprint" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#6AD34D">{booking.emissionSavedPerHectare || 0}%</KPIValue>
+              <KPILabel>Carbon Footprint Reduced</KPILabel>
+            </KPICard>
+          </KPIGrid>
+        </KPISection>
+      )}
+      {(booking.status === 'closed' && booking.cropOutputPerAcre && booking.quotePrice && booking.droneFlightHours && booking.chargeCycles) && (
+        <KPISection>
+          <h3>Economic Impact Report</h3>
+          <KPIGrid>
+            <KPICard>
+              <img src={droneSprayingIcon} alt="Drone ROI" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#5CBEFF">
+                {((booking.cropOutputPerAcre / booking.quotePrice) * 100).toFixed(1)}%
+              </KPIValue>
+              <KPILabel>Drone ROI</KPILabel>
+            </KPICard>
+            <KPICard>
+              <img src={batteryEfficiencyIcon} alt="Battery efficiency" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#FF826E">
+                {(parseInt(booking.droneFlightHours) / (booking.chargeCycles || 1)).toFixed(1)}
+              </KPIValue>
+              <KPILabel>Battery Efficiency</KPILabel>
+            </KPICard>
+            <KPICard>
+              <img src={droneRoiIcon} alt="Drone life" style={{ width: 40, height: 40 }} />
+              <KPIValue color="#6AD34D">
+                {((booking.cropOutputPerAcre - booking.quotePrice) / parseInt(booking.droneFlightHours || 1)).toFixed(1)}%
+              </KPIValue>
+              <KPILabel>Drone Longevity</KPILabel>
+            </KPICard>
+          </KPIGrid>
+        </KPISection>
       )}
     </Container>
   );

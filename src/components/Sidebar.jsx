@@ -10,7 +10,7 @@ import withdrawalRequestsIcon from '../assets/withdrawal-requests.png';
 import notificationsIcon from '../assets/notifications.png';
 import testimonialIcon from '../assets/testimonialial.png';
 import recommendation from '../assets/recommendation.png';
-
+import WalletIcon from '../assets/wallet-white.svg';
 import reportsIcon from '../assets/reports.png';
 import logoutIcon from '../assets/logout.png';
 
@@ -182,6 +182,12 @@ const Sidebar = () => {
       text: 'Spray Assist', 
       path: '/recommendation',
       activePaths: ['/recommendation']
+    },
+    { 
+      icon: WalletIcon, 
+      text: 'Wallet', 
+      path: '/wallet',
+      activePaths: ['/wallet']
     },
   ];
 
