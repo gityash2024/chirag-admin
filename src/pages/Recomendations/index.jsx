@@ -227,7 +227,10 @@ const Recommendations = () => {
       </CropCard>
         ))}
       </CropGrid>
-      <Button style={{disabled: !selectedCrop,cursor: !selectedCrop ? "not-allowed" : "pointer"}} onClick={handleViewRecommendations}>Next</Button>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+
+      <Button style={{disabled: !selectedCrop,cursor: !selectedCrop ? "not-allowed" : "pointer",width:"200px"}} onClick={handleViewRecommendations}>Next</Button>
+      </div>
     </>
   );
 
