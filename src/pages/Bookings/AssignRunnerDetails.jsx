@@ -208,6 +208,7 @@ const AssignRunnerDetails = () => {
 
   useEffect(() => {
     fetchBookingDetails();
+    console.log(booking);
   }, [id]);
 
   const fetchBookingDetails = async () => {
@@ -313,7 +314,7 @@ const AssignRunnerDetails = () => {
             {booking.vendor && (
               <DetailRow>
                 <DetailLabel>Assigned Vendor:</DetailLabel>
-                <DetailValue>{booking.vendor.name}</DetailValue>
+                <DetailValue>{booking.vendor.name} <small>({booking.vendor.mobileNumber})</small></DetailValue>
               </DetailRow>
             )}
             <HorizontalLine />
@@ -337,16 +338,16 @@ const AssignRunnerDetails = () => {
           <HorizontalLine />
           <PaymentRow>
             <DetailLabel>Service Charge</DetailLabel>
-            <DetailValue>₹{Math.round(booking.quotePrice * 0.1) || 0}</DetailValue>
+            <DetailValue>₹{Math.round(booking.quotePrice) || 0}</DetailValue>
           </PaymentRow>
-          <PaymentRow>
+          {/* <PaymentRow>
             <DetailLabel>Taxes</DetailLabel>
             <DetailValue>₹{Math.round(booking.quotePrice * 0.18) || 0}</DetailValue>
-          </PaymentRow>
+          </PaymentRow> */}
           <HorizontalLine />
           <PaymentRow>
             <DetailLabel>Total Amount</DetailLabel>
-            <DetailValue>₹{Math.round(booking.quotePrice * 1.28) || 0}</DetailValue>
+            <DetailValue>₹{Math.round(booking.quotePrice) || 0}</DetailValue>
           </PaymentRow>
         </PaymentSummary>
       </FlexContainer>

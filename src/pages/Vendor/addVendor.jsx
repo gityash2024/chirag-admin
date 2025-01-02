@@ -14,6 +14,8 @@ import { getVendorById, updateVendor, registerVendor, getAllBookingsList, getVen
 import Loader from '../../components/loader';
 import { FiCopy } from 'react-icons/fi';
 import { Eye } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+
 const Container = styled.div`
   padding: 20px;
   font-family: 'Public Sans';
@@ -356,6 +358,8 @@ const ImagePlaceholder = styled.div`
 `;
 
 const Vendor = ({ mode }) => {
+  const location = useLocation();
+
   const [selectedRunner, setSelectedRunner] = useState(null);
 const [isPanelOpen, setIsPanelOpen] = useState(false);
   const navigate = useNavigate();
@@ -386,7 +390,14 @@ const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [bookingsList, setBookingsList] = useState([]);
   const [runners, setRunners] = useState([]);
   const [errors, setErrors] = useState({});
-
+  useEffect(() => {
+    if (location.search === '?scroll=runners' && mode === 'view') {
+      const runnersSection = document.getElementById('runners-section');
+      if (runnersSection) {
+        runnersSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location, mode]);
 
   const viewRunnerDetails = (runner) => {
     setSelectedRunner(runner);
@@ -968,7 +979,7 @@ const [isPanelOpen, setIsPanelOpen] = useState(false);
             )}
           </BookingHistoryContainer>
 
-          <Header>
+          <Header >
             <Title>Associated Runners</Title>
           </Header>
           <Table>
@@ -1006,7 +1017,7 @@ const [isPanelOpen, setIsPanelOpen] = useState(false);
                 </TableRow>
               ))}
               {runners.length === 0 && (
-                <TableRow>
+                <TableRow id="runners-section">
                   <TableCell colSpan={4} style={{ textAlign: 'center' }}>
                     No runners associated
                   </TableCell>

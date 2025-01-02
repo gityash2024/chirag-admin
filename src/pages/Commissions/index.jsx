@@ -97,7 +97,7 @@ const TableCell = styled.td`
   font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #E3E6E8;
-  font-family: 'Montserrat';
+  font-family: 'Public Sans';
   color: #121212;
 `;
 
@@ -173,7 +173,7 @@ const Pagination = styled.div`
 const PageInfo = styled.span`
   font-size: 14px;
   font-weight: 500;
-  font-family: 'Montserrat';
+  font-family: 'Public Sans';
   color: #121212;
 `;
 

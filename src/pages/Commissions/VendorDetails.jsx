@@ -294,7 +294,7 @@ const VendorDetails = () => {
           <Input type="email" value={vendor.email} readOnly />
         </FormGroup>
         <FormGroup>
-          <Label>Commission Type</Label>
+          <Label>Commission Type </Label>
           <Select value={commissionType} onChange={handleCommissionTypeChange}>
             <option value="Default">Default</option>
             <option value="Custom">Custom</option>

@@ -9,6 +9,7 @@ import { getAllVendors, blockVendor, unblockVendor,updateVendorDroneVerification
 import { toast } from 'react-toastify';
 import Loader from '../../components/loader';
 import { Copy } from 'lucide-react';
+import { Users } from 'lucide-react'; // Add this with other imports
 
 const Container = styled.div`
   padding: 20px;
@@ -105,7 +106,7 @@ const TableCell = styled.td`
   font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid #DBDADE;
-  font-family: 'Montserrat';
+  font-family: 'Public Sans';
   color: #121212;
 `;
 
@@ -144,7 +145,7 @@ const Pagination = styled.div`
 const PageInfo = styled.span`
   font-size: 14px;
   font-weight: 500;
-  font-family: 'Montserrat';
+  font-family: 'Public Sans';
   color: #121212;
 `;
 
@@ -269,8 +270,8 @@ const DroneVerificationModal = ({ onClose, onConfirm, vendor, newStatus }) => (
   <Modal>
     <ModalContent>
       <CloseButton onClick={onClose}>&times;</CloseButton>
-      <h2 style={{ marginBottom: '20px',fontFamily: 'Montserrat', fontWeight: '500', color: '#000000' }}>Confirm Drone UIN Status Change</h2>
-      <p style={{ marginBottom: '20px',fontFamily: 'Montserrat', fontWeight: '400', color: '#121212' }}>Are you sure you want to {newStatus ? 'verify' : 'unverify'} the drone UIN for vendor {vendor.name}?</p>
+      <h2 style={{ marginBottom: '20px',fontFamily: 'Public Sans', fontWeight: '500', color: '#000000' }}>Confirm Drone UIN Status Change</h2>
+      <p style={{ marginBottom: '20px',fontFamily: 'Public Sans', fontWeight: '400', color: '#121212' }}>Are you sure you want to {newStatus ? 'verify' : 'unverify'} the drone UIN for vendor {vendor.name}?</p>
       <ModalButtons>
         <ModalButton onClick={onClose}>Cancel</ModalButton>
         <ModalButton 
@@ -520,10 +521,19 @@ const copyToClipboard = (text) => {
               onClick={() => navigate(`/edit-vendor/${vendor._id}`)} 
             />
             <ActionIcon 
-              src={blockIcon} 
+              src={blockIcon}
+              title="Block Vendor" 
               alt="Block" 
               onClick={() => handleBlockClick(vendor)} 
             />
+             <Users 
+        size={24} 
+        title="View Runners"
+        style={{ cursor: 'pointer', marginLeft: '10px' }} 
+        onClick={() => {
+          navigate(`/view-vendor/${vendor._id}?scroll=runners`);
+        }}
+      />
           </>
         )}
       </TableCell>

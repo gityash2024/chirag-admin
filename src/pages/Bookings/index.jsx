@@ -323,9 +323,10 @@ const MobileNumberContainer = styled.div`
 
 
 const ModalSubtitle = styled.p`
-  color: #8D98A4;
+  color: #000000;
   font-size: 14px;
   margin-bottom: 20px;
+  font-family: 'Public Sans';
 `;
 
 const ButtonGroup = styled.div`
@@ -509,7 +510,7 @@ const QuoteModal = styled.div`
   border-radius: 16px;
   width: 478px;
   position: relative;
-  font-family: Montserrat;
+  font-family: Public Sans;
 `;
 
 const ModalTitle = styled.h3`
@@ -517,7 +518,7 @@ const ModalTitle = styled.h3`
   font-size: 28px;
   line-height: 38px;
   font-weight: 600;
-  font-family: Montserrat;
+  font-family: Public Sans;
 `;
 
 const QuotePriceInput = styled.input`
@@ -545,7 +546,7 @@ const SubmitButton = styled.button`
   font-size: 16px;
   line-height: 16.24px;
   font-weight: 600;
-  font-family: Montserrat;
+  font-family: Public Sans;
 `;
 
 const Bookings = () => {

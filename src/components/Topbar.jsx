@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import printIcon from '../assets/wallet.svg';
 import profileIcon from '../assets/profile.svg';
 import { getAllVendors, getFarmers, getAllRunners, getAdminWallet, getWalletStats } from '../services/commonService';
+import AdminNotificationIcon from './AdminNotificationIcon';
 
 const scroll = keyframes`
   0% { transform: translate3d(0, 0, 0); }
@@ -157,6 +158,7 @@ const Topbar = () => {
         </RunningStrip>
       </TopbarCenter>
       <TopbarRight>
+      <AdminNotificationIcon />
         <TopbarIcon onClick={() => navigate('/wallet')} src={printIcon} alt="Print" />
         <TopbarIcon onClick={() => navigate('/profile')} src={profileIcon} alt="Profile" />
       </TopbarRight>
