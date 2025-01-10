@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+// AdminNotificationIcon.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from '../services/httpInterceptor';
 import { toast } from 'react-toastify';
-import io from 'socket.io-client';
 import styled from 'styled-components';
 import { Bell } from 'lucide-react';
 
 const NotificationContainer = styled.div`
   position: relative;
   display: inline-block;
-  z-index: 1100; // Higher z-index to ensure dropdown appears above other elements
+  z-index: 1100;
 `;
 
 const NotificationDropdown = styled.div`
-  position: fixed; // Change to fixed positioning
-  right: 80px; // Adjust based on your layout
-  top: 70px; // Adjust based on your topbar height
+  position: fixed;
+  right: 80px;
+  top: 70px;
   width: 300px;
   background: white;
   border: 1px solid #e0e0e0;
@@ -30,6 +30,7 @@ const NotificationItem = styled.div`
   border-bottom: 1px solid #e0e0e0;
   cursor: pointer;
   background-color: ${props => props.isRead ? 'white' : '#f0f7ff'};
+  transition: background-color 0.2s ease;
   
   &:hover {
     background-color: #f5f5f5;
@@ -54,103 +55,139 @@ const NotificationBadge = styled.span`
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 `;
 
-const TopbarContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 1000; // Lower than notification dropdown
+const NotificationTitle = styled.div`
+  font-weight: ${props => props.isRead ? 'normal' : 'bold'};
+  margin-bottom: 4px;
 `;
 
+const NotificationDescription = styled.div`
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+`;
 
+const NotificationTime = styled.div`
+  font-size: 12px;
+  color: #999;
+`;
+
+const EmptyNotification = styled.div`
+  padding: 10px;
+  text-align: center;
+  color: #666;
+`;
 
 const AdminNotificationIcon = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-    setupSocket();
-  }, []);
-
-  const setupSocket = () => {
-    const socket = io('https://chirag.solminica.com');
-    socket.on('adminNotification', (notification) => {
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
-      toast.info(notification.description);
-    });
-    return () => socket.disconnect();
-  };
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
-      const response = await axios.get('/api/admin/notifications/list');
-      setNotifications(response.data.notifications);
-      setUnreadCount(response.data.unreadCount);
+      const response = await axios.get('/admin/notifications/list');
+      setNotifications(response.data.notifications || []);
+      setUnreadCount(response.data.unreadCount || 0);
+      // Update localStorage for badge persistence
+      localStorage.setItem('adminNotificationCount', response.data.unreadCount || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Initial fetch
+    fetchNotifications();
+
+    // Set up polling interval
+    const pollInterval = setInterval(() => {
+      fetchNotifications();
+    }, 10000); // 10 seconds
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [fetchNotifications]);
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
       try {
-        await axios.post('/api/admin/notifications/mark-read', {
+        await axios.post('/admin/notifications/mark-read', {
           notificationIds: [notification._id]
         });
-        setUnreadCount(prev => prev - 1);
+        setUnreadCount(prev => Math.max(0, prev - 1));
         setNotifications(prev =>
           prev.map(n =>
             n._id === notification._id ? { ...n, isRead: true } : n
           )
         );
+        // Update localStorage
+        localStorage.setItem('adminNotificationCount', Math.max(0, unreadCount - 1));
       } catch (error) {
         console.error('Error marking notification as read:', error);
+        toast.error('Failed to mark notification as read');
       }
     }
   };
 
+  const handleBellClick = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      // Fetch latest notifications when opening dropdown
+      fetchNotifications();
+    }
+  };
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isOpen && !event.target.closest('.notification-container')) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <NotificationContainer>
+    <NotificationContainer className="notification-container">
       <Bell 
-        onClick={() => setIsOpen(!isOpen)} 
+        onClick={handleBellClick} 
         style={{ cursor: 'pointer' }}
+        size={24}
       />
       {unreadCount > 0 && <NotificationBadge>{unreadCount}</NotificationBadge>}
       
       {isOpen && (
-  <NotificationDropdown>
-    {notifications.length === 0 ? (
-      <div style={{ padding: '10px', textAlign: 'center', color: '#666' }}>
-        No notifications
-      </div>
-    ) : (
-      notifications.map(notification => (
-        <NotificationItem
-          key={notification._id}
-          isRead={notification.isRead}
-          onClick={() => handleNotificationClick(notification)}
-        >
-          <div style={{ fontWeight: notification.isRead ? 'normal' : 'bold' }}>
-            {notification.title}
-          </div>
-          <div style={{ fontSize: '14px', color: '#666' }}>
-            {notification.description}
-          </div>
-          <div style={{ fontSize: '12px', color: '#999' }}>
-            {new Date(notification.createdAt).toLocaleString()}
-          </div>
-        </NotificationItem>
-      ))
-    )}
-  </NotificationDropdown>
-)}
-
+        <NotificationDropdown>
+          {notifications.length === 0 ? (
+            <EmptyNotification>
+              No notifications
+            </EmptyNotification>
+          ) : (
+            notifications.map(notification => (
+              <NotificationItem
+                key={notification._id}
+                isRead={notification.isRead}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <NotificationTitle isRead={notification.isRead}>
+                  {notification.title}
+                </NotificationTitle>
+                <NotificationDescription>
+                  {notification.description}
+                </NotificationDescription>
+                <NotificationTime>
+                  {new Date(notification.createdAt).toLocaleString()}
+                </NotificationTime>
+              </NotificationItem>
+            ))
+          )}
+        </NotificationDropdown>
+      )}
     </NotificationContainer>
   );
 };
