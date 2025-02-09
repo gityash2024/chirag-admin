@@ -481,7 +481,7 @@ const AddFarmer = () => {
           </InputGroup>
         </FormRow>
         <FormRow>
-          <InputGroup>
+          {/* <InputGroup>
             {mode === 'view' && (
               <>
                 <InputLabel>Aadhar Authentication</InputLabel>
@@ -489,7 +489,7 @@ const AddFarmer = () => {
                 <ErrorBadge>Un-Authenticated</ErrorBadge>}
               </>
             )}
-          </InputGroup>
+          </InputGroup> */}
           <InputGroup>
           {mode === 'view' && (
             <>

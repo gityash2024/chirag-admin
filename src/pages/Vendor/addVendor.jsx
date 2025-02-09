@@ -736,14 +736,14 @@ const [isPanelOpen, setIsPanelOpen] = useState(false);
               disabled={mode === 'view'}
             />
           </InputGroup>
-          <InputGroup>
+          {/* <InputGroup>
             {mode === 'view' && (
               <>
                 <InputLabel>Aadhar Authentication</InputLabel>
                 <SuccessBadge>Successful</SuccessBadge>
               </>
             )}
-          </InputGroup>
+          </InputGroup> */}
         </FormRow>
 
         {droneSpecs.map((spec, index) => (
